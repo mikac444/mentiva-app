@@ -44,10 +44,19 @@ function TrashIcon({ className }: { className?: string }) {
 
 function BouncingDots() {
   return (
-    <div className="flex items-center gap-1 py-1">
-      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce [animation-delay:-0.3s]" />
-      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce [animation-delay:-0.15s]" />
-      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce" />
+    <div className="flex items-center gap-1.5 py-1" aria-hidden>
+      <span
+        className="w-2 h-2 rounded-full bg-gold-400 animate-bounce"
+        style={{ animationDelay: "0ms" }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-gold-400/90 animate-bounce"
+        style={{ animationDelay: "150ms" }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-gold-400 animate-bounce"
+        style={{ animationDelay: "300ms" }}
+      />
     </div>
   );
 }
@@ -464,7 +473,7 @@ export default function ChatPage() {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-sage-800/80 text-sage-200 border border-sage-700">
+                    <div className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-sage-800/80 text-sage-200 border border-sage-700 shadow-sm">
                       <p className="text-sm font-medium text-sage-500 mb-2">Menti</p>
                       <BouncingDots />
                     </div>
