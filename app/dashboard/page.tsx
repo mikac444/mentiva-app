@@ -11,6 +11,7 @@ type VisionBoardRow = {
   user_id: string;
   image_url: string;
   analysis: AnalysisResult;
+  title: string | null;
   created_at: string;
 };
 
@@ -29,7 +30,7 @@ export default function DashboardPage() {
       }
       const { data } = await supabase
         .from("vision_boards")
-        .select("id, user_id, image_url, analysis, created_at")
+        .select("id, user_id, image_url, analysis, title, created_at")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
       setBoards((data as VisionBoardRow[]) ?? []);
@@ -52,9 +53,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
       <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6 border-b border-sage-800">
-        <Link href="/" className="font-serif text-2xl text-gold-400">
-          Mentiva
-        </Link>
         <Nav active="dashboard" />
       </header>
 
@@ -66,16 +64,18 @@ export default function DashboardPage() {
           Create and manage your vision boards
         </p>
 
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="mt-8 grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
           <Link
             href="/upload"
-            className="flex flex-col items-center justify-center min-h-[200px] rounded-xl border-2 border-dashed border-sage-700 hover:border-gold-500/50 text-sage-500 hover:text-gold-400 transition-colors"
+            className="flex flex-col rounded-xl border-2 border-dashed border-sage-700 hover:border-gold-500/50 text-sage-500 hover:text-gold-400 transition-colors overflow-hidden"
           >
-            <span className="text-3xl mb-2">+</span>
-            <span className="font-medium">New vision board</span>
+            <div className="w-full aspect-square max-h-[150px] flex flex-col items-center justify-center shrink-0">
+              <span className="text-2xl mb-1">+</span>
+              <span className="font-medium text-sm text-center px-2">New vision board</span>
+            </div>
           </Link>
           {loading ? (
-            <div className="col-span-full sm:col-span-1 flex items-center justify-center min-h-[200px] text-sage-500 text-sm">
+            <div className="col-span-full flex items-center justify-center py-12 text-sage-500 text-sm">
               Loading…
             </div>
           ) : (
@@ -86,11 +86,11 @@ export default function DashboardPage() {
                 onClick={() => setSelectedBoard(board)}
                 className="flex flex-col rounded-xl border border-sage-700 bg-sage-900/30 overflow-hidden hover:border-gold-500/50 transition-colors text-left"
               >
-                <div className="aspect-video bg-sage-800 relative">
+                <div className="w-full aspect-square max-h-[150px] bg-sage-800 relative shrink-0">
                   {board.image_url ? (
                     <img
                       src={board.image_url}
-                      alt="Vision board"
+                      alt={board.title || "Vision board"}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -99,9 +99,14 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
-                <p className="p-3 text-sage-500 text-sm">
-                  {formatDate(board.created_at)}
-                </p>
+                <div className="p-2 min-h-0 flex flex-col justify-center">
+                  <p className="text-sage-200 text-sm font-medium truncate" title={board.title || "Untitled"}>
+                    {board.title || "Untitled board"}
+                  </p>
+                  <p className="text-sage-500 text-xs mt-0.5">
+                    {formatDate(board.created_at)}
+                  </p>
+                </div>
               </button>
             ))
           )}
@@ -117,14 +122,19 @@ export default function DashboardPage() {
             className="bg-sage-900 border border-sage-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-sage-700 bg-sage-900">
-              <span className="text-sage-400 text-sm">
-                {formatDate(selectedBoard.created_at)}
-              </span>
+            <div className="sticky top-0 flex items-center justify-between gap-4 p-4 border-b border-sage-700 bg-sage-900">
+              <div className="min-w-0">
+                <p className="text-sage-200 font-medium truncate">
+                  {selectedBoard.title || "Untitled board"}
+                </p>
+                <p className="text-sage-500 text-sm">
+                  {formatDate(selectedBoard.created_at)}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setSelectedBoard(null)}
-                className="text-sage-500 hover:text-gold-400"
+                className="shrink-0 text-sage-500 hover:text-gold-400"
               >
                 Close
               </button>

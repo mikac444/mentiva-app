@@ -41,7 +41,14 @@ export function Nav({ active }: NavProps) {
     null;
 
   return (
-    <nav className="flex items-center gap-3 sm:gap-4">
+    <>
+      <Link
+        href={user ? "/dashboard" : "/"}
+        className="font-serif text-2xl text-gold-400"
+      >
+        Mentiva
+      </Link>
+      <nav className="flex items-center gap-3 sm:gap-4">
       <Link
         href="/dashboard"
         className={
@@ -86,6 +93,7 @@ export function Nav({ active }: NavProps) {
           </button>
         </>
       )}
-    </nav>
+      </nav>
+    </>
   );
 }

@@ -116,9 +116,6 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
       <header className="shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
-        <Link href="/" className="font-serif text-xl sm:text-2xl text-gold-400">
-          Mentiva
-        </Link>
         <Nav active="chat" />
       </header>
 

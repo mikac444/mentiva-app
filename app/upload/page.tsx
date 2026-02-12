@@ -49,6 +49,10 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [savedBase64, setSavedBase64] = useState<string | null>(null);
+  const [boardTitle, setBoardTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -91,16 +95,9 @@ export default function UploadPage() {
       if (!res.ok) throw new Error(data.error || "Analysis failed");
       const analysisResult = data as AnalysisResult;
       setAnalysis(analysisResult);
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.id) {
-        await supabase.from("vision_boards").insert({
-          user_id: session.user.id,
-          image_url: base64,
-          analysis: analysisResult,
-        });
-      }
+      setSavedBase64(base64);
+      setBoardTitle("");
+      setSaveSuccess(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -108,10 +105,39 @@ export default function UploadPage() {
     }
   }
 
+  async function handleSaveBoard() {
+    if (!savedBase64 || !analysis) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        setError("Sign in to save your board.");
+        setSaving(false);
+        return;
+      }
+      await supabase.from("vision_boards").insert({
+        user_id: session.user.id,
+        image_url: savedBase64,
+        analysis,
+        title: boardTitle.trim() || "Untitled board",
+      });
+      setSaveSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function handleReset() {
     setFile(null);
     setPreview(null);
     setAnalysis(null);
+    setSavedBase64(null);
+    setBoardTitle("");
+    setSaveSuccess(false);
     setError(null);
     if (inputRef.current) inputRef.current.value = "";
   }
@@ -119,9 +145,6 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
       <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6 border-b border-sage-800">
-        <Link href="/" className="font-serif text-2xl text-gold-400">
-          Mentiva
-        </Link>
         <Nav active="upload" />
       </header>
 
@@ -267,13 +290,37 @@ export default function UploadPage() {
               </ol>
             </section>
 
-            <button
-              type="button"
-              onClick={handleReset}
-              className="rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 px-5 py-3 transition-colors"
-            >
-              Analyze another board
-            </button>
+            <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
+              <h2 className="font-serif text-lg text-gold-400 mb-3">Give this board a name</h2>
+              <input
+                type="text"
+                value={boardTitle}
+                onChange={(e) => setBoardTitle(e.target.value)}
+                placeholder="e.g. My 2026 Goals"
+                className="w-full rounded-lg border border-sage-700 bg-sage-900/50 px-4 py-3 text-sage-100 placeholder-sage-500 focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 outline-none"
+              />
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleSaveBoard}
+                  disabled={saving}
+                  className="rounded-lg bg-gold-500 hover:bg-gold-400 disabled:opacity-50 text-sage-950 font-semibold px-5 py-3 transition-colors"
+                >
+                  {saving ? "Saving…" : "Save to my boards"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={saving}
+                  className="rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 px-5 py-3 transition-colors"
+                >
+                  Analyze another board
+                </button>
+              </div>
+              {saveSuccess && (
+                <p className="mt-3 text-gold-400 text-sm">Board saved. View it on your dashboard.</p>
+              )}
+            </section>
           </div>
         )}
       </main>

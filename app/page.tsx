@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) redirect("/dashboard");
+
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
       {/* Subtle background texture */}
