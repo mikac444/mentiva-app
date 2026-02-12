@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
@@ -11,15 +11,83 @@ const WELCOME_MESSAGE =
 
 type Message = { role: "user" | "assistant"; content: string };
 
+type Conversation = {
+  id: string;
+  user_id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function formatConversationDate(iso: string) {
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return "Today";
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+  } catch {
+    return iso;
+  }
+}
+
+function BouncingDots() {
+  return (
+    <div className="flex items-center gap-1 py-1">
+      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce [animation-delay:-0.3s]" />
+      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce [animation-delay:-0.15s]" />
+      <span className="w-2 h-2 rounded-full bg-gold-400/80 animate-bounce" />
+    </div>
+  );
+}
+
 export default function ChatPage() {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [visionBoard, setVisionBoard] = useState<AnalysisResult | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const fetchConversations = useCallback(async () => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) return;
+    const { data } = await supabase
+      .from("chat_conversations")
+      .select("id, user_id, title, created_at, updated_at")
+      .eq("user_id", session.user.id)
+      .order("updated_at", { ascending: false });
+    setConversations((data as Conversation[]) ?? []);
+  }, []);
+
+  const currentConversationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    currentConversationIdRef.current = currentConversationId;
+  }, [currentConversationId]);
+
+  const loadMessages = useCallback(async (conversationId: string) => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("chat_messages")
+      .select("role, content")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true });
+    if (currentConversationIdRef.current !== conversationId) return;
+    if (data?.length) {
+      setMessages(data as Message[]);
+    } else {
+      setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -30,16 +98,6 @@ export default function ChatPage() {
         setLoadingHistory(false);
         return;
       }
-      const { data: chatRows } = await supabase
-        .from("chat_messages")
-        .select("role, content")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: true });
-      if (chatRows?.length) {
-        setMessages(chatRows as Message[]);
-      } else {
-        setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
-      }
       const { data: boardRows } = await supabase
         .from("vision_boards")
         .select("analysis")
@@ -49,13 +107,74 @@ export default function ChatPage() {
       if (boardRows?.[0]?.analysis) {
         setVisionBoard(boardRows[0].analysis as AnalysisResult);
       }
+      const { data: convRows } = await supabase
+        .from("chat_conversations")
+        .select("id, user_id, title, created_at, updated_at")
+        .eq("user_id", session.user.id)
+        .order("updated_at", { ascending: false });
+      const convs = (convRows as Conversation[]) ?? [];
+      setConversations(convs);
+      if (convs.length === 0) {
+        const { data: newConv } = await supabase
+          .from("chat_conversations")
+          .insert({ user_id: session.user.id, title: "New chat" })
+          .select("id")
+          .single();
+        if (newConv?.id) {
+          setCurrentConversationId(newConv.id);
+          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setConversations((prev) => [{ id: newConv.id, user_id: session.user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
+        }
+      } else {
+        setCurrentConversationId(convs[0].id);
+        const { data: msgs } = await supabase
+          .from("chat_messages")
+          .select("role, content")
+          .eq("conversation_id", convs[0].id)
+          .order("created_at", { ascending: true });
+        if (msgs?.length) {
+          setMessages(msgs as Message[]);
+        } else {
+          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+        }
+      }
       setLoadingHistory(false);
     })();
-  }, []);
+  }, [loadMessages]);
+
+  useEffect(() => {
+    if (!currentConversationId) return;
+    loadMessages(currentConversationId);
+  }, [currentConversationId, loadMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isLoading]);
+
+  async function handleNewChat() {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) return;
+    const { data } = await supabase
+      .from("chat_conversations")
+      .insert({ user_id: session.user.id, title: "New chat" })
+      .select("id, user_id, title, created_at, updated_at")
+      .single();
+    if (data) {
+      setCurrentConversationId(data.id);
+      setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+      setConversations((prev) => [data as Conversation, ...prev]);
+      setError(null);
+      setSidebarOpen(false);
+    }
+  }
+
+  async function handleSelectConversation(conv: Conversation) {
+    setCurrentConversationId(conv.id);
+    setMessages([]);
+    setError(null);
+    setSidebarOpen(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,13 +189,46 @@ export default function ChatPage() {
 
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user?.id) {
-      await supabase.from("chat_messages").insert({
-        user_id: session.user.id,
-        role: "user",
-        content: text,
-      });
+    if (!session?.user?.id) {
+      setError("Sign in to chat.");
+      setIsLoading(false);
+      return;
     }
+
+    let convId = currentConversationId;
+    const isFirstMessage = messages.length <= 1 && (messages.length === 0 || messages[0].role === "assistant");
+
+    if (!convId) {
+      const { data: newConv } = await supabase
+        .from("chat_conversations")
+        .insert({ user_id: session.user.id, title: "New chat" })
+        .select("id")
+        .single();
+      if (!newConv?.id) {
+        setError("Could not create conversation.");
+        setIsLoading(false);
+        return;
+      }
+      convId = newConv.id;
+      setCurrentConversationId(convId);
+      setConversations((prev) => [{ id: convId!, user_id: session.user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
+    }
+
+    const title = text.length > 30 ? text.slice(0, 30) + "…" : text;
+    if (isFirstMessage) {
+      await supabase
+        .from("chat_conversations")
+        .update({ title, updated_at: new Date().toISOString() })
+        .eq("id", convId);
+      setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, title, updated_at: new Date().toISOString() } : c));
+    }
+
+    await supabase.from("chat_messages").insert({
+      conversation_id: convId,
+      user_id: session.user.id,
+      role: "user",
+      content: text,
+    });
 
     try {
       const history = [...messages, userMessage];
@@ -98,13 +250,18 @@ export default function ChatPage() {
       const reply = typeof data.reply === "string" ? data.reply : "";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-      if (session?.user?.id) {
-        await supabase.from("chat_messages").insert({
-          user_id: session.user.id,
-          role: "assistant",
-          content: reply,
-        });
-      }
+      await supabase.from("chat_messages").insert({
+        conversation_id: convId,
+        user_id: session.user.id,
+        role: "assistant",
+        content: reply,
+      });
+
+      await supabase
+        .from("chat_conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", convId);
+      await fetchConversations();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -116,77 +273,141 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
       <header className="shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((o) => !o)}
+          className="lg:hidden p-2 -ml-2 text-sage-400 hover:text-gold-400"
+          aria-label="Toggle sidebar"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         <Nav active="chat" />
       </header>
 
-      <main className="flex-1 flex flex-col min-h-0 max-w-3xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4">
-          {loadingHistory ? (
-            <div className="flex items-center justify-center py-12 text-sage-500 text-sm">
-              Loading conversation…
-            </div>
-          ) : (
-          <>
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+      <div className="flex-1 flex min-h-0">
+        {/* Sidebar */}
+        <aside
+          className={`${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 flex flex-col border-r border-sage-800 bg-sage-950 transition-transform duration-200 ease-out pt-4 pb-6`}
+          style={{ top: "65px" }}
+        >
+          <div className="px-3 pb-3">
+            <button
+              type="button"
+              onClick={handleNewChat}
+              className="w-full rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 font-medium py-2.5 px-3 text-sm transition-colors"
             >
-              <div
-                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
-                  msg.role === "user"
-                    ? "bg-gold-500/20 text-sage-100 rounded-br-md"
-                    : "bg-sage-800/80 text-sage-200 border border-sage-700 rounded-bl-md"
+              + New chat
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-2">
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                type="button"
+                onClick={() => handleSelectConversation(conv)}
+                className={`w-full text-left rounded-lg px-3 py-2.5 mb-1 text-sm transition-colors ${
+                  currentConversationId === conv.id
+                    ? "bg-sage-800 text-gold-400"
+                    : "text-sage-400 hover:bg-sage-800/60 hover:text-sage-200"
                 }`}
               >
-                <p className="text-sm font-medium text-sage-500 mb-1">
-                  {msg.role === "user" ? "You" : "Menti"}
-                </p>
-                <p className="text-sm sm:text-base whitespace-pre-wrap break-words">
-                  {msg.content}
-                </p>
-              </div>
-            </div>
-          ))}
-          <div ref={bottomRef} />
-          </>
-          )}
-        </div>
-
-        {error && (
-          <div className="shrink-0 rounded-lg border border-red-900/50 bg-red-950/20 px-4 py-2 text-red-300 text-sm mb-3">
-            {error}
+                <p className="truncate font-medium">{conv.title || "New chat"}</p>
+                <p className="text-xs text-sage-500 mt-0.5">{formatConversationDate(conv.updated_at)}</p>
+              </button>
+            ))}
           </div>
+        </aside>
+
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-sage-950/60 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden
+          />
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="shrink-0 flex gap-2 sm:gap-3 items-end border-t border-sage-800 pt-4"
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-            placeholder="Message Menti…"
-            rows={1}
-            disabled={isLoading}
-            className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl border border-sage-700 bg-sage-900/50 px-4 py-3 text-sage-100 placeholder-sage-500 focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 outline-none disabled:opacity-50 text-sm sm:text-base"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="shrink-0 rounded-xl bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-sage-950 font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
+        {/* Chat area */}
+        <main className="flex-1 flex flex-col min-h-0 min-w-0 max-w-3xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4">
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-12 text-sage-500 text-sm">
+                Loading…
+              </div>
+            ) : (
+              <>
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
+                        msg.role === "user"
+                          ? "bg-gold-500/20 text-sage-100 rounded-br-md"
+                          : "bg-sage-800/80 text-sage-200 border border-sage-700 rounded-bl-md"
+                      }`}
+                    >
+                      <p className="text-sm font-medium text-sage-500 mb-1">
+                        {msg.role === "user" ? "You" : "Menti"}
+                      </p>
+                      <p className="text-sm sm:text-base whitespace-pre-wrap break-words">
+                        {msg.content}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-sage-800/80 text-sage-200 border border-sage-700">
+                      <p className="text-sm font-medium text-sage-500 mb-2">Menti</p>
+                      <BouncingDots />
+                    </div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </>
+            )}
+          </div>
+
+          {error && (
+            <div className="shrink-0 rounded-lg border border-red-900/50 bg-red-950/20 px-4 py-2 text-red-300 text-sm mb-3">
+              {error}
+            </div>
+          )}
+
+          <form
+            onSubmit={handleSubmit}
+            className="shrink-0 flex gap-2 sm:gap-3 items-end border-t border-sage-800 pt-4"
           >
-            Send
-          </button>
-        </form>
-      </main>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              placeholder="Message Menti…"
+              rows={1}
+              disabled={isLoading}
+              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl border border-sage-700 bg-sage-900/50 px-4 py-3 text-sage-100 placeholder-sage-500 focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 outline-none disabled:opacity-50 text-sm sm:text-base"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="shrink-0 rounded-xl bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-sage-950 font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
+            >
+              Send
+            </button>
+          </form>
+        </main>
+      </div>
     </div>
   );
 }
