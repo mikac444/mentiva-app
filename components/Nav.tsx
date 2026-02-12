@@ -8,6 +8,7 @@ import type { User } from "@supabase/supabase-js";
 
 type NavProps = {
   active?: "dashboard" | "upload" | "chat";
+  hideHamburger?: boolean;
 };
 
 const linkClass = (active: boolean) =>
@@ -15,7 +16,7 @@ const linkClass = (active: boolean) =>
     ? "text-gold-400 font-medium text-sm"
     : "text-sage-400 hover:text-gold-400 transition-colors text-sm";
 
-export function Nav({ active }: NavProps) {
+export function Nav({ active, hideHamburger }: NavProps) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -140,21 +141,23 @@ export function Nav({ active }: NavProps) {
         )}
       </nav>
 
-      {/* Mobile hamburger */}
-      <button
-        type="button"
-        onClick={() => setMobileMenuOpen((o) => !o)}
-        className="md:hidden p-2 -mr-2 text-sage-400 hover:text-gold-400 transition-colors"
-        aria-label="Open menu"
-        aria-expanded={mobileMenuOpen}
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
-        </svg>
-      </button>
+      {!hideHamburger && (
+        <>
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            className="md:hidden p-2 -mr-2 text-sage-400 hover:text-gold-400 transition-colors"
+            aria-label="Open menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
+            </svg>
+          </button>
 
-      {/* Mobile slide-down menu */}
-      <div
+          {/* Mobile slide-down menu */}
+          <div
         className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-[max-height] duration-200 ease-out ${
           mobileMenuOpen ? "max-h-[80vh]" : "max-h-0"
         }`}
@@ -209,6 +212,8 @@ export function Nav({ active }: NavProps) {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

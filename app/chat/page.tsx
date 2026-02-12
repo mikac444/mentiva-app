@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase";
@@ -62,6 +63,7 @@ function BouncingDots() {
 }
 
 export default function ChatPage() {
+  const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -344,7 +346,7 @@ export default function ChatPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <Nav active="chat" />
+          <Nav active="chat" hideHamburger />
         </div>
         <button
           type="button"
@@ -404,6 +406,35 @@ export default function ChatPage() {
                 </button>
               </div>
             ))}
+          </div>
+          <div className="mt-auto border-t border-sage-800 px-3 pt-3 pb-2 space-y-1">
+            <Link
+              href="/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className="block px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/upload"
+              onClick={() => setSidebarOpen(false)}
+              className="block px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+            >
+              Upload
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                setSidebarOpen(false);
+                const supabase = createClient();
+                await supabase.auth.signOut();
+                router.push("/");
+                router.refresh();
+              }}
+              className="block w-full text-left px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+            >
+              Sign out
+            </button>
           </div>
         </aside>
 
