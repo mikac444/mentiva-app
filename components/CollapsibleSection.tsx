@@ -25,26 +25,20 @@ export function CollapsibleSection({
     >
       <button
         type="button"
-        onClick={() => setIsOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left hover:bg-sage-800/30 transition-colors"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left hover:bg-sage-800/30 transition-colors cursor-pointer"
       >
         <h2 className="font-serif text-lg text-gold-400">{title}</h2>
-        <span
-          className="shrink-0 text-gold-400/80 transition-transform duration-200"
-          style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
-          aria-hidden
-        >
-          ▼
+        <span className="shrink-0 text-gold-400/80 text-sm" aria-hidden>
+          {isOpen ? "▼" : "▶"}
         </span>
       </button>
       <div
-        className="grid transition-[grid-template-rows] duration-200 ease-in-out"
-        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+        className="overflow-hidden transition-[max-height] duration-200 ease-in-out"
+        style={{ maxHeight: isOpen ? 2000 : 0 }}
       >
-        <div className="min-h-0 overflow-hidden">
-          <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 sm:pt-0">
-            {children}
-          </div>
+        <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 sm:pt-0">
+          {children}
         </div>
       </div>
     </section>
