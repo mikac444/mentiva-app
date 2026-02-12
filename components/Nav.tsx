@@ -10,11 +10,18 @@ type NavProps = {
   active?: "dashboard" | "upload" | "chat";
 };
 
+const linkClass = (active: boolean) =>
+  active
+    ? "text-gold-400 font-medium text-sm"
+    : "text-sage-400 hover:text-gold-400 transition-colors text-sm";
+
 export function Nav({ active }: NavProps) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -41,8 +48,20 @@ export function Nav({ active }: NavProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
+
   async function handleSignOut() {
     setDropdownOpen(false);
+    setMobileMenuOpen(false);
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
@@ -55,43 +74,26 @@ export function Nav({ active }: NavProps) {
   const firstName = fullName?.split(/\s+/)[0] ?? user?.email?.split("@")[0] ?? "Account";
   const email = user?.email ?? null;
 
+  const closeMobile = () => setMobileMenuOpen(false);
+
   return (
-    <>
+    <div ref={navRef} className="relative flex items-center justify-between w-full">
       <Link
         href={user ? "/dashboard" : "/"}
-        className="font-serif text-2xl text-gold-400"
+        className="font-serif text-2xl text-gold-400 shrink-0"
       >
         Mentiva
       </Link>
-      <nav className="flex items-center gap-3 sm:gap-4">
-        <Link
-          href="/dashboard"
-          className={
-            active === "dashboard"
-              ? "text-gold-400 font-medium text-sm"
-              : "text-sage-400 hover:text-gold-400 transition-colors text-sm"
-          }
-        >
+
+      {/* Desktop nav (md and above) */}
+      <nav className="hidden md:flex items-center gap-3 sm:gap-4">
+        <Link href="/dashboard" className={linkClass(active === "dashboard")}>
           Dashboard
         </Link>
-        <Link
-          href="/upload"
-          className={
-            active === "upload"
-              ? "text-gold-400 font-medium text-sm"
-              : "text-sage-400 hover:text-gold-400 transition-colors text-sm"
-          }
-        >
+        <Link href="/upload" className={linkClass(active === "upload")}>
           Upload
         </Link>
-        <Link
-          href="/chat"
-          className={
-            active === "chat"
-              ? "text-gold-400 font-medium text-sm"
-              : "text-sage-400 hover:text-gold-400 transition-colors text-sm"
-          }
-        >
+        <Link href="/chat" className={linkClass(active === "chat")}>
           AI Chat
         </Link>
         {user && (
@@ -137,6 +139,76 @@ export function Nav({ active }: NavProps) {
           </div>
         )}
       </nav>
-    </>
+
+      {/* Mobile hamburger */}
+      <button
+        type="button"
+        onClick={() => setMobileMenuOpen((o) => !o)}
+        className="md:hidden p-2 -mr-2 text-sage-400 hover:text-gold-400 transition-colors"
+        aria-label="Open menu"
+        aria-expanded={mobileMenuOpen}
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
+        </svg>
+      </button>
+
+      {/* Mobile slide-down menu */}
+      <div
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-[max-height] duration-200 ease-out ${
+          mobileMenuOpen ? "max-h-[80vh]" : "max-h-0"
+        }`}
+      >
+        <div className="bg-sage-900 border-b border-sage-700 border-t border-sage-800 shadow-xl">
+          <div className="px-4 py-3 flex flex-col gap-0">
+            <Link
+              href="/dashboard"
+              onClick={closeMobile}
+              className={`py-3 border-b border-sage-700/80 ${linkClass(active === "dashboard")}`}
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/upload"
+              onClick={closeMobile}
+              className={`py-3 border-b border-sage-700/80 ${linkClass(active === "upload")}`}
+            >
+              Upload
+            </Link>
+            <Link
+              href="/chat"
+              onClick={closeMobile}
+              className={`py-3 border-b border-sage-700/80 ${linkClass(active === "chat")}`}
+            >
+              AI Chat
+            </Link>
+            {user && (
+              <div className="pt-3 pb-1">
+                {fullName && (
+                  <p className="text-sage-100 text-sm font-medium truncate px-1">{fullName}</p>
+                )}
+                {email && (
+                  <p className="text-sage-500 text-xs truncate mt-0.5 px-1">{email}</p>
+                )}
+                <a
+                  href="mailto:mika@mentiva.app"
+                  onClick={closeMobile}
+                  className="block py-2.5 px-1 text-sage-300 hover:text-gold-400 text-sm transition-colors"
+                >
+                  Send feedback
+                </a>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full text-left py-2.5 px-1 text-sage-300 hover:text-gold-400 text-sm transition-colors"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

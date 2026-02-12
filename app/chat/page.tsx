@@ -321,19 +321,30 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-sage-950">
-      <header className="shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-sage-950">
+      <header className="shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
+        <div className="flex items-center gap-2 min-w-0">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((o) => !o)}
+            className="lg:hidden shrink-0 p-3 -ml-2 rounded-lg text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 transition-colors touch-manipulation"
+            aria-label="Conversations"
+            aria-expanded={sidebarOpen}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <Nav active="chat" />
+        </div>
         <button
           type="button"
-          onClick={() => setSidebarOpen((o) => !o)}
-          className="lg:hidden p-2 -ml-2 text-sage-400 hover:text-gold-400"
-          aria-label="Toggle sidebar"
+          onClick={handleNewChat}
+          className="lg:hidden shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 font-medium transition-colors touch-manipulation"
+          aria-label="New chat"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <span className="text-xl leading-none">+</span>
         </button>
-        <Nav active="chat" />
       </header>
 
       <div className="flex-1 flex min-h-0">
@@ -423,7 +434,7 @@ export default function ChatPage() {
 
         {/* Chat area */}
         <main className="flex-1 flex flex-col min-h-0 min-w-0 max-w-3xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
-          <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4">
+          <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4 min-h-0">
             {loadingHistory ? (
               <div className="flex items-center justify-center py-12 text-sage-500 text-sm">
                 Loading…
@@ -472,7 +483,7 @@ export default function ChatPage() {
 
           <form
             onSubmit={handleSubmit}
-            className="shrink-0 flex gap-2 sm:gap-3 items-end border-t border-sage-800 pt-4"
+            className="shrink-0 flex gap-2 sm:gap-3 items-end border-t border-sage-800 pt-4 pb-[env(safe-area-inset-bottom)] bg-sage-950"
           >
             <textarea
               ref={inputRef}
