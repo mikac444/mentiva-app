@@ -159,7 +159,7 @@ export default function UploadPage() {
                     disabled={loading}
                     className="rounded-lg bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-sage-950 font-semibold px-5 py-3 transition-colors"
                   >
-                    {loading ? "Analyzing…" : "Analyze with AI"}
+                    {loading ? "Menti is reading…" : "Analyze with Menti"}
                   </button>
                   <button
                     type="button"
@@ -176,7 +176,7 @@ export default function UploadPage() {
             {loading && (
               <div className="mt-6 rounded-xl border border-sage-700 bg-sage-900/30 p-6 flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-gold-500/50 border-t-gold-400 rounded-full animate-spin" />
-                <span className="text-sage-400">Claude is reading your vision board…</span>
+                <span className="text-sage-400">Menti is reading your vision board…</span>
               </div>
             )}
 
