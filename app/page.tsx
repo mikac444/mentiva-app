@@ -23,7 +23,7 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link
-            href="/dashboard"
+            href="/login"
             className="rounded-full bg-gold-500/90 hover:bg-gold-400 text-sage-950 font-semibold px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base transition-colors"
           >
             Get started
@@ -42,18 +42,12 @@ export default function LandingPage() {
             Create beautiful vision boards and let AI help you clarify goals,
             uncover patterns, and turn inspiration into action.
           </p>
-          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="w-full sm:w-auto rounded-full bg-gold-500 hover:bg-gold-400 text-sage-950 font-semibold px-8 py-4 text-base transition-colors"
-            >
-              Start your board
-            </Link>
+          <div className="mt-10 sm:mt-12">
             <Link
               href="/login"
-              className="w-full sm:w-auto rounded-full border border-sage-600 hover:border-gold-500/50 text-sage-200 hover:text-gold-400 font-medium px-8 py-4 text-base transition-colors"
+              className="inline-block rounded-full bg-gold-500 hover:bg-gold-400 text-sage-950 font-semibold px-8 py-4 text-base transition-colors"
             >
-              Sign in
+              Get started
             </Link>
           </div>
         </div>
