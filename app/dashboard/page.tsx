@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Nav } from "@/components/Nav";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
@@ -150,9 +151,12 @@ export default function DashboardPage() {
                 </div>
               )}
               {selectedBoard.analysis && (
-                <>
-                  <section className="rounded-xl border border-sage-700 bg-sage-800/50 p-5">
-                    <h2 className="font-serif text-lg text-gold-400 mb-3">Themes</h2>
+                <div className="space-y-4">
+                  <CollapsibleSection
+                    title="Themes"
+                    defaultOpen
+                    className="bg-sage-800/50"
+                  >
                     <ul className="space-y-2">
                       {selectedBoard.analysis.themes?.map((t, i) => (
                         <li key={i} className="text-sage-200 flex items-start gap-2">
@@ -161,9 +165,12 @@ export default function DashboardPage() {
                         </li>
                       ))}
                     </ul>
-                  </section>
-                  <section className="rounded-xl border border-sage-700 bg-sage-800/50 p-5">
-                    <h2 className="font-serif text-lg text-gold-400 mb-3">Goals</h2>
+                  </CollapsibleSection>
+                  <CollapsibleSection
+                    title="Goals"
+                    defaultOpen={false}
+                    className="bg-sage-800/50"
+                  >
                     <ul className="space-y-2">
                       {selectedBoard.analysis.goals?.map((g, i) => (
                         <li key={i} className="text-sage-200 flex items-start gap-2">
@@ -172,10 +179,13 @@ export default function DashboardPage() {
                         </li>
                       ))}
                     </ul>
-                  </section>
+                  </CollapsibleSection>
                   {selectedBoard.analysis.patterns?.length > 0 && (
-                    <section className="rounded-xl border border-sage-700 bg-sage-800/50 p-5">
-                      <h2 className="font-serif text-lg text-gold-400 mb-3">Patterns</h2>
+                    <CollapsibleSection
+                      title="Patterns"
+                      defaultOpen={false}
+                      className="bg-sage-800/50"
+                    >
                       <ul className="space-y-2">
                         {selectedBoard.analysis.patterns.map((p, i) => (
                           <li key={i} className="text-sage-200 flex items-start gap-2">
@@ -184,11 +194,15 @@ export default function DashboardPage() {
                           </li>
                         ))}
                       </ul>
-                    </section>
+                    </CollapsibleSection>
                   )}
                   {selectedBoard.analysis.actionSteps?.length > 0 && (
-                    <section className="rounded-xl border border-gold-500/30 bg-sage-800/50 p-5">
-                      <h2 className="font-serif text-lg text-gold-400 mb-4">Your 5 action steps</h2>
+                    <CollapsibleSection
+                      title="Your 5 action steps"
+                      defaultOpen={false}
+                      borderClassName="border-gold-500/30"
+                      className="bg-sage-800/50"
+                    >
                       <ol className="space-y-4">
                         {selectedBoard.analysis.actionSteps.map(({ step, title, description }) => (
                           <li key={step} className="flex gap-4">
@@ -202,9 +216,9 @@ export default function DashboardPage() {
                           </li>
                         ))}
                       </ol>
-                    </section>
+                    </CollapsibleSection>
                   )}
-                </>
+                </div>
               )}
             </div>
           </div>

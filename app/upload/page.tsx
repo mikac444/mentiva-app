@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { Nav } from "@/components/Nav";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
@@ -233,9 +234,8 @@ export default function UploadPage() {
               </div>
             )}
 
-            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-              <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
-                <h2 className="font-serif text-lg text-gold-400 mb-3">Themes</h2>
+            <div className="space-y-4">
+              <CollapsibleSection title="Themes" defaultOpen>
                 <ul className="space-y-2">
                   {analysis.themes.map((t, i) => (
                     <li key={i} className="text-sage-200 flex items-start gap-2">
@@ -244,10 +244,9 @@ export default function UploadPage() {
                     </li>
                   ))}
                 </ul>
-              </section>
+              </CollapsibleSection>
 
-              <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
-                <h2 className="font-serif text-lg text-gold-400 mb-3">Goals</h2>
+              <CollapsibleSection title="Goals" defaultOpen={false}>
                 <ul className="space-y-2">
                   {analysis.goals.map((g, i) => (
                     <li key={i} className="text-sage-200 flex items-start gap-2">
@@ -256,39 +255,41 @@ export default function UploadPage() {
                     </li>
                   ))}
                 </ul>
-              </section>
-            </div>
+              </CollapsibleSection>
 
-            {analysis.patterns.length > 0 && (
-              <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
-                <h2 className="font-serif text-lg text-gold-400 mb-3">Patterns</h2>
-                <ul className="space-y-2">
-                  {analysis.patterns.map((p, i) => (
-                    <li key={i} className="text-sage-200 flex items-start gap-2">
-                      <span className="text-gold-500/80 mt-0.5">◆</span>
-                      <span>{p}</span>
+              {analysis.patterns.length > 0 && (
+                <CollapsibleSection title="Patterns" defaultOpen={false}>
+                  <ul className="space-y-2">
+                    {analysis.patterns.map((p, i) => (
+                      <li key={i} className="text-sage-200 flex items-start gap-2">
+                        <span className="text-gold-500/80 mt-0.5">◆</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CollapsibleSection>
+              )}
+
+              <CollapsibleSection
+                title="Your 5 action steps"
+                defaultOpen={false}
+                borderClassName="border-gold-500/30"
+              >
+                <ol className="space-y-4">
+                  {analysis.actionSteps.map(({ step, title, description }) => (
+                    <li key={step} className="flex gap-4">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-500/20 text-gold-400 font-serif font-medium text-sm">
+                        {step}
+                      </span>
+                      <div>
+                        <p className="font-medium text-sage-100">{title}</p>
+                        <p className="text-sage-400 text-sm mt-0.5">{description}</p>
+                      </div>
                     </li>
                   ))}
-                </ul>
-              </section>
-            )}
-
-            <section className="rounded-xl border border-gold-500/30 bg-sage-900/50 p-6">
-              <h2 className="font-serif text-lg text-gold-400 mb-4">Your 5 action steps</h2>
-              <ol className="space-y-4">
-                {analysis.actionSteps.map(({ step, title, description }) => (
-                  <li key={step} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-500/20 text-gold-400 font-serif font-medium text-sm">
-                      {step}
-                    </span>
-                    <div>
-                      <p className="font-medium text-sage-100">{title}</p>
-                      <p className="text-sage-400 text-sm mt-0.5">{description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </section>
+                </ol>
+              </CollapsibleSection>
+            </div>
 
             <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
               <h2 className="font-serif text-lg text-gold-400 mb-3">Give this board a name</h2>
