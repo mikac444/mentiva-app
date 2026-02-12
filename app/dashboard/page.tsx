@@ -16,10 +16,20 @@ type VisionBoardRow = {
   created_at: string;
 };
 
+function TrashIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
 export default function DashboardPage() {
   const [boards, setBoards] = useState<VisionBoardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBoard, setSelectedBoard] = useState<VisionBoardRow | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -49,6 +59,26 @@ export default function DashboardPage() {
     } catch {
       return iso;
     }
+  }
+
+  async function handleDeleteBoard() {
+    if (!selectedBoard) return;
+    setDeleting(true);
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      setDeleting(false);
+      return;
+    }
+    await supabase
+      .from("vision_boards")
+      .delete()
+      .eq("id", selectedBoard.id)
+      .eq("user_id", session.user.id);
+    setBoards((prev) => prev.filter((b) => b.id !== selectedBoard.id));
+    setSelectedBoard(null);
+    setShowDeleteConfirm(false);
+    setDeleting(false);
   }
 
   return (
@@ -120,7 +150,7 @@ export default function DashboardPage() {
           onClick={() => setSelectedBoard(null)}
         >
           <div
-            className="bg-sage-900 border border-sage-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+            className="relative bg-sage-900 border border-sage-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 flex items-center justify-between gap-4 p-4 border-b border-sage-700 bg-sage-900">
@@ -132,14 +162,51 @@ export default function DashboardPage() {
                   {formatDate(selectedBoard.created_at)}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedBoard(null)}
-                className="shrink-0 text-sage-500 hover:text-gold-400"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-950/40 rounded-lg transition-colors"
+                  title="Delete board"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBoard(null)}
+                  className="text-sage-500 hover:text-gold-400"
+                >
+                  Close
+                </button>
+              </div>
             </div>
+            {showDeleteConfirm && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-sage-950/80 p-4">
+                <div className="bg-sage-900 border border-sage-700 rounded-xl p-5 shadow-xl max-w-sm w-full">
+                  <p className="text-sage-200 text-sm">
+                    Are you sure you want to delete this board?
+                  </p>
+                  <div className="mt-4 flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={deleting}
+                      className="px-4 py-2 rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 transition-colors disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteBoard}
+                      disabled={deleting}
+                      className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors disabled:opacity-50"
+                    >
+                      {deleting ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="p-4 sm:p-6 space-y-6">
               {selectedBoard.image_url && (
                 <div className="rounded-xl overflow-hidden border border-sage-700 max-w-sm">

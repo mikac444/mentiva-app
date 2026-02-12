@@ -34,6 +34,14 @@ function formatConversationDate(iso: string) {
   }
 }
 
+function TrashIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
 function BouncingDots() {
   return (
     <div className="flex items-center gap-1 py-1">
@@ -54,6 +62,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null);
+  const [deletingConversation, setDeletingConversation] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -174,6 +184,46 @@ export default function ChatPage() {
     setMessages([]);
     setError(null);
     setSidebarOpen(false);
+  }
+
+  async function handleDeleteConversation() {
+    if (!conversationToDelete) return;
+    setDeletingConversation(true);
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      setDeletingConversation(false);
+      setConversationToDelete(null);
+      return;
+    }
+    const id = conversationToDelete.id;
+    await supabase.from("chat_messages").delete().eq("conversation_id", id);
+    await supabase.from("chat_conversations").delete().eq("id", id).eq("user_id", session.user.id);
+    const nextConvs = conversations.filter((c) => c.id !== id);
+    setConversations(nextConvs);
+    setConversationToDelete(null);
+    setDeletingConversation(false);
+
+    if (currentConversationId === id) {
+      if (nextConvs.length === 0) {
+        const { data: newConv } = await supabase
+          .from("chat_conversations")
+          .insert({ user_id: session.user.id, title: "New chat" })
+          .select("id, user_id, title, created_at, updated_at")
+          .single();
+        if (newConv) {
+          const newConversation = newConv as Conversation;
+          setCurrentConversationId(newConversation.id);
+          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setConversations([newConversation]);
+        } else {
+          setCurrentConversationId(null);
+          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+        }
+      } else {
+        setCurrentConversationId(nextConvs[0].id);
+      }
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -305,22 +355,63 @@ export default function ChatPage() {
           </div>
           <div className="flex-1 overflow-y-auto px-2">
             {conversations.map((conv) => (
-              <button
+              <div
                 key={conv.id}
-                type="button"
-                onClick={() => handleSelectConversation(conv)}
-                className={`w-full text-left rounded-lg px-3 py-2.5 mb-1 text-sm transition-colors ${
-                  currentConversationId === conv.id
-                    ? "bg-sage-800 text-gold-400"
-                    : "text-sage-400 hover:bg-sage-800/60 hover:text-sage-200"
+                className={`group flex items-center gap-1 rounded-lg mb-1 ${
+                  currentConversationId === conv.id ? "bg-sage-800" : "hover:bg-sage-800/60"
                 }`}
               >
-                <p className="truncate font-medium">{conv.title || "New chat"}</p>
-                <p className="text-xs text-sage-500 mt-0.5">{formatConversationDate(conv.updated_at)}</p>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectConversation(conv)}
+                  className={`flex-1 min-w-0 text-left px-3 py-2.5 text-sm transition-colors ${
+                    currentConversationId === conv.id ? "text-gold-400" : "text-sage-400 hover:text-sage-200"
+                  }`}
+                >
+                  <p className="truncate font-medium">{conv.title || "New chat"}</p>
+                  <p className="text-xs text-sage-500 mt-0.5">{formatConversationDate(conv.updated_at)}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setConversationToDelete(conv);
+                  }}
+                  className="shrink-0 p-1.5 rounded text-sage-500 hover:text-red-400 hover:bg-red-950/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Delete conversation"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
         </aside>
+
+        {conversationToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-sage-950/80">
+            <div className="bg-sage-900 border border-sage-700 rounded-xl p-5 shadow-xl max-w-sm w-full">
+              <p className="text-sage-200 text-sm">Delete this conversation?</p>
+              <div className="mt-4 flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setConversationToDelete(null)}
+                  disabled={deletingConversation}
+                  className="px-4 py-2 rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteConversation}
+                  disabled={deletingConversation}
+                  className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors disabled:opacity-50"
+                >
+                  {deletingConversation ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {sidebarOpen && (
           <div
