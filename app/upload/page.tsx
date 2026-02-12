@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { Nav } from "@/components/Nav";
+import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
 const MAX_LONGEST_SIDE = 1024;
@@ -88,7 +89,18 @@ export default function UploadPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Analysis failed");
-      setAnalysis(data as AnalysisResult);
+      const analysisResult = data as AnalysisResult;
+      setAnalysis(analysisResult);
+
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        await supabase.from("vision_boards").insert({
+          user_id: session.user.id,
+          image_url: base64,
+          analysis: analysisResult,
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
