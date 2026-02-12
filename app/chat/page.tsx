@@ -363,8 +363,8 @@ export default function ChatPage() {
         <aside
           className={`${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 flex flex-col border-r border-sage-800 bg-sage-950 transition-transform duration-200 ease-out pt-4 pb-6`}
-          style={{ top: "65px" }}
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-full sm:w-72 shrink-0 flex flex-col border-r border-sage-800 bg-sage-950 transition-transform duration-200 ease-out pt-4 pb-6`}
+          style={{ top: "64px", bottom: 0 }}
         >
           <div className="px-3 pb-3">
             <button
@@ -407,20 +407,20 @@ export default function ChatPage() {
               </div>
             ))}
           </div>
-          <div className="mt-auto border-t border-sage-800 px-3 pt-3 pb-2 space-y-1">
+          <div className="mt-auto border-t border-sage-800 px-3 pt-3 pb-4 space-y-1">
             <Link
               href="/dashboard"
               onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
             >
-              Dashboard
+              📊 Dashboard
             </Link>
             <Link
               href="/upload"
               onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
             >
-              Upload
+              📤 Upload
             </Link>
             <button
               type="button"
@@ -431,7 +431,7 @@ export default function ChatPage() {
                 router.push("/");
                 router.refresh();
               }}
-              className="block w-full text-left px-3 py-2 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block w-full text-left px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
             >
               Sign out
             </button>
