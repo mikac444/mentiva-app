@@ -4,8 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function LandingPage() {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) redirect("/dashboard");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email) {
+    const { data } = await supabase
+      .from("allowed_emails")
+      .select("email")
+      .eq("email", user.email.toLowerCase())
+      .single();
+    if (data) {
+      redirect("/dashboard");
+    } else {
+      redirect("/unauthorized");
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-sage-950">
