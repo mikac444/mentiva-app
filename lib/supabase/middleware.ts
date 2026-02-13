@@ -3,6 +3,19 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
+const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/unauthorized"];
+const PROTECTED_PATHS = ["/dashboard", "/chat", "/upload"];
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.includes(pathname)) return true;
+  if (pathname.startsWith("/api/")) return true;
+  return false;
+}
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,21 +47,43 @@ export async function updateSession(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Temporarily no protected routes for local testing
-  const isProtected = false;
-
-  if (isProtected && !session) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
+  if (isPublicPath(request.nextUrl.pathname)) {
+    if (request.nextUrl.pathname === "/login" && session?.user?.email) {
+      const { data } = await supabase
+        .from("allowed_emails")
+        .select("email")
+        .eq("email", session.user.email)
+        .single();
+      if (data) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = "/dashboard";
+        redirectUrl.searchParams.delete("redirectTo");
+        return NextResponse.redirect(redirectUrl);
+      }
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+    return response;
   }
 
-  if (request.nextUrl.pathname === "/login" && session) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
-    redirectUrl.searchParams.delete("redirectTo");
-    return NextResponse.redirect(redirectUrl);
+  if (isProtectedPath(request.nextUrl.pathname)) {
+    if (!session) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+    const email = session.user?.email;
+    if (!email) {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+    const { data } = await supabase
+      .from("allowed_emails")
+      .select("email")
+      .eq("email", email)
+      .single();
+    if (!data) {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
   }
 
   return response;
