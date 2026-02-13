@@ -44,15 +44,15 @@ export async function updateSession(request: NextRequest) {
   });
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (isPublicPath(request.nextUrl.pathname)) {
-    if (request.nextUrl.pathname === "/login" && session?.user?.email) {
+    if (request.nextUrl.pathname === "/login" && user?.email) {
       const { data } = await supabase
         .from("allowed_emails")
         .select("email")
-        .eq("email", session.user.email)
+        .eq("email", user.email.toLowerCase())
         .single();
       if (data) {
         const redirectUrl = request.nextUrl.clone();
@@ -66,20 +66,20 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isProtectedPath(request.nextUrl.pathname)) {
-    if (!session) {
+    if (!user) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/login";
       redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
       return NextResponse.redirect(redirectUrl);
     }
-    const email = session.user?.email;
+    const email = user.email;
     if (!email) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
     const { data } = await supabase
       .from("allowed_emails")
       .select("email")
-      .eq("email", email)
+      .eq("email", email.toLowerCase())
       .single();
     if (!data) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
