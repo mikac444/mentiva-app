@@ -1,17 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 export default function UnauthorizedPage() {
-  const router = useRouter();
-
   async function handleSignOut() {
     const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    await supabase.auth.signOut({ scope: "global" });
+    window.location.href = "/login";
   }
 
   return (

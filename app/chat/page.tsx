@@ -434,9 +434,8 @@ export default function ChatPage() {
               onClick={async () => {
                 setSidebarOpen(false);
                 const supabase = createClient();
-                await supabase.auth.signOut();
-                router.push("/");
-                router.refresh();
+                await supabase.auth.signOut({ scope: "global" });
+                window.location.href = "/login";
               }}
               className="block w-full text-left px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
             >

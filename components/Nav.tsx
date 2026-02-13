@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -17,7 +16,6 @@ const linkClass = (active: boolean) =>
     : "text-sage-400 hover:text-gold-400 transition-colors text-sm";
 
 export function Nav({ active, hideHamburger }: NavProps) {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -63,9 +61,8 @@ export function Nav({ active, hideHamburger }: NavProps) {
   async function handleSignOut() {
     setDropdownOpen(false);
     setMobileMenuOpen(false);
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    await supabase.auth.signOut({ scope: "global" });
+    window.location.href = "/login";
   }
 
   const fullName =
