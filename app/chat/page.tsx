@@ -334,7 +334,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-sage-950">
       <header className="shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-4 min-w-0">
           <button
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}

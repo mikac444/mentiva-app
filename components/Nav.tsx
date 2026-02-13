@@ -87,7 +87,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
       </Link>
 
       {/* Desktop nav (md and above) */}
-      <nav className="hidden md:flex items-center gap-3 sm:gap-4">
+      <nav className="hidden md:flex items-center gap-4 ml-6">
         <Link href="/dashboard" className={linkClass(active === "dashboard")}>
           Dashboard
         </Link>
