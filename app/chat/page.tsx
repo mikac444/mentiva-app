@@ -422,6 +422,13 @@ export default function ChatPage() {
             >
               📤 Upload
             </Link>
+            <a
+              href="mailto:mika@mentiva.app"
+              onClick={() => setSidebarOpen(false)}
+              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+            >
+              💬 Send feedback
+            </a>
             <button
               type="button"
               onClick={async () => {
