@@ -9,18 +9,20 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
     const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error && session?.user?.email) {
       const { data } = await supabase
         .from("allowed_emails")
         .select("email")
         .eq("email", session.user.email.toLowerCase())
         .single();
+
       if (!data) {
-        return NextResponse.redirect(`${origin}/unauthorized`);
+        return NextResponse.redirect(new URL("/unauthorized", origin));
       }
-      return NextResponse.redirect(`${origin}${redirectTo}`);
+      return NextResponse.redirect(new URL(redirectTo, origin));
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  return NextResponse.redirect(new URL("/login?error=auth", origin));
 }
