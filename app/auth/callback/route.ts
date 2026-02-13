@@ -13,7 +13,7 @@ export async function GET(request: Request) {
       const { data } = await supabase
         .from("allowed_emails")
         .select("email")
-        .eq("email", session.user.email)
+        .eq("email", session.user.email.toLowerCase())
         .single();
       if (!data) {
         return NextResponse.redirect(`${origin}/unauthorized`);
