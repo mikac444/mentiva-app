@@ -128,7 +128,7 @@ export default function LandingPage() {
               <span className="font-medium">$10 forever</span>
             </span>
             <span>Founding members only</span>
-            <span>Limited to 3,000</span>
+            <span>23 of 3,000 spots claimed</span>
           </div>
         </div>
       </main>
