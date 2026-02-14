@@ -44,6 +44,10 @@ function compressImage(file: File): Promise<string> {
   });
 }
 
+const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+const inputStyle = { background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" };
+
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -144,28 +148,31 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-sage-950">
-      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6 border-b border-sage-800">
+    <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
         <Nav active="upload" />
       </header>
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto w-full">
-        <h1 className="font-serif text-2xl sm:text-3xl text-sage-100">
+        <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
           Upload vision board
         </h1>
-        <p className="mt-1 text-sage-500 text-sm">
+        <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
           Add an image and we&apos;ll analyze themes, goals, and suggest action steps
         </p>
 
         {!analysis ? (
           <>
             <div className="mt-8">
-              <label className="flex flex-col items-center justify-center min-h-[240px] rounded-xl border-2 border-dashed border-sage-700 hover:border-gold-500/50 bg-sage-900/30 cursor-pointer transition-colors">
-                <span className="text-4xl text-sage-500 mb-3">↑</span>
-                <span className="text-sage-400 font-medium">
+              <label
+                className="flex flex-col items-center justify-center min-h-[240px] rounded-xl border-2 border-dashed cursor-pointer transition-colors"
+                style={{ borderColor: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)" }}
+              >
+                <span className="text-4xl mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>↑</span>
+                <span className="font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
                   Drop an image here or click to upload
                 </span>
-                <span className="mt-1 text-sage-600 text-sm">
+                <span className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
                   JPEG, PNG, GIF, or WebP
                 </span>
                 <input
@@ -181,7 +188,7 @@ export default function UploadPage() {
 
             {preview && (
               <div className="mt-6 flex flex-col sm:flex-row sm:items-start gap-4">
-                <div className="rounded-xl overflow-hidden border border-sage-700 bg-sage-900/30 shrink-0 max-w-xs">
+                <div className="rounded-xl overflow-hidden shrink-0 max-w-xs" style={glassStyle}>
                   <img
                     src={preview}
                     alt="Vision board preview"
@@ -193,7 +200,8 @@ export default function UploadPage() {
                     type="button"
                     onClick={handleAnalyze}
                     disabled={loading}
-                    className="rounded-lg bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-sage-950 font-semibold px-5 py-3 transition-colors"
+                    className="rounded-lg font-semibold px-5 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ background: "#FFFFFF", color: "#4A5C3F" }}
                   >
                     {loading ? "Menti is reading…" : "Analyze with Menti"}
                   </button>
@@ -201,7 +209,8 @@ export default function UploadPage() {
                     type="button"
                     onClick={handleReset}
                     disabled={loading}
-                    className="rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 px-5 py-3 transition-colors"
+                    className="rounded-lg px-5 py-3 transition-colors"
+                    style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
                   >
                     Choose different image
                   </button>
@@ -210,14 +219,14 @@ export default function UploadPage() {
             )}
 
             {loading && (
-              <div className="mt-6 rounded-xl border border-sage-700 bg-sage-900/30 p-6 flex items-center gap-3">
-                <div className="w-5 h-5 border-2 border-gold-500/50 border-t-gold-400 rounded-full animate-spin" />
-                <span className="text-sage-400">Menti is reading your vision board…</span>
+              <div className="mt-6 rounded-xl p-6 flex items-center gap-3" style={glassStyle}>
+                <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.3)", borderTopColor: "#D4BE8C" }} />
+                <span style={{ color: "rgba(255,255,255,0.8)" }}>Menti is reading your vision board…</span>
               </div>
             )}
 
             {error && (
-              <div className="mt-6 rounded-xl border border-red-900/50 bg-red-950/20 p-4 text-red-300 text-sm">
+              <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: "rgba(229,115,115,0.2)", border: "1px solid rgba(229,115,115,0.5)", color: "#ffcdd2" }}>
                 {error}
               </div>
             )}
@@ -225,7 +234,7 @@ export default function UploadPage() {
         ) : (
           <div className="mt-8 space-y-8">
             {preview && (
-              <div className="rounded-xl overflow-hidden border border-sage-700 max-w-sm">
+              <div className="rounded-xl overflow-hidden max-w-sm" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
                 <img
                   src={preview}
                   alt="Your vision board"
@@ -238,8 +247,8 @@ export default function UploadPage() {
               <CollapsibleSection title="Themes" defaultOpen>
                 <ul className="space-y-2">
                   {analysis.themes.map((t, i) => (
-                    <li key={i} className="text-sage-200 flex items-start gap-2">
-                      <span className="text-gold-500/80 mt-0.5">✦</span>
+                    <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
+                      <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
                       <span>{t}</span>
                     </li>
                   ))}
@@ -249,8 +258,8 @@ export default function UploadPage() {
               <CollapsibleSection title="Goals" defaultOpen={false}>
                 <ul className="space-y-2">
                   {analysis.goals.map((g, i) => (
-                    <li key={i} className="text-sage-200 flex items-start gap-2">
-                      <span className="text-gold-500/80 mt-0.5">◈</span>
+                    <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
+                      <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
                       <span>{g}</span>
                     </li>
                   ))}
@@ -261,8 +270,8 @@ export default function UploadPage() {
                 <CollapsibleSection title="Patterns" defaultOpen={false}>
                   <ul className="space-y-2">
                     {analysis.patterns.map((p, i) => (
-                      <li key={i} className="text-sage-200 flex items-start gap-2">
-                        <span className="text-gold-500/80 mt-0.5">◆</span>
+                      <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
+                        <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
                         <span>{p}</span>
                       </li>
                     ))}
@@ -270,20 +279,19 @@ export default function UploadPage() {
                 </CollapsibleSection>
               )}
 
-              <CollapsibleSection
-                title="Your 5 action steps"
-                defaultOpen={false}
-                borderClassName="border-gold-500/30"
-              >
+              <CollapsibleSection title="Your 5 action steps" defaultOpen={false}>
                 <ol className="space-y-4">
                   {analysis.actionSteps.map(({ step, title, description }) => (
                     <li key={step} className="flex gap-4">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-500/20 text-gold-400 font-serif font-medium text-sm">
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif font-medium text-sm"
+                        style={{ background: "rgba(212,190,140,0.3)", color: "#D4BE8C" }}
+                      >
                         {step}
                       </span>
                       <div>
-                        <p className="font-medium text-sage-100">{title}</p>
-                        <p className="text-sage-400 text-sm mt-0.5">{description}</p>
+                        <p className="font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</p>
+                        <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>{description}</p>
                       </div>
                     </li>
                   ))}
@@ -291,21 +299,23 @@ export default function UploadPage() {
               </CollapsibleSection>
             </div>
 
-            <section className="rounded-xl border border-sage-700 bg-sage-900/30 p-5">
-              <h2 className="font-serif text-lg text-gold-400 mb-3">Give this board a name</h2>
+            <section className="rounded-xl p-5" style={glassStyle}>
+              <h2 className="font-serif text-lg mb-3" style={{ color: "#D4BE8C" }}>Give this board a name</h2>
               <input
                 type="text"
                 value={boardTitle}
                 onChange={(e) => setBoardTitle(e.target.value)}
                 placeholder="e.g. My 2026 Goals"
-                className="w-full rounded-lg border border-sage-700 bg-sage-900/50 px-4 py-3 text-sage-100 placeholder-sage-500 focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 outline-none"
+                className="w-full rounded-lg px-4 py-3 outline-none placeholder-white/60"
+                style={{ ...inputStyle, color: "white" }}
               />
               <div className="mt-4 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={handleSaveBoard}
                   disabled={saving}
-                  className="rounded-lg bg-gold-500 hover:bg-gold-400 disabled:opacity-50 text-sage-950 font-semibold px-5 py-3 transition-colors"
+                  className="rounded-lg font-semibold px-5 py-3 transition-colors disabled:opacity-50"
+                  style={{ background: "#FFFFFF", color: "#4A5C3F" }}
                 >
                   {saving ? "Saving…" : "Save to my boards"}
                 </button>
@@ -313,13 +323,14 @@ export default function UploadPage() {
                   type="button"
                   onClick={handleReset}
                   disabled={saving}
-                  className="rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 px-5 py-3 transition-colors"
+                  className="rounded-lg px-5 py-3 transition-colors"
+                  style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
                 >
                   Analyze another board
                 </button>
               </div>
               {saveSuccess && (
-                <p className="mt-3 text-gold-400 text-sm">Board saved. View it on your dashboard.</p>
+                <p className="mt-3 text-sm" style={{ color: "#D4BE8C" }}>Board saved. View it on your dashboard.</p>
               )}
             </section>
           </div>

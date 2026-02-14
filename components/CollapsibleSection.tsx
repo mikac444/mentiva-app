@@ -10,26 +10,34 @@ type CollapsibleSectionProps = {
   borderClassName?: string;
 };
 
+const glassStyle = {
+  background: "rgba(255,255,255,0.1)",
+  border: "1px solid rgba(255,255,255,0.15)",
+  backdropFilter: "blur(10px)",
+};
+
 export function CollapsibleSection({
   title,
   children,
   defaultOpen = false,
   className = "",
-  borderClassName = "border-sage-700",
+  borderClassName = "",
 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <section
-      className={`rounded-xl border bg-sage-900/30 overflow-hidden ${borderClassName} ${className}`}
+      className={`rounded-xl overflow-hidden ${className}`}
+      style={glassStyle}
     >
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left hover:bg-sage-800/30 transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left transition-colors cursor-pointer hover:bg-white/5 rounded-t-xl"
+        style={{ color: "rgba(255,255,255,0.9)" }}
       >
-        <h2 className="font-serif text-lg text-gold-400">{title}</h2>
-        <span className="shrink-0 text-gold-400/80 text-sm" aria-hidden>
+        <h2 className="font-serif text-lg" style={{ color: "#D4BE8C" }}>{title}</h2>
+        <span className="shrink-0 text-sm" style={{ color: "rgba(255,255,255,0.7)" }} aria-hidden>
           {isOpen ? "▼" : "▶"}
         </span>
       </button>

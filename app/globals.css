@@ -3,17 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --sage-950: #161b14;
-  --sage-900: #2d3429;
-  --sage-800: #343d2f;
-  --sage-700: #3d4a36;
-  --gold-400: #e0ab48;
-  --gold-500: #d8922a;
-  --gold-300: #e9c671;
+  --mentiva-gradient: radial-gradient(ellipse 70% 50% at 75% 15%, rgba(255,255,255,0.18) 0%, transparent 55%), radial-gradient(ellipse 80% 50% at 50% 0%, rgba(185,205,170,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 20% 80%, rgba(139,158,124,0.1) 0%, transparent 50%), linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%);
+  --mentiva-accent: #D4BE8C;
+  --mentiva-dark-sage: #4A5C3F;
 }
 
 body {
-  @apply bg-sage-950 text-sage-100 antialiased;
+  background: #7A8E6C;
+  color: rgba(255, 255, 255, 0.9);
+  @apply antialiased;
+}
+
+.bg-mentiva-gradient {
+  background: var(--mentiva-gradient);
 }
 
 @layer utilities {

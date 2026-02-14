@@ -49,7 +49,7 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${dmSans.variable}`}
     >
-      <body className="font-sans min-h-screen">
+      <body className="font-sans min-h-screen min-h-[100dvh]">
         {children}
         <script
           dangerouslySetInnerHTML={{

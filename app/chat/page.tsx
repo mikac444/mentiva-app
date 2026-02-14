@@ -47,16 +47,16 @@ function BouncingDots() {
   return (
     <div className="flex items-center gap-1.5 py-1" aria-hidden>
       <span
-        className="w-2 h-2 rounded-full bg-gold-400 animate-bounce"
-        style={{ animationDelay: "0ms" }}
+        className="w-2 h-2 rounded-full animate-bounce"
+        style={{ animationDelay: "0ms", background: "#D4BE8C" }}
       />
       <span
-        className="w-2 h-2 rounded-full bg-gold-400/90 animate-bounce"
-        style={{ animationDelay: "150ms" }}
+        className="w-2 h-2 rounded-full animate-bounce"
+        style={{ animationDelay: "150ms", background: "#D4BE8C" }}
       />
       <span
-        className="w-2 h-2 rounded-full bg-gold-400 animate-bounce"
-        style={{ animationDelay: "300ms" }}
+        className="w-2 h-2 rounded-full animate-bounce"
+        style={{ animationDelay: "300ms", background: "#D4BE8C" }}
       />
     </div>
   );
@@ -331,14 +331,19 @@ export default function ChatPage() {
     }
   }
 
+  const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+  const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+  const sidebarStyle = { background: "rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-sage-950">
-      <header className="shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-sage-800">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-mentiva-gradient">
+      <header className="shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-6" style={headerStyle}>
         <div className="flex items-center gap-4 min-w-0">
           <button
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
-            className="lg:hidden shrink-0 p-3 -ml-2 rounded-lg text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 transition-colors touch-manipulation"
+            className="lg:hidden shrink-0 p-3 -ml-2 rounded-lg transition-colors touch-manipulation"
+            style={{ color: "rgba(255,255,255,0.6)" }}
             aria-label="Conversations"
             aria-expanded={sidebarOpen}
           >
@@ -351,7 +356,8 @@ export default function ChatPage() {
         <button
           type="button"
           onClick={handleNewChat}
-          className="lg:hidden shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 font-medium transition-colors touch-manipulation"
+          className="lg:hidden shrink-0 flex items-center justify-center w-10 h-10 rounded-lg font-medium transition-colors touch-manipulation"
+          style={{ background: "#FFFFFF", color: "#4A5C3F" }}
           aria-label="New chat"
         >
           <span className="text-xl leading-none">+</span>
@@ -359,18 +365,18 @@ export default function ChatPage() {
       </header>
 
       <div className="flex-1 flex min-h-0">
-        {/* Sidebar */}
         <aside
           className={`${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-full sm:w-72 shrink-0 flex flex-col border-r border-sage-800 bg-sage-950 transition-transform duration-200 ease-out pt-4 pb-6`}
-          style={{ top: "64px", bottom: 0 }}
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-full sm:w-72 shrink-0 flex flex-col transition-transform duration-200 ease-out pt-4 pb-6`}
+          style={{ ...sidebarStyle, top: "64px", bottom: 0 }}
         >
           <div className="px-3 pb-3">
             <button
               type="button"
               onClick={handleNewChat}
-              className="w-full rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 font-medium py-2.5 px-3 text-sm transition-colors"
+              className="w-full rounded-lg font-medium py-2.5 px-3 text-sm transition-colors"
+              style={{ background: "#FFFFFF", color: "#4A5C3F" }}
             >
               + New chat
             </button>
@@ -379,19 +385,17 @@ export default function ChatPage() {
             {conversations.map((conv) => (
               <div
                 key={conv.id}
-                className={`group flex items-center gap-1 rounded-lg mb-1 ${
-                  currentConversationId === conv.id ? "bg-sage-800" : "hover:bg-sage-800/60"
-                }`}
+                className="group flex items-center gap-1 rounded-lg mb-1 transition-colors"
+                style={{ background: currentConversationId === conv.id ? "rgba(255,255,255,0.15)" : "transparent" }}
               >
                 <button
                   type="button"
                   onClick={() => handleSelectConversation(conv)}
-                  className={`flex-1 min-w-0 text-left px-3 py-2.5 text-sm transition-colors ${
-                    currentConversationId === conv.id ? "text-gold-400" : "text-sage-400 hover:text-sage-200"
-                  }`}
+                  className="flex-1 min-w-0 text-left px-3 py-2.5 text-sm transition-colors"
+                  style={{ color: currentConversationId === conv.id ? "white" : "rgba(255,255,255,0.7)" }}
                 >
                   <p className="truncate font-medium">{conv.title || "New chat"}</p>
-                  <p className="text-xs text-sage-500 mt-0.5">{formatConversationDate(conv.updated_at)}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{formatConversationDate(conv.updated_at)}</p>
                 </button>
                 <button
                   type="button"
@@ -399,7 +403,8 @@ export default function ChatPage() {
                     e.stopPropagation();
                     setConversationToDelete(conv);
                   }}
-                  className="shrink-0 p-1.5 rounded text-sage-500 hover:text-red-400 hover:bg-red-950/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="shrink-0 p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: "#e57373" }}
                   title="Delete conversation"
                 >
                   <TrashIcon className="w-4 h-4" />
@@ -407,27 +412,30 @@ export default function ChatPage() {
               </div>
             ))}
           </div>
-          <div className="mt-auto border-t border-sage-800 px-3 pt-3 pb-4 space-y-1">
+          <div className="mt-auto px-3 pt-3 pb-4 space-y-1" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
             <Link
               href="/dashboard"
               onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+              style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              📊 Dashboard
+              Dashboard
             </Link>
             <Link
               href="/upload"
               onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+              style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              📤 Upload
+              Upload
             </Link>
             <a
               href="mailto:mika@mentiva.app"
               onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+              style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              💬 Send feedback
+              Send feedback
             </a>
             <button
               type="button"
@@ -437,7 +445,8 @@ export default function ChatPage() {
                 await supabase.auth.signOut({ scope: "global" });
                 window.location.href = "/login";
               }}
-              className="block w-full text-left px-3 py-2.5 text-sm text-sage-400 hover:text-gold-400 hover:bg-sage-800/60 rounded-lg transition-colors"
+              className="block w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+              style={{ color: "rgba(255,255,255,0.6)" }}
             >
               Sign out
             </button>
@@ -445,15 +454,16 @@ export default function ChatPage() {
         </aside>
 
         {conversationToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-sage-950/80">
-            <div className="bg-sage-900 border border-sage-700 rounded-xl p-5 shadow-xl max-w-sm w-full">
-              <p className="text-sage-200 text-sm">Delete this conversation?</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)" }}>
+            <div className="rounded-xl p-5 shadow-xl max-w-sm w-full" style={glassStyle}>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>Delete this conversation?</p>
               <div className="mt-4 flex gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => setConversationToDelete(null)}
                   disabled={deletingConversation}
-                  className="px-4 py-2 rounded-lg border border-sage-600 text-sage-400 hover:text-gold-400 hover:border-gold-500/50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
                 >
                   Cancel
                 </button>
@@ -472,17 +482,17 @@ export default function ChatPage() {
 
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-sage-950/60 lg:hidden"
+            className="fixed inset-0 z-30 lg:hidden"
+            style={{ background: "rgba(0,0,0,0.2)" }}
             onClick={() => setSidebarOpen(false)}
             aria-hidden
           />
         )}
 
-        {/* Chat area */}
         <main className="flex-1 flex flex-col min-h-0 min-w-0 max-w-3xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4 min-h-0">
             {loadingHistory ? (
-              <div className="flex items-center justify-center py-12 text-sage-500 text-sm">
+              <div className="flex items-center justify-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 Loading…
               </div>
             ) : (
@@ -495,11 +505,16 @@ export default function ChatPage() {
                     <div
                       className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 ${
                         msg.role === "user"
-                          ? "bg-gold-500/20 text-sage-100 rounded-br-md"
-                          : "bg-sage-800/80 text-sage-200 border border-sage-700 rounded-bl-md"
+                          ? "rounded-br-md"
+                          : "rounded-bl-md"
                       }`}
+                      style={{
+                        background: msg.role === "user" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        color: "rgba(255,255,255,0.9)",
+                      }}
                     >
-                      <p className="text-sm font-medium text-sage-500 mb-1">
+                      <p className="text-sm font-medium mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>
                         {msg.role === "user" ? "You" : "Menti"}
                       </p>
                       <p className="text-sm sm:text-base whitespace-pre-wrap break-words">
@@ -510,8 +525,11 @@ export default function ChatPage() {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-sage-800/80 text-sage-200 border border-sage-700 shadow-sm">
-                      <p className="text-sm font-medium text-sage-500 mb-2">Menti</p>
+                    <div
+                      className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm"
+                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.9)" }}
+                    >
+                      <p className="text-sm font-medium mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Menti</p>
                       <BouncingDots />
                     </div>
                   </div>
@@ -522,14 +540,15 @@ export default function ChatPage() {
           </div>
 
           {error && (
-            <div className="shrink-0 rounded-lg border border-red-900/50 bg-red-950/20 px-4 py-2 text-red-300 text-sm mb-3">
+            <div className="shrink-0 rounded-lg px-4 py-2 text-sm mb-3" style={{ background: "rgba(229,115,115,0.2)", border: "1px solid rgba(229,115,115,0.5)", color: "#ffcdd2" }}>
               {error}
             </div>
           )}
 
           <form
             onSubmit={handleSubmit}
-            className="shrink-0 flex gap-2 sm:gap-3 items-end border-t border-sage-800 pt-4 pb-[env(safe-area-inset-bottom)] bg-sage-950"
+            className="shrink-0 flex gap-2 sm:gap-3 items-end pt-4 pb-[env(safe-area-inset-bottom)]"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}
           >
             <textarea
               ref={inputRef}
@@ -544,12 +563,14 @@ export default function ChatPage() {
               placeholder="Message Menti…"
               rows={1}
               disabled={isLoading}
-              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl border border-sage-700 bg-sage-900/50 px-4 py-3 text-sage-100 placeholder-sage-500 focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/50 outline-none disabled:opacity-50 text-sm sm:text-base"
+              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-opacity-60"
+              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" }}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="shrink-0 rounded-xl bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-sage-950 font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
+              className="shrink-0 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
+              style={{ background: "#FFFFFF", color: "#4A5C3F" }}
             >
               Send
             </button>
