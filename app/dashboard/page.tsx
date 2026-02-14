@@ -6,6 +6,7 @@ import { Nav } from "@/components/Nav";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
+import { Onboarding } from "@/components/Onboarding";
 
 type VisionBoardRow = {
   id: string;
@@ -33,6 +34,9 @@ export default function DashboardPage() {
   const [selectedBoard, setSelectedBoard] = useState<VisionBoardRow | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [memberNumber, setMemberNumber] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -48,6 +52,23 @@ export default function DashboardPage() {
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
       setBoards((data as VisionBoardRow[]) ?? []);
+      // Onboarding check
+      const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? session.user.email?.split("@")[0] ?? "friend";
+      setUserName(name.split(/\s+/)[0]);
+      if (!localStorage.getItem("mentiva_onboarding_done")) {
+        // Get member number
+        try {
+          const { data: members } = await supabase
+            .from("allowed_emails")
+            .select("email")
+            .order("created_at", { ascending: true });
+          if (members) {
+            const pos = members.findIndex((m: any) => m.email === session.user.email?.toLowerCase());
+            setMemberNumber(pos >= 0 ? pos + 1 : members.length);
+          }
+        } catch (e) {}
+        setShowOnboarding(true);
+      }
       setLoading(false);
     })();
   }, []);
