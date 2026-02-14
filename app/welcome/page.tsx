@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 const MENTIVA_URL = "https://mentiva.app";
 
@@ -21,81 +20,56 @@ function referralCodeFromEmail(email: string): string {
 }
 
 export default function WelcomePage() {
-  const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
-  const [referralCode, setReferralCode] = useState<string>("");
-  const [memberNumber, setMemberNumber] = useState<number>(0);
-  const [referralCount, setReferralCount] = useState<number>(0);
+  const [referralCode, setReferralCode] = useState<string>("M----");
+  const [memberNumber, setMemberNumber] = useState<number | null>(null);
+  const [spotsClaimed, setSpotsClaimed] = useState<number>(0);
+  const [referralCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("mentiva_early_access_email") : null;
-    if (!stored) {
-      router.replace("/");
-      return;
+    if (stored) {
+      setEmail(stored);
+      setReferralCode(referralCodeFromEmail(stored));
     }
-    setEmail(stored);
-    const code = referralCodeFromEmail(stored);
-    setReferralCode(code);
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key) {
       setLoading(false);
-      setMemberNumber(1);
-      setReferralCount(0);
+      if (!stored) setMemberNumber(null);
       return;
     }
 
     (async () => {
       try {
-        const res = await fetch(`${url}/rest/v1/founding_members`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: key,
-            Authorization: `Bearer ${key}`,
-            Prefer: "resolution=merge-duplicates,return=representation",
-          },
-          body: JSON.stringify({
-            email: stored.toLowerCase(),
-            referral_code: code,
-            converted: true,
-          }),
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("Supabase upsert error:", errText);
-        }
-
-        const membersRes = await fetch(
-          `${url}/rest/v1/founding_members?email=eq.${encodeURIComponent(stored.toLowerCase())}&select=created_at,referral_count`,
+        const emailsRes = await fetch(
+          `${url}/rest/v1/allowed_emails?order=created_at.asc&select=email`,
           { headers: { apikey: key, Authorization: `Bearer ${key}` } }
         );
-        if (membersRes.ok) {
-          const members = await membersRes.json();
-          const me = members?.[0];
-          if (me) {
-        const countRes = await fetch(
-          `${url}/rest/v1/founding_members?created_at=lte.${encodeURIComponent(me.created_at)}&select=id`,
-          { headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: "count=exact" } }
-        );
-        const countHeader = countRes.headers.get("content-range");
-        const num = countHeader ? parseInt(countHeader.split("/")[1] || "1", 10) : 1;
-        setMemberNumber(isNaN(num) ? 1 : num);
-            setReferralCount(me.referral_count ?? 0);
-          }
+        if (!emailsRes.ok) {
+          setLoading(false);
+          return;
+        }
+        const emails = await emailsRes.json() as { email: string }[];
+        setSpotsClaimed(emails.length);
+
+        if (stored) {
+          const normalized = stored.toLowerCase();
+          const index = emails.findIndex((r) => r.email.toLowerCase() === normalized);
+          setMemberNumber(index >= 0 ? index + 1 : null);
+        } else {
+          setMemberNumber(null);
         }
       } catch (e) {
         console.error("Failed to load member data:", e);
-        setMemberNumber(1);
-        setReferralCount(0);
       } finally {
         setLoading(false);
       }
     })();
-  }, [router]);
+  }, []);
 
   const referralLink = `${MENTIVA_URL}?ref=${referralCode}`;
 
@@ -115,7 +89,7 @@ export default function WelcomePage() {
     { label: "Email", url: `mailto:?subject=Mentiva - Vision board with a brain&body=${shareText}%20${shareUrl}` },
   ];
 
-  if (!email && loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #A1B392 0%, #6B7F5E 100%)" }}>
         <div className="text-white/80 font-sans">Loading...</div>
@@ -123,9 +97,7 @@ export default function WelcomePage() {
     );
   }
 
-  if (!email) {
-    return null;
-  }
+  const displayMemberNumber = memberNumber !== null ? memberNumber : "--";
 
   return (
     <div
@@ -152,17 +124,17 @@ export default function WelcomePage() {
           </h1>
 
           <div className="animate-[scaleIn_0.6s_ease-out_0.3s_both]" style={{ color: "#D4BE8C" }}>
-            <span className="font-serif text-6xl sm:text-7xl font-light">#{loading ? "—" : memberNumber}</span>
+            <span className="font-serif text-6xl sm:text-7xl font-light">#{displayMemberNumber}</span>
           </div>
 
           <div className="space-y-2">
             <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
-              {loading ? "—" : memberNumber} of 3,000 spots claimed
+              {spotsClaimed} of 3,000 spots claimed
             </p>
             <div className="h-1 rounded-full bg-white/20 max-w-xs mx-auto overflow-hidden">
               <div
                 className="h-full rounded-full bg-[#D4BE8C] transition-all duration-500"
-                style={{ width: `${Math.min(100, (memberNumber / 3000) * 100)}%` }}
+                style={{ width: `${Math.min(100, (spotsClaimed / 3000) * 100)}%` }}
               />
             </div>
           </div>
