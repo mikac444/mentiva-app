@@ -110,7 +110,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
           className={`${linkBase} ${active === "chat" ? linkActive : linkInactive}`}
           style={active === "chat" ? undefined : linkInactiveColor}
         >
-          AI Chat
+          Chat with Menti
         </Link>
         {user && (
           <div className="relative border-l pl-3" style={{ borderColor: "rgba(255,255,255,0.15)" }} ref={dropdownRef}>
@@ -203,7 +203,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
                   className={`py-3 border-b ${linkBase} ${active === "chat" ? linkActive : linkInactive}`}
                   style={active === "chat" ? undefined : linkInactiveColor}
                 >
-                  AI Chat
+                  Chat with Menti
                 </Link>
                 {user && (
                   <div className="pt-3 pb-1">
