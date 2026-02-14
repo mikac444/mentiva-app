@@ -1,13 +1,28 @@
 "use client";
-
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          router.replace('/dashboard');
+          return;
+        }
+      } catch (e) {}
+      setChecking(false);
+    };
+    checkAuth();
+  }, [router]);
 
   async function handleGoogleSignIn() {
     const supabase = createClient();
@@ -29,6 +44,16 @@ function LoginForm() {
     }
   }
 
+  if (checking) {
+    return (
+      <div className="w-full max-w-md animate-pulse">
+        <div className="h-9 rounded mx-auto w-3/4" style={{ background: "rgba(255,255,255,0.15)" }} />
+        <div className="mt-2 h-4 rounded mx-auto w-1/2" style={{ background: "rgba(255,255,255,0.15)" }} />
+        <div className="mt-8 h-12 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md">
       <h1 className="font-serif font-light text-3xl sm:text-4xl text-center" style={{ color: "rgba(255,255,255,0.9)" }}>
@@ -37,7 +62,6 @@ function LoginForm() {
       <p className="mt-2 text-center text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
         Sign in to access your vision boards
       </p>
-
       <div className="mt-8 space-y-4">
         <button
           type="button"
@@ -59,7 +83,6 @@ function LoginForm() {
           Continue with Google
         </button>
       </div>
-
       <p className="mt-6 text-center text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
         Don&apos;t have an account? Sign in with Google to get started.
       </p>
@@ -96,7 +119,6 @@ export default function LoginPage() {
           Back
         </Link>
       </header>
-
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <Suspense fallback={<LoginFallback />}>
           <LoginForm />
