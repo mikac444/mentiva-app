@@ -1,12 +1,30 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
 
 const STRIPE_URL = "https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01";
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          router.replace('/dashboard');
+          return;
+        }
+      } catch (e) {}
+      setChecking(false);
+    };
+    checkAuth();
+  }, [router]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -17,6 +35,18 @@ export default function LandingPage() {
       localStorage.setItem("mentiva_early_access_email", trimmed);
       window.location.href = `${STRIPE_URL}?prefilled_email=${encodeURIComponent(trimmed)}`;
     }
+  }
+
+  if (checking) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%)'
+      }} />
+    );
   }
 
   return (
