@@ -14,7 +14,7 @@ function LoginForm() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+        redirectTo: "https://mentiva.app/auth/callback?redirectTo=%2Fdashboard",
         queryParams: {
           prompt: "select_account",
         },
