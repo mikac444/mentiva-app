@@ -75,7 +75,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
   const closeMobile = () => setMobileMenuOpen(false);
 
   const glassStyle = {
-    background: "rgba(255,255,255,0.1)",
+    background: "rgba(100,120,90,0.95)",
     border: "1px solid rgba(255,255,255,0.15)",
     backdropFilter: "blur(10px)",
   };
