@@ -32,7 +32,7 @@ export function TopNav() {
   const tabs = [
     { label: "Boards", href: "/dashboard" },
     { label: "Today", href: "/today" },
-    { label: "Menti", href: "/chat" },
+    { label: "Chat", href: "/chat" },
   ];
 
   function isActive(href: string) {
