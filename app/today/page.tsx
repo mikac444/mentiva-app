@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Nav } from "@/components/Nav";
 import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -127,7 +126,7 @@ export default function TodayPage() {
   return (
     <div className="min-h-screen bg-mentiva-gradient" style={{ paddingBottom: 100 }}>
       <header className="px-4 py-4" style={headerStyle}>
-        <Nav active="dashboard" hideHamburger />
+        <span style={{ fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.3em", textTransform: "uppercase" }}>Mentiva</span>
       </header>
 
       <div className="px-6 max-w-lg mx-auto">

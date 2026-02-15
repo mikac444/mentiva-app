@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Nav } from "@/components/Nav";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
@@ -113,8 +112,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-mentiva-gradient">
-      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
-        <Nav active="dashboard" />
+      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4" style={headerStyle}>
+        <span style={{ fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.3em", textTransform: "uppercase" }}>Mentiva</span>
       </header>
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
