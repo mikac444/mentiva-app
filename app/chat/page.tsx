@@ -336,7 +336,7 @@ export default function ChatPage() {
   const sidebarStyle = { background: "rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-mentiva-gradient">
+    <div className="h-screen h-[100dvh] flex flex-col overflow-hidden bg-mentiva-gradient">
       <TopNav />
       <div className="shrink-0 flex items-center justify-between px-4 py-2 lg:hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <button type="button" onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Conversations">
@@ -350,7 +350,7 @@ export default function ChatPage() {
           className={`${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-full sm:w-72 shrink-0 flex flex-col transition-transform duration-200 ease-out pt-4 pb-6`}
-          style={{ ...sidebarStyle, top: "64px", bottom: 0 }}
+          style={{ ...sidebarStyle, top: "96px", bottom: 0 }}
         >
           <div className="px-3 pb-3">
             <button
