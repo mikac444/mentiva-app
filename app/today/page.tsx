@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase";
+import { TopNav } from "@/components/TopNav";
 import type { User } from "@supabase/supabase-js";
 
 type DailyTask = {
@@ -125,9 +125,7 @@ export default function TodayPage() {
 
   return (
     <div className="min-h-screen bg-mentiva-gradient" style={{ paddingBottom: 100 }}>
-      <header className="px-4 py-4" style={headerStyle}>
-        <span style={{ fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.3em", textTransform: "uppercase" }}>Mentiva</span>
-      </header>
+      <TopNav />
 
       <div className="px-6 max-w-lg mx-auto">
         <div className="text-center pt-6 pb-2">
@@ -280,7 +278,6 @@ export default function TodayPage() {
         </div>
       )}
 
-      <BottomNav />
       <style>{`
         @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes ripple { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }

@@ -6,7 +6,7 @@ import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { Onboarding } from "@/components/Onboarding";
-import { BottomNav } from "@/components/BottomNav";
+import { TopNav } from "@/components/TopNav";
 
 type VisionBoardRow = {
   id: string;
@@ -112,9 +112,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-mentiva-gradient">
-      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4" style={headerStyle}>
-        <span style={{ fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.3em", textTransform: "uppercase" }}>Mentiva</span>
-      </header>
+      <TopNav />
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
@@ -313,7 +311,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-          <BottomNav />
     </div>
   );
 }

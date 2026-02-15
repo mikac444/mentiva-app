@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Nav } from "@/components/Nav";
-import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase";
+import { TopNav } from "@/components/TopNav";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
 const WELCOME_MESSAGE =
@@ -352,7 +351,7 @@ export default function ChatPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <Nav active="chat" hideHamburger />
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 400, color: "rgba(255,255,255,0.6)" }}>Menti</span>
         </div>
         <button
           type="button"
@@ -578,7 +577,6 @@ export default function ChatPage() {
           </form>
         </main>
       </div>
-          <BottomNav />
     </div>
   );
 }
