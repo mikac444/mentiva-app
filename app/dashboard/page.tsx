@@ -7,6 +7,7 @@ import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { Onboarding } from "@/components/Onboarding";
+import { BottomNav } from "@/components/BottomNav";
 
 type VisionBoardRow = {
   id: string;
@@ -313,6 +314,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+          <BottomNav />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Nav } from "@/components/Nav";
+import { BottomNav } from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
@@ -577,6 +578,7 @@ export default function ChatPage() {
           </form>
         </main>
       </div>
+          <BottomNav />
     </div>
   );
 }
