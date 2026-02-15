@@ -393,31 +393,7 @@ export default function ChatPage() {
               </div>
             ))}
           </div>
-          <div className="mt-auto px-3 pt-3 pb-4 space-y-1" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-            <Link
-              href="/dashboard"
-              onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/upload"
-              onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
-              Upload
-            </Link>
-            <a
-              href="mailto:mika@mentiva.app"
-              onClick={() => setSidebarOpen(false)}
-              className="block px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
-              Send feedback
-            </a>
+          <div className="mt-auto px-3 pt-3 pb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
             <button
               type="button"
               onClick={async () => {
