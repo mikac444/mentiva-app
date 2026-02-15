@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Nav } from "@/components/Nav";
+import { TopNav } from "@/components/TopNav";
 import { createClient } from "@/lib/supabase";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
@@ -250,7 +250,7 @@ export default function UploadPage() {
     return (
       <div className="min-h-screen flex flex-col bg-mentiva-gradient">
         <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
-          <Nav active="upload" />
+          <TopNav />
         </header>
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto w-full">
 
@@ -471,7 +471,7 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen flex flex-col bg-mentiva-gradient">
       <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
-        <Nav active="upload" />
+        <TopNav />
       </header>
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto w-full">
         <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>

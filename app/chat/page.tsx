@@ -337,32 +337,13 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-mentiva-gradient">
-      <header className="shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-6" style={headerStyle}>
-        <div className="flex items-center gap-4 min-w-0">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((o) => !o)}
-            className="lg:hidden shrink-0 p-3 -ml-2 rounded-lg transition-colors touch-manipulation"
-            style={{ color: "rgba(255,255,255,0.6)" }}
-            aria-label="Conversations"
-            aria-expanded={sidebarOpen}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 400, color: "rgba(255,255,255,0.6)" }}>Menti</span>
-        </div>
-        <button
-          type="button"
-          onClick={handleNewChat}
-          className="lg:hidden shrink-0 flex items-center justify-center w-10 h-10 rounded-lg font-medium transition-colors touch-manipulation"
-          style={{ background: "#FFFFFF", color: "#4A5C3F" }}
-          aria-label="New chat"
-        >
-          <span className="text-xl leading-none">+</span>
+      <TopNav />
+      <div className="shrink-0 flex items-center justify-between px-4 py-2 lg:hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <button type="button" onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Conversations">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
         </button>
-      </header>
+        <button type="button" onClick={handleNewChat} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)" }}>+ New chat</button>
+      </div>
 
       <div className="flex-1 flex min-h-0">
         <aside

@@ -30,9 +30,9 @@ export function TopNav() {
   const firstName = user?.user_metadata?.full_name?.split(/\s+/)[0] ?? user?.user_metadata?.name?.split(/\s+/)[0] ?? "";
 
   const tabs = [
-    { label: "Boards", href: "/dashboard", icon: "M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z" },
-    { label: "Today", href: "/today", icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4v6l4 2" },
-    { label: "Menti", href: "/chat", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
+    { label: "Boards", href: "/dashboard" },
+    { label: "Today", href: "/today" },
+    { label: "Menti", href: "/chat" },
   ];
 
   function isActive(href: string) {
@@ -43,48 +43,43 @@ export function TopNav() {
   return (
     <nav style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0.7rem 1.2rem", 
+      padding: "0.75rem 1.5rem",
       background: "rgba(255,255,255,0.06)",
       borderBottom: "1px solid rgba(255,255,255,0.1)",
       backdropFilter: "blur(10px)",
     }}>
       <Link href="/dashboard" style={{
-        fontFamily: "serif", fontWeight: 300, fontSize: "1rem",
-        color: "rgba(255,255,255,0.3)", letterSpacing: "0.25em",
+        fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem",
+        color: "rgba(255,255,255,0.4)", letterSpacing: "0.25em",
         textTransform: "uppercase", textDecoration: "none",
       }}>
         Mentiva
       </Link>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.15rem" }}>
         {tabs.map((tab) => {
           const active = isActive(tab.href);
           return (
             <Link key={tab.href} href={tab.href} style={{
-              display: "flex", alignItems: "center", gap: "5px",
-              padding: "0.45rem 0.75rem", borderRadius: 10,
-              fontSize: "0.78rem", fontWeight: 600,
-              color: active ? "#D4BE8C" : "rgba(255,255,255,0.35)",
-              background: active ? "rgba(212,190,140,0.12)" : "transparent",
+              padding: "0.5rem 0.9rem", borderRadius: 10,
+              fontSize: "0.85rem", fontWeight: active ? 600 : 500,
+              color: active ? "white" : "rgba(255,255,255,0.5)",
+              background: active ? "rgba(255,255,255,0.12)" : "transparent",
               textDecoration: "none", transition: "all 0.3s",
-              letterSpacing: "0.02em",
             }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d={tab.icon} />
-              </svg>
-              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.label}
             </Link>
           );
         })}
 
         {user && (
-          <div ref={dropRef} style={{ position: "relative", marginLeft: "0.5rem" }}>
+          <div ref={dropRef} style={{ position: "relative", marginLeft: "0.6rem" }}>
             <button onClick={() => setDropOpen((o) => !o)} style={{
-              display: "flex", alignItems: "center", gap: "4px",
-              padding: "0.4rem 0.6rem", borderRadius: 10,
-              background: dropOpen ? "rgba(255,255,255,0.1)" : "transparent",
+              display: "flex", alignItems: "center", gap: "5px",
+              padding: "0.45rem 0.7rem", borderRadius: 10,
+              background: dropOpen ? "rgba(255,255,255,0.12)" : "transparent",
               border: "none", cursor: "pointer", transition: "all 0.3s",
-              color: "rgba(255,255,255,0.45)",
+              color: "rgba(255,255,255,0.55)",
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -97,20 +92,20 @@ export function TopNav() {
             {dropOpen && (
               <div style={{
                 position: "absolute", right: 0, top: "calc(100% + 6px)",
-                minWidth: 180, borderRadius: 12, padding: "0.5rem 0",
-                background: "rgba(100,120,90,0.95)", border: "1px solid rgba(255,255,255,0.15)",
-                backdropFilter: "blur(20px)", boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+                minWidth: 200, borderRadius: 14, padding: "0.5rem 0",
+                background: "rgba(80,100,70,0.97)", border: "1px solid rgba(255,255,255,0.15)",
+                backdropFilter: "blur(20px)", boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
                 zIndex: 100,
               }}>
                 {firstName && (
-                  <div style={{ padding: "0.5rem 1rem 0.6rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                    <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{firstName}</div>
-                    <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.4)", marginTop: 1 }}>{user.email}</div>
+                  <div style={{ padding: "0.6rem 1rem 0.7rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{firstName}</div>
+                    <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{user.email}</div>
                   </div>
                 )}
                 <a href="mailto:mika@mentiva.app" onClick={() => setDropOpen(false)} style={{
-                  display: "block", padding: "0.55rem 1rem", fontSize: "0.8rem",
-                  color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.2s",
+                  display: "block", padding: "0.6rem 1rem", fontSize: "0.82rem",
+                  color: "rgba(255,255,255,0.6)", textDecoration: "none",
                 }}>Send feedback</a>
                 <button onClick={async () => {
                   setDropOpen(false);
@@ -119,7 +114,7 @@ export function TopNav() {
                   window.location.href = "/login";
                 }} style={{
                   display: "block", width: "100%", textAlign: "left",
-                  padding: "0.55rem 1rem", fontSize: "0.8rem",
+                  padding: "0.6rem 1rem", fontSize: "0.82rem",
                   color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer",
                 }}>Sign out</button>
               </div>
