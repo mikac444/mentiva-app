@@ -336,7 +336,7 @@ export default function ChatPage() {
   const sidebarStyle = { background: "rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 
   return (
-    <div className="h-screen h-[100dvh] flex flex-col overflow-hidden bg-mentiva-gradient">
+    <div className="fixed inset-0 flex flex-col bg-mentiva-gradient">
       <TopNav />
       <div className="shrink-0 flex items-center justify-between px-4 py-2 lg:hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <button type="button" onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Conversations">
