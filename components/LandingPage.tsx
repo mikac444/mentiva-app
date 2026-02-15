@@ -12,18 +12,22 @@ export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          router.replace('/dashboard');
-          return;
-        }
-      } catch (e) {}
-      setChecking(false);
-    };
-    checkAuth();
+    const supabase = createClient();
+    // Check current session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        router.replace('/dashboard');
+      } else {
+        setChecking(false);
+      }
+    });
+    // Also listen for auth state changes (catches mobile OAuth redirect)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        router.replace('/dashboard');
+      }
+    });
+    return () => subscription.unsubscribe();
   }, [router]);
 
   function handleSubmit(e: React.FormEvent) {
