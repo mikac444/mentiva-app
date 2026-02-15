@@ -105,6 +105,11 @@ export default function DashboardPage() {
     setDeleting(false);
   }
 
+
+  if (showOnboarding) {
+    return <Onboarding firstName={userName} memberNumber={memberNumber} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-mentiva-gradient">
       <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
