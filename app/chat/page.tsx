@@ -361,7 +361,7 @@ export default function ChatPage() {
               className="w-full rounded-lg font-medium py-2.5 px-3 text-sm transition-colors"
               style={{ background: "#FFFFFF", color: "#4A5C3F" }}
             >
-              + New chat
+              {t("+ New chat", "+ Nuevo chat")}
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-2">
@@ -377,7 +377,7 @@ export default function ChatPage() {
                   className="flex-1 min-w-0 text-left px-3 py-2.5 text-sm transition-colors"
                   style={{ color: currentConversationId === conv.id ? "white" : "rgba(255,255,255,0.7)" }}
                 >
-                  <p className="truncate font-medium">{conv.title || "New chat"}</p>
+                  <p className="truncate font-medium">{conv.title || t("New chat", "Nuevo chat")}</p>
                   <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{formatConversationDate(conv.updated_at)}</p>
                 </button>
                 <button
@@ -407,7 +407,7 @@ export default function ChatPage() {
               className="block w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Sign out
+              {t("Sign out", "Cerrar sesión")}
             </button>
           </div>
         </aside>
@@ -519,7 +519,7 @@ export default function ChatPage() {
                   handleSubmit(e);
                 }
               }}
-              placeholder="Message Menti…"
+              placeholder={t("Message Menti…", "Escribe a Menti…")}
               rows={1}
               disabled={isLoading}
               className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-opacity-60"

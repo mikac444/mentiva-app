@@ -118,10 +118,10 @@ export default function DashboardPage() {
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
-          Your boards
+          {t("Your boards", "Tus tableros")}
         </h1>
         <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-          Create and manage your vision boards
+          {t("Create and manage your vision boards", "Crea y administra tus tableros de visión")}
         </p>
 
         <div className="mt-8 grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
