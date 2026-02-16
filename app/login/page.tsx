@@ -97,7 +97,7 @@ function LoginContent() {
     <>
       {/* Language toggle */}
       <button
-        onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
+        onClick={() => setLang(lang === "en" ? "es" : "en")}
         style={{
           position: "fixed", top: 24, right: 28, zIndex: 60,
           padding: "7px 16px", borderRadius: 22,
