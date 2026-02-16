@@ -90,7 +90,7 @@ function FloatingVisionCards() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
       <div className="absolute inset-0" style={{
-        background: "radial-gradient(ellipse 45% 40% at 50% 48%, rgba(123,143,108,0.95) 0%, rgba(123,143,108,0.75) 35%, rgba(123,143,108,0.2) 60%, transparent 80%)",
+        background: "radial-gradient(ellipse 40% 35% at 50% 48%, rgba(123,143,108,0.9) 0%, rgba(123,143,108,0.5) 40%, transparent 70%)",
       }} />
       {CARD_SLOTS.map((slot, i) => (
         <div
@@ -103,7 +103,7 @@ function FloatingVisionCards() {
             transform: `rotate(${slot.rot}deg)`,
             border: "3px solid rgba(255,255,255,0.45)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)",
-            opacity: entered[i] ? 0.4 : 0,
+            opacity: entered[i] ? 0.8 : 0,
             transition: "opacity 1s ease",
           }}
         >
