@@ -226,45 +226,8 @@ export default function LandingPage() {
       `}</style>
 
 
-      {/* Floating vision board cards */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
-        {/* Vignette to keep center readable */}
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse 45% 40% at 50% 48%, rgba(123,143,108,0.95) 0%, rgba(123,143,108,0.75) 35%, rgba(123,143,108,0.2) 60%, transparent 80%)",
-        }} />
-        {[
-          { src: "/vision/1.jpg", w: 145, h: 108, top: "4%", left: "2.5%", rot: -7, delay: 0 },
-          { src: "/vision/5.jpg", w: 125, h: 95, top: "22%", left: "6%", rot: 4, delay: 0.3 },
-          { src: "/vision/11.jpg", w: 155, h: 115, top: "2%", right: "4%", rot: 5, delay: 0.6 },
-          { src: "/vision/15.jpg", w: 120, h: 90, top: "24%", right: "2%", rot: -4, delay: 0.9 },
-          { src: "/vision/20.jpg", w: 135, h: 100, top: "50%", left: "1.5%", rot: -2, delay: 1.2 },
-          { src: "/vision/22.jpg", w: 130, h: 98, top: "52%", right: "1.5%", rot: 6, delay: 1.5 },
-          { src: "/vision/27.jpg", w: 140, h: 105, bottom: "12%", left: "3.5%", rot: 3, delay: 1.8 },
-          { src: "/vision/33.jpg", w: 148, h: 110, bottom: "10%", right: "5%", rot: -5, delay: 2.1 },
-        ].map((card, i) => (
-          <div
-            key={i}
-            className="absolute rounded-md overflow-hidden hidden sm:block"
-            style={{
-              width: card.w,
-              height: card.h,
-              top: card.top,
-              bottom: (card as any).bottom,
-              left: card.left,
-              right: card.right,
-              transform: `rotate(${card.rot}deg)`,
-              border: "3px solid rgba(255,255,255,0.45)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)",
-              opacity: 0,
-              animation: `cardFloat 20s ease-in-out infinite, cardEnter 0.8s ease-out ${card.delay}s forwards`,
-              animationDelay: `${card.delay}s`,
-            }}
-          >
-            <img src={card.src} alt="" className="w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-      <header className="relative z-10 pt-8 pb-4">
+      <FloatingVisionCards />
+            <header className="relative z-10 pt-8 pb-4">
         <p
           className="text-center font-serif font-light tracking-[0.35em] uppercase"
           style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}
