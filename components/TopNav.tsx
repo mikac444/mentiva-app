@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 
 export function TopNav() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [dropOpen, setDropOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const { lang, setLang, t } = useLanguage();
 
   useEffect(() => {
     const supabase = createClient();
@@ -30,9 +32,9 @@ export function TopNav() {
   const firstName = user?.user_metadata?.full_name?.split(/\s+/)[0] ?? user?.user_metadata?.name?.split(/\s+/)[0] ?? "";
 
   const tabs = [
-    { label: "Boards", href: "/dashboard" },
-    { label: "Today", href: "/today" },
-    { label: "Chat with Menti", href: "/chat" },
+    { label: t("Boards", "Tableros"), href: "/dashboard" },
+    { label: t("Today", "Hoy"), href: "/today" },
+    { label: t("Chat with Menti", "Chat con Menti"), href: "/chat" },
   ];
 
   function isActive(href: string) {
@@ -103,10 +105,21 @@ export function TopNav() {
                     <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{user.email}</div>
                   </div>
                 )}
+                <button onClick={() => { setLang(lang === "en" ? "es" : "en"); setDropOpen(false); }} style={{
+                  display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
+                  padding: "0.6rem 1rem", fontSize: "0.82rem",
+                  color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer",
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg>
+                  {lang === "en" ? "Espa\u00f1ol" : "English"}
+                </button>
                 <a href="mailto:mika@mentiva.app" onClick={() => setDropOpen(false)} style={{
                   display: "block", padding: "0.6rem 1rem", fontSize: "0.82rem",
                   color: "rgba(255,255,255,0.6)", textDecoration: "none",
-                }}>Send feedback</a>
+                }}>{t("Send feedback", "Enviar comentarios")}</a>
                 <button onClick={async () => {
                   setDropOpen(false);
                   const supabase = createClient();
@@ -116,7 +129,7 @@ export function TopNav() {
                   display: "block", width: "100%", textAlign: "left",
                   padding: "0.6rem 1rem", fontSize: "0.82rem",
                   color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer",
-                }}>Sign out</button>
+                }}>{t("Sign out", "Cerrar sesi\u00f3n")}</button>
               </div>
             )}
           </div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 
 const translations = {
   en: {
@@ -26,7 +27,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [checking, setChecking] = useState(true);
-  const [lang, setLang] = useState<"en" | "es">("en");
+  const { lang, setLang } = useLanguage();
   const [phase, setPhase] = useState(0);
   const [wordIdx, setWordIdx] = useState(0);
   const [showWord, setShowWord] = useState(true);
