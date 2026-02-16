@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 import { TopNav } from "@/components/TopNav";
 import type { User } from "@supabase/supabase-js";
 
@@ -22,27 +23,33 @@ function getGoalColor(goalName: string) {
   return GOAL_COLORS[goalName] ?? GOAL_COLORS.default;
 }
 
-function getGreeting() {
+function getGreeting(lang: string) {
   const h = new Date().getHours();
+  if (lang === "es") {
+    if (h < 12) return "Buenos días,";
+    if (h < 18) return "Buenas tardes,";
+    return "Buenas noches,";
+  }
   if (h < 12) return "Good morning,";
   if (h < 18) return "Good afternoon,";
   return "Good evening,";
 }
 
-function getToday() {
-  return new Date().toLocaleDateString("en-US", {
+function getToday(lang: string) {
+  return new Date().toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric",
   });
 }
 
-function getWeekDates() {
+function getWeekDates(lang: string) {
   const now = new Date();
   const day = now.getDay();
   const monday = new Date(now);
   monday.setDate(now.getDate() - ((day + 6) % 7));
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
-  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const loc = lang === "es" ? "es-ES" : "en-US";
+  const fmt = (d: Date) => d.toLocaleDateString(loc, { month: "short", day: "numeric" });
   return fmt(monday) + " - " + fmt(sunday) + ", " + sunday.getFullYear();
 }
 
@@ -53,6 +60,7 @@ const headerStyle = {
 };
 
 export default function TodayPage() {
+  const { t: t2 } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"daily" | "weekly">("daily");
@@ -130,21 +138,21 @@ export default function TodayPage() {
       <div className="px-6 max-w-lg mx-auto">
         <div className="text-center pt-6 pb-2">
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.7)" }}>
-            {getGreeting()}
+            {getGreeting(t2("en","es"))}
             <span style={{ display: "block", fontSize: "clamp(2rem, 7vw, 2.8rem)", color: "rgba(255,255,255,0.95)", fontWeight: 300, letterSpacing: "-0.03em" }}>
               <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{firstName}</em>
             </span>
           </h1>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 30, fontSize: "0.72rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em", textTransform: "uppercase" as const, marginTop: "0.6rem" }}>
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(255,255,255,0.3)" }} />
-            {getToday()}
+            {getToday(t2("en","es"))}
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 4, margin: "1.2rem 0", background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: 4, border: "1px solid rgba(255,255,255,0.08)" }}>
           {(["daily", "weekly"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "0.55rem 0", textAlign: "center", borderRadius: 9, fontSize: "0.8rem", fontWeight: 600, color: tab === t ? "#D4BE8C" : "rgba(255,255,255,0.35)", background: tab === t ? "rgba(255,255,255,0.12)" : "none", border: "none", cursor: "pointer", transition: "all 0.3s", letterSpacing: "0.03em", boxShadow: tab === t ? "0 2px 8px rgba(0,0,0,0.1)" : "none" }}>
-              {t === "daily" ? "Today" : "This Week"}
+              {t === "daily" ? t2("Today", "Hoy") : t2("This Week", "Esta Semana")}
             </button>
           ))}
         </div>
@@ -163,11 +171,11 @@ export default function TodayPage() {
                   </svg>
                   <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center" }}>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "2.6rem", color: "#D4BE8C", lineHeight: 1 }}>{percent}%</div>
-                    <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const, letterSpacing: "0.15em", marginTop: 2 }}>complete</div>
+                    <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const, letterSpacing: "0.15em", marginTop: 2 }}>{t2("complete", "completado")}</div>
                   </div>
                 </div>
                 <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", marginTop: "0.4rem" }}>
-                  <strong style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{completed} of {total}</strong> tasks done
+                  <strong style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{completed} {t2("of", "de")} {total}</strong> tasks done
                 </p>
               </div>
             )}
@@ -179,7 +187,7 @@ export default function TodayPage() {
                   <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#D4BE8C", textTransform: "uppercase" as const, letterSpacing: "0.12em" }}>Menti</div>
                 </div>
                 <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
-                  {completed === total && total > 0 ? "Amazing work today! Every task checked off." : completed > 0 ? "You're making progress — " + (total - completed) + " more to go. You've got this." : "Your tasks are ready. Start with whatever feels easiest."}
+                  {completed === total && total > 0 ? t2("Amazing work today! Every task checked off.", "\u00a1Incre\u00edble trabajo hoy! Todas las tareas completadas.") : completed > 0 ? t2("You're making progress — " + (total - completed) + " more to go. You've got this.", "Vas progresando — " + (total - completed) + " m\u00e1s por hacer. \u00a1T\u00fa puedes!") : t2("Your tasks are ready. Start with whatever feels easiest.", "Tus tareas est\u00e1n listas. Empieza con la que te parezca m\u00e1s f\u00e1cil.")}
                 </p>
               </div>
             )}
@@ -187,9 +195,9 @@ export default function TodayPage() {
             {total === 0 && !loading && (
               <div style={{ textAlign: "center", padding: "3rem 1rem", background: "rgba(255,255,255,0.05)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.8rem" }}>&#10024;</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "1.3rem", color: "rgba(255,255,255,0.8)", marginBottom: "0.5rem" }}>No tasks yet</h3>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", marginBottom: "1.2rem", lineHeight: 1.5 }}>Upload a vision board and Menti will create your daily action plan.</p>
-                <a href="/upload" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "0.8rem 1.6rem", background: "white", color: "#4A5C3F", fontWeight: 600, fontSize: "0.9rem", border: "none", borderRadius: 40, textDecoration: "none" }}>Upload my vision board &#8594;</a>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "1.3rem", color: "rgba(255,255,255,0.8)", marginBottom: "0.5rem" }}>{t2("No tasks yet", "A\u00fan no hay tareas")}</h3>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", marginBottom: "1.2rem", lineHeight: 1.5 }}>{t2("Upload a vision board and Menti will create your daily action plan.", "Sube un tablero de visi\u00f3n y Menti crear\u00e1 tu plan de acci\u00f3n diario.")}</p>
+                <a href="/upload" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "0.8rem 1.6rem", background: "white", color: "#4A5C3F", fontWeight: 600, fontSize: "0.9rem", border: "none", borderRadius: 40, textDecoration: "none" }}>{t2("Upload my vision board", "Subir mi tablero de visi\u00f3n")} &#8594;</a>
               </div>
             )}
 
@@ -218,11 +226,11 @@ export default function TodayPage() {
         {tab === "weekly" && (
           <div>
             <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.5rem, 5vw, 2rem)", color: "rgba(255,255,255,0.95)" }}>Your week in review</h2>
-              <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: "0.2rem" }}>{getWeekDates()}</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.5rem, 5vw, 2rem)", color: "rgba(255,255,255,0.95)" }}>{t2("Your week in review", "Tu semana en resumen")}</h2>
+              <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: "0.2rem" }}>{getWeekDates(t2("en","es"))}</p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "1.5rem" }}>
-              {[{ value: String(completed), label: "Tasks done", sub: "today" }, { value: percent + "%", label: "Completion", sub: "today" }].map((s, i) => (
+              {[{ value: String(completed), label: t2("Tasks done", "Tareas hechas"), sub: t2("today", "hoy") }, { value: percent + "%", label: t2("Completion", "Completado"), sub: t2("today", "hoy") }].map((s, i) => (
                 <div key={i} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "1rem", textAlign: "center" }}>
                   <div style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "2.2rem", color: "#D4BE8C", lineHeight: 1 }}>{s.value}</div>
                   <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const, letterSpacing: "0.08em", marginTop: "0.2rem", fontWeight: 600 }}>{s.label}</div>
@@ -232,7 +240,7 @@ export default function TodayPage() {
             </div>
             {tasks.length > 0 && (
               <div>
-                <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, letterSpacing: "0.08em", fontWeight: 600, marginBottom: "0.6rem" }}>Progress by goal</div>
+                <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, letterSpacing: "0.08em", fontWeight: 600, marginBottom: "0.6rem" }}>{t2("Progress by goal", "Progreso por meta")}</div>
                 {Object.entries(tasks.reduce<Record<string, { done: number; total: number }>>((acc, t) => { if (!acc[t.goal_name]) acc[t.goal_name] = { done: 0, total: 0 }; acc[t.goal_name].total++; if (t.completed) acc[t.goal_name].done++; return acc; }, {})).map(([goal, { done, total: goalTotal }]) => {
                   const goalPercent = Math.round((done / goalTotal) * 100);
                   const color = getGoalColor(goal);
@@ -248,7 +256,7 @@ export default function TodayPage() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{goal}</div>
-                        <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", marginTop: "0.1rem" }}>{done} of {goalTotal} tasks done</div>
+                        <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", marginTop: "0.1rem" }}>{done} of {goalTotal} {t2("tasks done", "tareas hechas")}</div>
                       </div>
                       <div style={{ fontSize: "1rem", fontWeight: 700, color, minWidth: 36, textAlign: "right" }}>{goalPercent}%</div>
                     </div>
@@ -259,7 +267,7 @@ export default function TodayPage() {
             <div style={{ background: "linear-gradient(135deg, rgba(212,190,140,0.1) 0%, rgba(212,190,140,0.02) 100%)", border: "1px solid rgba(212,190,140,0.2)", borderRadius: 18, padding: "1.2rem", marginTop: "1.2rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.6rem" }}>
                 <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#D4BE8C", animation: "gentlePulse 3s ease-in-out infinite" }} />
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C", background: "rgba(212,190,140,0.15)", padding: "3px 10px", borderRadius: 6, letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Menti&apos;s Weekly Review</div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C", background: "rgba(212,190,140,0.15)", padding: "3px 10px", borderRadius: 6, letterSpacing: "0.1em", textTransform: "uppercase" as const }}>{t2("Menti\u2019s Weekly Review", "Resumen Semanal de Menti")}</div>
               </div>
               <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.65 }}>Keep showing up, {firstName}. Consistency matters more than perfection.</p>
             </div>
@@ -271,9 +279,9 @@ export default function TodayPage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "radial-gradient(ellipse 70% 50% at 50% 40%, rgba(212,190,140,0.12) 0%, transparent 60%), linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%)" }}>
           <div style={{ textAlign: "center" }}>
             <div style={{ width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,190,140,0.5) 0%, rgba(212,190,140,0.15) 40%, transparent 65%)", border: "1px solid rgba(212,190,140,0.3)", margin: "0 auto 2rem", boxShadow: "0 0 60px rgba(212,190,140,0.15)" }} />
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "2.2rem", color: "rgba(255,255,255,0.95)", marginBottom: "0.5rem" }}>You showed up today.</h2>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "1rem", color: "rgba(255,255,255,0.5)", maxWidth: 280, lineHeight: 1.5, margin: "0 auto 2rem" }}>Menti is proud of you.</p>
-            <button onClick={() => setShowCelebration(false)} style={{ padding: "0.85rem 2rem", background: "white", color: "#4A5C3F", fontWeight: 600, fontSize: "0.88rem", border: "none", borderRadius: 60, cursor: "pointer" }}>See you tomorrow &#8594;</button>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "2.2rem", color: "rgba(255,255,255,0.95)", marginBottom: "0.5rem" }}>{t2("You showed up today.", "Hoy te presentaste.")}</h2>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "1rem", color: "rgba(255,255,255,0.5)", maxWidth: 280, lineHeight: 1.5, margin: "0 auto 2rem" }}>{t2("Menti is proud of you.", "Menti est\u00e1 orgullosa de ti.")}</p>
+            <button onClick={() => setShowCelebration(false)} style={{ padding: "0.85rem 2rem", background: "white", color: "#4A5C3F", fontWeight: 600, fontSize: "0.88rem", border: "none", borderRadius: 60, cursor: "pointer" }}>{t2("See you tomorrow", "Nos vemos ma\u00f1ana")} &#8594;</button>
           </div>
         </div>
       )}

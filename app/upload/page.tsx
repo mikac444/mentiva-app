@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/TopNav";
 import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
 const MAX_LONGEST_SIDE = 1024;
@@ -38,14 +39,14 @@ const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px s
 const inputStyle = { background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" };
 
 /* ===== LOADING SCREEN ===== */
-function AnalyzingScreen() {
+function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
   const [msgIndex, setMsgIndex] = useState(0);
   const messages = [
-    "Finding your themes...",
-    "Identifying your goals...",
-    "Discovering patterns...",
-    "Creating your action plan...",
-    "Almost ready...",
+    t("Finding your themes...", "Encontrando tus temas..."),
+    t("Identifying your goals...", "Identificando tus metas..."),
+    t("Discovering patterns...", "Descubriendo patrones..."),
+    t("Creating your action plan...", "Creando tu plan de acción..."),
+    t("Almost ready...", "Casi listo..."),
   ];
 
   useEffect(() => {
@@ -144,6 +145,7 @@ function AnalyzingScreen() {
 
 /* ===== MAIN PAGE ===== */
 export default function UploadPage() {
+  const { t } = useLanguage();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -243,7 +245,7 @@ export default function UploadPage() {
     : analysis?.goals?.map((g) => ({ goal: g, steps: [] })) ?? [];
 
   /* ===== LOADING STATE ===== */
-  if (loading) return <AnalyzingScreen />;
+  if (loading) return <AnalyzingScreen t={t} />;
 
   /* ===== RESULTS STATE ===== */
   if (analysis) {
@@ -313,7 +315,7 @@ export default function UploadPage() {
                 {goalsWithSteps.length}
               </div>
               <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
-                <strong style={{ color: "rgba(255,255,255,0.8)", display: "block", fontSize: "1rem" }}>Goals identified</strong>
+                <strong style={{ color: "rgba(255,255,255,0.8)", display: "block", fontSize: "1rem" }}>{t("Goals identified", "Metas identificadas")}</strong>
                 with action steps for each
               </div>
             </div>
@@ -389,7 +391,7 @@ export default function UploadPage() {
               type="text"
               value={boardTitle}
               onChange={(e) => setBoardTitle(e.target.value)}
-              placeholder="e.g. My 2026 Vision"
+              placeholder={t("e.g. My 2026 Vision", "ej. Mi Visión 2026")}
               className="w-full rounded-xl px-4 py-3 outline-none"
               style={{ ...inputStyle, color: "white" }}
             />
@@ -418,7 +420,7 @@ export default function UploadPage() {
                 opacity: saving ? 0.5 : 1,
               }}
             >
-              {saving ? "Saving..." : "Save & Chat with Menti"} <span>&rarr;</span>
+              {saving ? t("Saving...", "Guardando...") : t("Save & Chat with Menti", "Guardar y chatear con Menti")} <span>&rarr;</span>
             </button>
             <br />
             <button
@@ -439,7 +441,7 @@ export default function UploadPage() {
             </button>
             {saveSuccess && (
               <p style={{ color: "#D4BE8C", fontSize: "0.85rem", marginTop: "1rem" }}>
-                Board saved! <Link href="/dashboard" style={{ color: "#D4BE8C", textDecoration: "underline" }}>View dashboard</Link>
+                Board saved! <Link href="/dashboard" style={{ color: "#D4BE8C", textDecoration: "underline" }}>{t("View dashboard", "Ver tableros")}</Link>
               </p>
             )}
             <br />

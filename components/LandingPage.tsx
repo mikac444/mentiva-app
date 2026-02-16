@@ -301,7 +301,7 @@ export default function LandingPage() {
         className="relative z-10 py-6 text-center font-sans text-sm animate-[rise_0.8s_ease-out_0.4s_both]"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
-        © 2026 Mentiva · Austin, TX
+        © 2026 Mentiva
       </footer>
 
       <style>{`

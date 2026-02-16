@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { Onboarding } from "@/components/Onboarding";
 import { TopNav } from "@/components/TopNav";
@@ -29,6 +30,7 @@ const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgb
 const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const [boards, setBoards] = useState<VisionBoardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBoard, setSelectedBoard] = useState<VisionBoardRow | null>(null);
@@ -130,7 +132,7 @@ export default function DashboardPage() {
           >
             <div className="w-full aspect-square max-h-[150px] flex flex-col items-center justify-center shrink-0">
               <span className="text-2xl mb-1">+</span>
-              <span className="font-medium text-sm text-center px-2">Upload New Board</span>
+              <span className="font-medium text-sm text-center px-2">{t("Upload New Board", "Subir Nuevo Tablero")}</span>
             </div>
           </Link>
           {loading ? (
