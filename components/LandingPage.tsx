@@ -1,9 +1,128 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 const STRIPE_URL = "https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01";
+
+
+const ALL_IMAGES = Array.from({ length: 35 }, (_, i) => `/vision/${i + 1}.jpg`);
+
+const CARD_SLOTS = [
+  { w: 145, h: 108, top: "4%", left: "2.5%", rot: -7 },
+  { w: 125, h: 95, top: "22%", left: "6%", rot: 4 },
+  { w: 155, h: 115, top: "2%", right: "4%", rot: 5 },
+  { w: 120, h: 90, top: "24%", right: "2%", rot: -4 },
+  { w: 135, h: 100, top: "50%", left: "1.5%", rot: -2 },
+  { w: 130, h: 98, top: "52%", right: "1.5%", rot: 6 },
+  { w: 140, h: 105, bottom: "12%", left: "3.5%", rot: 3 },
+  { w: 148, h: 110, bottom: "10%", right: "5%", rot: -5 },
+];
+
+function shuffle(arr: any[]): any[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function FloatingVisionCards() {
+  const [cardImages, setCardImages] = useState([] as string[]);
+  const [fadingSlot, setFadingSlot] = useState(null as number | null);
+  const [entered, setEntered] = useState(new Array(8).fill(false) as boolean[]);
+  const queueRef = useRef([] as string[]);
+  const displayedRef = useRef(new Set() as Set<string>);
+
+  useEffect(() => {
+    // Pick initial 8 random images
+    const shuffled = shuffle(ALL_IMAGES);
+    const initial = shuffled.slice(0, 8);
+    const rest = shuffled.slice(8);
+    setCardImages(initial);
+    queueRef.current = rest;
+    displayedRef.current = new Set(initial);
+
+    // Staggered entrance
+    initial.forEach((_, i) => {
+      setTimeout(() => {
+        setEntered(prev => { const n = [...prev]; n[i] = true; return n; });
+      }, 300 + i * 200);
+    });
+
+    // Start cycling after entrance
+    const slotOrder = shuffle([0, 1, 2, 3, 4, 5, 6, 7]);
+    let slotIdx = 0;
+
+    const interval = setInterval(() => {
+      const slot = slotOrder[slotIdx];
+      slotIdx = (slotIdx + 1) % slotOrder.length;
+
+      setFadingSlot(slot);
+
+      setTimeout(() => {
+        setCardImages(prev => {
+          const next = [...prev];
+          const oldSrc = next[slot];
+
+          // Get next from queue
+          if (queueRef.current.length === 0) {
+            queueRef.current = shuffle(ALL_IMAGES.filter(i => !displayedRef.current.has(i)));
+            if (queueRef.current.length === 0) {
+              queueRef.current = shuffle(ALL_IMAGES.filter(i => i !== oldSrc));
+            }
+          }
+
+          const newSrc = queueRef.current.shift() as string;
+          displayedRef.current.delete(oldSrc);
+          displayedRef.current.add(newSrc);
+          next[slot] = newSrc;
+          return next;
+        });
+        setFadingSlot(null);
+      }, 800);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+      <div className="absolute inset-0" style={{
+        background: "radial-gradient(ellipse 45% 40% at 50% 48%, rgba(123,143,108,0.95) 0%, rgba(123,143,108,0.75) 35%, rgba(123,143,108,0.2) 60%, transparent 80%)",
+      }} />
+      {CARD_SLOTS.map((slot, i) => (
+        <div
+          key={i}
+          className="absolute rounded-md overflow-hidden hidden sm:block"
+          style={{
+            width: slot.w, height: slot.h,
+            top: slot.top, bottom: (slot as any).bottom,
+            left: slot.left, right: slot.right,
+            transform: `rotate(${slot.rot}deg)`,
+            border: "3px solid rgba(255,255,255,0.45)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)",
+            opacity: entered[i] ? 0.4 : 0,
+            transition: "opacity 1s ease",
+          }}
+        >
+          {cardImages[i] && (
+            <img
+              src={cardImages[i]}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{
+                opacity: fadingSlot === i ? 0 : 1,
+                transition: "opacity 0.8s ease",
+              }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
