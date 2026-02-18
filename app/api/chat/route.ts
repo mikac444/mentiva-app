@@ -81,29 +81,50 @@ export async function POST(request: Request) {
       .map((block) => block.text)
       .join("");
 
-    // Detect focus areas in Menti's response
-    let detectedFocusAreas: string[] = [];
-    let cleanReply = reply;
-    const focusMatch = reply.match(/\[FOCUS_AREAS:\s*(.+?)\]/);
-    if (focusMatch) {
-      detectedFocusAreas = focusMatch[1].split(",").map((a: string) => a.trim()).filter(Boolean);
-      cleanReply = reply.replace(/\[FOCUS_AREAS:\s*.+?\]/, "").trim();
-
-      // Save focus areas if we have a userId
-      if (userId && detectedFocusAreas.length > 0) {
+    // Detect focus areas from the user's latest message
+    if (userId && messages.length > 0) {
+      const lastUserMsg = messages[messages.length - 1];
+      if (lastUserMsg.role === "user") {
         try {
-          await fetch(new URL("/api/focus-areas", request.url).toString(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, areas: detectedFocusAreas }),
+          const focusDetector = await anthropic.messages.create({
+            model: "claude-sonnet-4-5-20250929",
+            max_tokens: 200,
+            messages: [{
+              role: "user",
+              content: `Analyze this message and determine if the user is expressing priorities, goals, or focus areas for their life.
+
+Message: "${lastUserMsg.content}"
+
+If YES, respond with ONLY a JSON array of short focus area labels in the SAME language as the message. Examples: ["Negocio", "Salud"], ["Business", "Morning routine"], ["Fitness", "Relaciones"]
+If NO (just casual chat, questions, etc.), respond with exactly: []
+
+Respond with ONLY the JSON array, nothing else.`
+            }],
           });
+          const focusText = focusDetector.content
+            .filter((b): b is { type: "text"; text: string } => b.type === "text")
+            .map(b => b.text).join("").trim();
+          const parsed = JSON.parse(focusText.replace(/\`\`\`json\n?/g, "").replace(/\`\`\`\n?/g, "").trim());
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Save focus areas
+            const { createClient } = await import("@supabase/supabase-js");
+            const supabase = createClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            );
+            await supabase.from("user_focus_areas").delete().eq("user_id", userId);
+            await supabase.from("user_focus_areas").insert(
+              parsed.map((a: string) => ({ user_id: userId, area: String(a) }))
+            );
+            console.log("Focus areas saved:", parsed);
+          }
         } catch (e) {
-          console.error("Failed to save focus areas:", e);
+          console.error("Focus detection failed:", e);
         }
       }
     }
 
-    return NextResponse.json({ reply: cleanReply, focusAreas: detectedFocusAreas });
+    return NextResponse.json({ reply });
   } catch (err) {
     console.error("Chat API error:", err);
     const message = err instanceof Error ? err.message : "Chat failed";

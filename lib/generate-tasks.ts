@@ -66,6 +66,8 @@ RULES:
 7. Each task needs a goal_name (the life area it belongs to) and priority (high/medium/low).
 8. Language: respond in ${ctx.lang === "es" ? "Spanish" : "English"}.
 
+CRITICAL: The goal_name must be a SHORT label (1-3 words max) in ${ctx.lang === "es" ? "SPANISH" : "ENGLISH"}. Translate if needed. Examples: "Negocio", "Salud", "Rutina matutina", "Finanzas", "Relaciones".
+
 Respond ONLY with valid JSON array, no other text:
 [{"task_text": "...", "goal_name": "...", "priority": "high|medium|low"}]`;
 
