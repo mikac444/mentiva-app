@@ -70,6 +70,8 @@ export default function ChatPage() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [visionBoard, setVisionBoard] = useState<AnalysisResult | null>(null);
+  const [focusAreas, setFocusAreas] = useState<string[]>([]);
+  const [recentTasks, setRecentTasks] = useState<{ task_text: string; completed: boolean; date: string }[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -79,6 +81,23 @@ export default function ChatPage() {
   const [deletingConversation, setDeletingConversation] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load focus areas and recent tasks for Menti context
+  useEffect(() => {
+    async function loadContext() {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) return;
+      // Focus areas
+      const { data: fa } = await supabase.from("user_focus_areas").select("area").eq("user_id", session.user.id);
+      if (fa) setFocusAreas(fa.map(f => f.area));
+      // Recent tasks (7 days)
+      const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+      const { data: rt } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", session.user.id).gte("date", weekAgo.toISOString().split("T")[0]);
+      if (rt) setRecentTasks(rt);
+    }
+    loadContext();
+  }, []);
 
   const fetchConversations = useCallback(async () => {
     const supabase = createClient();
@@ -301,6 +320,9 @@ export default function ChatPage() {
         body: JSON.stringify({
           messages: history.map((m) => ({ role: m.role, content: m.content })),
           visionBoard: visionBoard ?? undefined,
+          focusAreas: focusAreas ?? [],
+          recentTasks: recentTasks ?? [],
+          userId: session?.user?.id ?? null,
         }),
       });
 

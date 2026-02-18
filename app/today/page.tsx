@@ -82,8 +82,26 @@ export default function TodayPage() {
     const supabase = createClient();
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase.from("daily_tasks").select("*").eq("user_id", userId).eq("date", today).order("created_at", { ascending: true });
-    if (data && data.length > 0) { setTasks(data); }
-    else { await generateTasksFromGoals(userId, today); }
+    if (data && data.length > 0) { setTasks(data); setLoading(false); return; }
+    // No tasks for today - use smart AI generation
+    try {
+      const lang = localStorage.getItem("mentiva-lang") || "en";
+      const res = await fetch("/api/generate-tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, userName: firstName, lang }),
+      });
+      const result = await res.json();
+      if (result.tasks && result.tasks.length > 0) {
+        setTasks(result.tasks);
+      } else {
+        // Fallback to old method if API fails
+        await generateTasksFromGoals(userId, today);
+      }
+    } catch (e) {
+      console.error("Smart task generation failed, falling back:", e);
+      await generateTasksFromGoals(userId, today);
+    }
     setLoading(false);
   }
 

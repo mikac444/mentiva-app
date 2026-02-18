@@ -4,7 +4,7 @@ import type { AnalysisResult } from "@/lib/analyze-types";
 
 export const dynamic = "force-dynamic";
 
-function buildSystemPrompt(visionBoard?: AnalysisResult | null): string {
+function buildSystemPrompt(visionBoard?: AnalysisResult | null, focusAreas?: string[], recentTasks?: { task_text: string; completed: boolean; date: string }[]): string {
   let prompt = `You are Menti, a warm, motivational AI mentor and life coach for the Mentiva vision board app. Your role is to help users turn their vision board dreams into reality.
 
 Be encouraging but practical. Give actionable advice, ask thoughtful follow-up questions, and help users break big goals into small steps. Use a friendly, conversational tone—like a supportive friend who's also a great coach. Keep responses focused and not overly long unless the user asks for more.`;
@@ -46,9 +46,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { messages = [], visionBoard = null } = body as {
+    const { messages = [], visionBoard = null, focusAreas = [], recentTasks = [], userId = null } = body as {
       messages?: ChatMessage[];
       visionBoard?: AnalysisResult | null;
+      focusAreas?: string[];
+      recentTasks?: { task_text: string; completed: boolean; date: string }[];
+      userId?: string | null;
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     const anthropic = new Anthropic({ apiKey });
-    const system = buildSystemPrompt(visionBoard);
+    const system = buildSystemPrompt(visionBoard, focusAreas, recentTasks);
 
     const apiMessages = messages.map((m) => ({
       role: m.role as "user" | "assistant",
@@ -78,7 +81,29 @@ export async function POST(request: Request) {
       .map((block) => block.text)
       .join("");
 
-    return NextResponse.json({ reply });
+    // Detect focus areas in Menti's response
+    let detectedFocusAreas: string[] = [];
+    let cleanReply = reply;
+    const focusMatch = reply.match(/\[FOCUS_AREAS:\s*(.+?)\]/);
+    if (focusMatch) {
+      detectedFocusAreas = focusMatch[1].split(",").map((a: string) => a.trim()).filter(Boolean);
+      cleanReply = reply.replace(/\[FOCUS_AREAS:\s*.+?\]/, "").trim();
+
+      // Save focus areas if we have a userId
+      if (userId && detectedFocusAreas.length > 0) {
+        try {
+          await fetch(new URL("/api/focus-areas", request.url).toString(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, areas: detectedFocusAreas }),
+          });
+        } catch (e) {
+          console.error("Failed to save focus areas:", e);
+        }
+      }
+    }
+
+    return NextResponse.json({ reply: cleanReply, focusAreas: detectedFocusAreas });
   } catch (err) {
     console.error("Chat API error:", err);
     const message = err instanceof Error ? err.message : "Chat failed";
