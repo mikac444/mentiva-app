@@ -34,9 +34,30 @@ function compressImage(file: File): Promise<string> {
   });
 }
 
-const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 const inputStyle = { background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" };
+
+type GoalWithArea = {
+  goal: string;
+  area?: string;
+  steps: string[];
+};
+
+// Area emoji mapping
+const AREA_EMOJI: Record<string, string> = {
+  business: "💼",
+  health: "🧘",
+  finance: "💰",
+  relationships: "❤️",
+  learning: "📚",
+  creative: "🎨",
+  routine: "⏰",
+  other: "✨",
+};
+
+function getAreaEmoji(area?: string) {
+  return AREA_EMOJI[area || "other"] || "✨";
+}
 
 /* ===== LOADING SCREEN ===== */
 function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
@@ -54,12 +75,12 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
       setMsgIndex((i) => (i + 1) % messages.length);
     }, 2500);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-mentiva-gradient">
       <div className="flex flex-col items-center text-center px-8 max-w-[380px]">
-        {/* Halo */}
         <div style={{ position: "relative", width: 140, height: 140, marginBottom: "2.5rem" }}>
           <div style={{
             position: "absolute", inset: 0, borderRadius: "50%",
@@ -106,7 +127,6 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
           Analyzing your vision board to create your personalized roadmap
         </p>
 
-        {/* Status messages */}
         <div style={{ marginTop: "2.5rem", height: 24, position: "relative", width: "100%" }}>
           {messages.map((msg, i) => (
             <div key={i} style={{
@@ -121,7 +141,6 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
           ))}
         </div>
 
-        {/* Progress bar */}
         <div style={{ width: 200, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
           <div style={{
             height: "100%", borderRadius: 2,
@@ -143,12 +162,49 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
   );
 }
 
+/* ===== ENHANCING SCREEN ===== */
+function EnhancingScreen({ t }: { t: (en: string, es: string) => string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-mentiva-gradient">
+      <div className="flex flex-col items-center text-center px-8 max-w-[380px]">
+        <div style={{ fontSize: "3rem", marginBottom: "1.5rem", animation: "glowPulse 2s ease-in-out infinite" }}>✨</div>
+        <h1 style={{
+          fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+          fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.95)",
+          lineHeight: 1.3, marginBottom: "0.8rem",
+        }}>
+          {t("Updating your roadmap...", "Actualizando tu hoja de ruta...")}
+        </h1>
+        <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)" }}>
+          {t("Menti is combining your board with your new goals", "Menti está combinando tu board con tus nuevas metas")}
+        </p>
+        <div style={{ width: 160, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
+          <div style={{
+            height: "100%", borderRadius: 2,
+            background: "linear-gradient(90deg, rgba(212,190,140,0.3), rgba(212,190,140,0.8))",
+            animation: "progressGrow 10s ease-in-out forwards",
+          }} />
+        </div>
+      </div>
+      <style>{`
+        @keyframes glowPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+        @keyframes progressGrow {
+          0% { width: 0%; } 30% { width: 35%; } 60% { width: 65%; } 85% { width: 85%; } 100% { width: 95%; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ===== MAIN PAGE ===== */
+type PageState = "upload" | "analyzing" | "clarify" | "enhancing" | "results";
+
 export default function UploadPage() {
   const { t } = useLanguage();
+  const lang = t("en", "es");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [pageState, setPageState] = useState<PageState>("upload");
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [savedBase64, setSavedBase64] = useState<string | null>(null);
@@ -156,16 +212,24 @@ export default function UploadPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [revealedGoals, setRevealedGoals] = useState<number[]>([]);
+  const [additionalGoals, setAdditionalGoals] = useState("");
+  const [skippedClarify, setSkippedClarify] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  const goalsWithSteps: GoalWithArea[] = analysis?.goalsWithSteps && analysis.goalsWithSteps.length > 0
+    ? analysis.goalsWithSteps
+    : analysis?.goals?.map((g) => ({ goal: g, steps: [] })) ?? [];
+
   // Stagger reveal goal cards
   useEffect(() => {
-    if (!analysis?.goalsWithSteps) return;
-    analysis.goalsWithSteps.forEach((_, i) => {
+    if (pageState !== "results" || !analysis?.goalsWithSteps) return;
+    setRevealedGoals([]);
+    const gws = analysis.goalsWithSteps;
+    gws.forEach((_: GoalWithArea, i: number) => {
       setTimeout(() => setRevealedGoals((prev) => [...prev, i]), 300 + i * 200);
     });
-  }, [analysis]);
+  }, [pageState, analysis]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const chosen = e.target.files?.[0];
@@ -173,7 +237,7 @@ export default function UploadPage() {
     setAnalysis(null);
     if (!chosen) { setFile(null); setPreview(null); return; }
     if (!chosen.type.startsWith("image/")) {
-      setError("Please choose an image file (JPEG, PNG, GIF, or WebP).");
+      setError(t("Please choose an image file (JPEG, PNG, GIF, or WebP).", "Por favor elige un archivo de imagen (JPEG, PNG, GIF, o WebP)."));
       setFile(null); setPreview(null); return;
     }
     setFile(chosen);
@@ -182,14 +246,14 @@ export default function UploadPage() {
 
   async function handleAnalyze() {
     if (!file) return;
-    setLoading(true);
+    setPageState("analyzing");
     setError(null);
     try {
       const base64 = await compressImage(file);
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, mediaType: "image/jpeg" }),
+        body: JSON.stringify({ image: base64, mediaType: "image/jpeg", lang }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Analysis failed");
@@ -198,11 +262,63 @@ export default function UploadPage() {
       setBoardTitle("");
       setSaveSuccess(false);
       setRevealedGoals([]);
+      setAdditionalGoals("");
+      setSkippedClarify(false);
+      // Go to clarifying questions step
+      setPageState("clarify");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
+      setPageState("upload");
     }
+  }
+
+  async function handleEnhanceWithGoals() {
+    if (!additionalGoals.trim() || !analysis) return;
+    setPageState("enhancing");
+    setError(null);
+    try {
+      const existingGoalsStr = (analysis.goalsWithSteps || [])
+        .map((g: GoalWithArea) => `- ${g.goal}: ${g.steps.join(", ")}`)
+        .join("\n");
+
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enhance: true,
+          existingGoals: existingGoalsStr,
+          additionalGoals: additionalGoals.trim(),
+          lang,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Enhancement failed");
+
+      // Merge enhanced data into analysis
+      setAnalysis((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          goalsWithSteps: data.goalsWithSteps || prev.goalsWithSteps,
+          summary: data.summary || prev.summary,
+          insight: data.insight || prev.insight,
+          goals: (data.goalsWithSteps || prev.goalsWithSteps).map((g: GoalWithArea) => g.goal),
+        };
+      });
+      setPageState("results");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setPageState("clarify");
+    }
+  }
+
+  function handleSkipClarify() {
+    setSkippedClarify(true);
+    setPageState("results");
+  }
+
+  function handleBackToClarify() {
+    setPageState("clarify");
   }
 
   async function handleSaveBoard() {
@@ -212,12 +328,12 @@ export default function UploadPage() {
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) { setError("Sign in to save your board."); setSaving(false); return; }
+      if (!session?.user?.id) { setError(t("Sign in to save your board.", "Inicia sesión para guardar tu board.")); setSaving(false); return; }
       await supabase.from("vision_boards").insert({
         user_id: session.user.id,
         image_url: savedBase64,
         analysis,
-        title: boardTitle.trim() || "Untitled board",
+        title: boardTitle.trim() || t("Untitled board", "Board sin título"),
       });
       setSaveSuccess(true);
     } catch (err) {
@@ -236,19 +352,255 @@ export default function UploadPage() {
     setFile(null); setPreview(null); setAnalysis(null);
     setSavedBase64(null); setBoardTitle(""); setSaveSuccess(false);
     setError(null); setRevealedGoals([]);
+    setAdditionalGoals(""); setSkippedClarify(false);
+    setPageState("upload");
     if (inputRef.current) inputRef.current.value = "";
   }
 
-  // Use goalsWithSteps if available, fallback to old format
-  const goalsWithSteps = analysis?.goalsWithSteps && analysis.goalsWithSteps.length > 0
-    ? analysis.goalsWithSteps
-    : analysis?.goals?.map((g) => ({ goal: g, steps: [] })) ?? [];
+  /* ===== ANALYZING STATE ===== */
+  if (pageState === "analyzing") return <AnalyzingScreen t={t} />;
 
-  /* ===== LOADING STATE ===== */
-  if (loading) return <AnalyzingScreen t={t} />;
+  /* ===== ENHANCING STATE ===== */
+  if (pageState === "enhancing") return <EnhancingScreen t={t} />;
+
+  /* ===== CLARIFYING QUESTIONS STATE ===== */
+  if (pageState === "clarify" && analysis) {
+    const boardAreas = Array.from(new Set((analysis.goalsWithSteps || []).map((g: GoalWithArea) => g.area || "other")));
+
+    // Suggestion chips based on what's NOT in the board
+    const allAreas = ["business", "health", "finance", "relationships", "learning", "creative", "routine"];
+    const missingAreas = allAreas.filter((a) => !boardAreas.includes(a));
+
+    const areaLabels: Record<string, { en: string; es: string; emoji: string }> = {
+      business: { en: "My career or business", es: "Mi carrera o negocio", emoji: "💼" },
+      health: { en: "Health & fitness", es: "Salud y ejercicio", emoji: "🧘" },
+      finance: { en: "Saving or finances", es: "Ahorro o finanzas", emoji: "💰" },
+      relationships: { en: "Relationships & family", es: "Relaciones y familia", emoji: "❤️" },
+      learning: { en: "Learning new skills", es: "Aprender algo nuevo", emoji: "📚" },
+      creative: { en: "Creative projects", es: "Proyectos creativos", emoji: "🎨" },
+      routine: { en: "Daily routine & habits", es: "Rutina diaria y hábitos", emoji: "⏰" },
+    };
+
+    return (
+      <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+          <TopNav />
+        </header>
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto w-full">
+
+          {/* What Menti found */}
+          <div style={{ animation: "riseIn 0.6s ease both" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              marginBottom: "1rem", backdropFilter: "blur(8px)",
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C", animation: "pulse 2s ease-in-out infinite" }} />
+              {t("Step 1 of 2", "Paso 1 de 2")}
+            </div>
+
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+              fontSize: "clamp(1.5rem, 5vw, 2rem)", lineHeight: 1.2,
+              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              marginBottom: "0.5rem",
+            }}>
+              {t("Here's what Menti sees", "Esto es lo que Menti ve")}
+            </h1>
+            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.5, marginBottom: "1.5rem" }}>
+              {analysis.summary}
+            </p>
+          </div>
+
+          {/* Board thumbnail + themes found */}
+          <div style={{
+            display: "flex", gap: "1rem", marginBottom: "1.5rem",
+            animation: "riseIn 0.6s ease 0.15s both",
+          }}>
+            {preview && (
+              <div style={{
+                width: 100, height: 100, borderRadius: 14, overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0,
+              }}>
+                <img src={preview} alt="Board" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "rgba(212,190,140,0.7)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
+                {t("Themes found", "Temas encontrados")}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                {(analysis.themes || []).map((theme, i) => (
+                  <span key={i} style={{
+                    padding: "4px 12px", borderRadius: 20,
+                    background: "rgba(212,190,140,0.12)", border: "1px solid rgba(212,190,140,0.2)",
+                    fontSize: "0.8rem", color: "rgba(255,255,255,0.7)",
+                  }}>
+                    {theme}
+                  </span>
+                ))}
+              </div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "rgba(212,190,140,0.7)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginTop: "0.8rem", marginBottom: "0.4rem" }}>
+                {t("Goals from board", "Metas del board")}
+              </div>
+              <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+                {goalsWithSteps.map((g, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                    <span>{getAreaEmoji(g.area)}</span>
+                    <span>{g.goal}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{
+            width: "100%", height: 1,
+            background: "linear-gradient(90deg, transparent, rgba(212,190,140,0.3), transparent)",
+            margin: "1.5rem 0",
+          }} />
+
+          {/* Clarifying question */}
+          <div style={{ animation: "riseIn 0.6s ease 0.3s both" }}>
+            <div style={{
+              background: "linear-gradient(135deg, rgba(212,190,140,0.1) 0%, rgba(212,190,140,0.03) 100%)",
+              border: "1px solid rgba(212,190,140,0.2)", borderRadius: 18,
+              padding: "1.3rem", marginBottom: "1rem",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.8rem" }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "0.85rem",
+                }}>
+                  🌱
+                </div>
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
+                  MENTI
+                </span>
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
+                fontSize: "1.1rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.5,
+              }}>
+                {t(
+                  "Your board shows beautiful goals! But I want to know the full picture. What else are you working on that isn't on this board?",
+                  "¡Tu board tiene metas hermosas! Pero quiero conocer todo el panorama. ¿Qué más estás trabajando que no está en este board?"
+                )}
+              </p>
+            </div>
+
+            {/* Suggestion chips for missing areas */}
+            {missingAreas.length > 0 && (
+              <div style={{ marginBottom: "1rem" }}>
+                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                  {t("Tap to add, or type your own below:", "Toca para agregar, o escribe abajo:")}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                  {missingAreas.map((area) => {
+                    const label = areaLabels[area];
+                    if (!label) return null;
+                    const text = lang === "es" ? label.es : label.en;
+                    const isSelected = additionalGoals.toLowerCase().includes(text.toLowerCase());
+                    return (
+                      <button
+                        key={area}
+                        onClick={() => {
+                          if (isSelected) return;
+                          setAdditionalGoals((prev) =>
+                            prev ? `${prev}, ${text}` : text
+                          );
+                        }}
+                        style={{
+                          padding: "6px 14px", borderRadius: 20,
+                          background: isSelected ? "rgba(212,190,140,0.2)" : "rgba(255,255,255,0.06)",
+                          border: `1px solid ${isSelected ? "rgba(212,190,140,0.4)" : "rgba(255,255,255,0.12)"}`,
+                          fontSize: "0.82rem",
+                          color: isSelected ? "#D4BE8C" : "rgba(255,255,255,0.55)",
+                          cursor: isSelected ? "default" : "pointer",
+                          transition: "all 0.2s",
+                          display: "inline-flex", alignItems: "center", gap: 6,
+                        }}
+                      >
+                        <span>{label.emoji}</span> {text}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Text area for custom input */}
+            <textarea
+              value={additionalGoals}
+              onChange={(e) => setAdditionalGoals(e.target.value)}
+              placeholder={t(
+                "e.g. Wake up early, build my business, save more money, learn to cook, exercise daily...",
+                "ej. Despertar temprano, construir mi negocio, ahorrar más dinero, aprender a cocinar, hacer ejercicio diario..."
+              )}
+              rows={3}
+              style={{
+                ...inputStyle,
+                width: "100%", borderRadius: 14, padding: "0.8rem 1rem",
+                fontSize: "0.9rem", lineHeight: 1.5, resize: "vertical",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            />
+
+            {/* Action buttons */}
+            <div style={{ display: "flex", gap: "0.6rem", marginTop: "1rem" }}>
+              <button
+                onClick={handleEnhanceWithGoals}
+                disabled={!additionalGoals.trim()}
+                style={{
+                  flex: 1, padding: "0.9rem 1.5rem",
+                  background: additionalGoals.trim() ? "white" : "rgba(255,255,255,0.1)",
+                  color: additionalGoals.trim() ? "#4A5C3F" : "rgba(255,255,255,0.3)",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
+                  border: "none", borderRadius: 60, cursor: additionalGoals.trim() ? "pointer" : "default",
+                  transition: "all 0.3s",
+                }}
+              >
+                {t("Add to my goals ✨", "Agregar a mis metas ✨")}
+              </button>
+            </div>
+
+            <button
+              onClick={handleSkipClarify}
+              style={{
+                width: "100%", marginTop: "0.6rem", padding: "0.7rem",
+                background: "none", border: "none",
+                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {t("Skip — my board covers everything", "Omitir — mi board cubre todo")}
+            </button>
+          </div>
+
+          {error && (
+            <div className="rounded-xl p-4 text-sm mt-4" style={{ background: "rgba(229,115,115,0.2)", border: "1px solid rgba(229,115,115,0.5)", color: "#ffcdd2" }}>
+              {error}
+            </div>
+          )}
+        </main>
+
+        <style>{`
+          @keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+        `}</style>
+      </div>
+    );
+  }
 
   /* ===== RESULTS STATE ===== */
-  if (analysis) {
+  if (pageState === "results" && analysis) {
     return (
       <div className="min-h-screen flex flex-col bg-mentiva-gradient">
         <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
@@ -267,17 +619,26 @@ export default function UploadPage() {
               marginBottom: "1.5rem", backdropFilter: "blur(8px)",
             }}>
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C", animation: "pulse 2s ease-in-out infinite" }} />
-              Menti has analyzed your board
+              {skippedClarify
+                ? t("Menti has analyzed your board", "Menti ha analizado tu board")
+                : t("Your complete roadmap", "Tu hoja de ruta completa")
+              }
             </div>
             <h1 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
               fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
               color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
             }}>
-              Menti found <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{goalsWithSteps.length} goals</em><br />in your vision board
+              {skippedClarify
+                ? <>{t("Menti found", "Menti encontró")} <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{goalsWithSteps.length} {t("goals", "metas")}</em><br />{t("in your vision board", "en tu vision board")}</>
+                : <>{t("Your", "Tu")} <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{goalsWithSteps.length} {t("goals", "metas")}</em> {t("are ready", "están listas")}</>
+              }
             </h1>
             <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.45)", marginTop: "0.5rem" }}>
-              Here&apos;s your personalized roadmap
+              {skippedClarify
+                ? t("Here's your personalized roadmap", "Aquí está tu hoja de ruta personalizada")
+                : t("Board + your personal goals combined", "Board + tus metas personales combinadas")
+              }
             </p>
           </div>
 
@@ -305,7 +666,7 @@ export default function UploadPage() {
               marginBottom: "1.5rem", paddingBottom: "1.5rem",
               borderBottom: "1px solid rgba(255,255,255,0.1)",
             }}>
-              &ldquo;{analysis.summary || "Your vision board reveals inspiring goals. Let me break them down for you."}&rdquo;
+              &ldquo;{analysis.summary}&rdquo;
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{
@@ -316,7 +677,7 @@ export default function UploadPage() {
               </div>
               <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
                 <strong style={{ color: "rgba(255,255,255,0.8)", display: "block", fontSize: "1rem" }}>{t("Goals identified", "Metas identificadas")}</strong>
-                with action steps for each
+                {t("with action steps for each", "con pasos de acción para cada una")}
               </div>
             </div>
           </div>
@@ -327,7 +688,7 @@ export default function UploadPage() {
             fontSize: "1.4rem", color: "rgba(255,255,255,0.9)",
             marginBottom: "1rem", marginTop: "0.5rem",
           }}>
-            Your goals &amp; action steps
+            {t("Your goals & action steps", "Tus metas y pasos de acción")}
           </h2>
 
           {goalsWithSteps.map((g, i) => (
@@ -341,16 +702,22 @@ export default function UploadPage() {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.8rem" }}>
                 <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  background: "rgba(212,190,140,0.3)", border: "1px solid rgba(212,190,140,0.3)",
+                  width: 36, height: 36, borderRadius: 12,
+                  background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.2)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
-                  fontSize: "0.95rem", color: "#D4BE8C", flexShrink: 0,
+                  fontSize: "1.1rem", flexShrink: 0,
                 }}>
-                  {i + 1}
+                  {getAreaEmoji(g.area)}
                 </div>
-                <div style={{ fontWeight: 600, fontSize: "1rem", color: "rgba(255,255,255,0.9)" }}>
-                  {g.goal}
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "1rem", color: "rgba(255,255,255,0.9)" }}>
+                    {g.goal}
+                  </div>
+                  {g.area && (
+                    <div style={{ fontSize: "0.7rem", color: "rgba(212,190,140,0.6)", textTransform: "capitalize" as const, marginTop: 1 }}>
+                      {g.area}
+                    </div>
+                  )}
                 </div>
               </div>
               {g.steps.length > 0 && (
@@ -374,7 +741,7 @@ export default function UploadPage() {
               padding: "1.3rem", marginTop: "1rem", marginBottom: "1.5rem",
             }}>
               <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C", marginBottom: "0.6rem" }}>
-                Menti&apos;s Insight
+                {t("Menti's Insight", "Insight de Menti")}
               </div>
               <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
                 {analysis.insight}
@@ -382,10 +749,42 @@ export default function UploadPage() {
             </div>
           )}
 
+          {/* Edit goals button (go back to clarify) */}
+          {!skippedClarify && (
+            <button
+              onClick={handleBackToClarify}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 6, width: "100%", padding: "0.7rem",
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 14, fontSize: "0.82rem", color: "rgba(255,255,255,0.4)",
+                cursor: "pointer", marginBottom: "1rem",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              ← {t("Edit my additional goals", "Editar mis metas adicionales")}
+            </button>
+          )}
+          {skippedClarify && (
+            <button
+              onClick={handleBackToClarify}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 6, width: "100%", padding: "0.7rem",
+                background: "rgba(212,190,140,0.08)", border: "1px solid rgba(212,190,140,0.15)",
+                borderRadius: 14, fontSize: "0.82rem", color: "rgba(212,190,140,0.7)",
+                cursor: "pointer", marginBottom: "1rem",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              + {t("Add goals that aren't on my board", "Agregar metas que no están en mi board")}
+            </button>
+          )}
+
           {/* Name input */}
-          <div style={{ marginTop: "1.5rem" }}>
+          <div style={{ marginTop: "1rem" }}>
             <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
-              Give this board a name
+              {t("Give this board a name", "Dale un nombre a este board")}
             </div>
             <input
               type="text"
@@ -405,7 +804,7 @@ export default function UploadPage() {
               fontSize: "1.1rem", color: "rgba(255,255,255,0.5)", marginBottom: "1.5rem",
               maxWidth: 320, marginLeft: "auto", marginRight: "auto",
             }}>
-              Your roadmap is ready. Want to dive deeper with Menti?
+              {t("Your roadmap is ready. Want to dive deeper with Menti?", "Tu hoja de ruta está lista. ¿Quieres profundizar con Menti?")}
             </p>
             <button
               onClick={handleSaveAndChat}
@@ -437,11 +836,11 @@ export default function UploadPage() {
                 opacity: saving ? 0.5 : 1,
               }}
             >
-              Save to my boards
+              {t("Save to my boards", "Guardar en mis boards")}
             </button>
             {saveSuccess && (
               <p style={{ color: "#D4BE8C", fontSize: "0.85rem", marginTop: "1rem" }}>
-                Board saved! <Link href="/dashboard" style={{ color: "#D4BE8C", textDecoration: "underline" }}>{t("View dashboard", "Ver tableros")}</Link>
+                {t("Board saved!", "¡Board guardado!")} <Link href="/dashboard" style={{ color: "#D4BE8C", textDecoration: "underline" }}>{t("View dashboard", "Ver tableros")}</Link>
               </p>
             )}
             <br />
@@ -450,7 +849,7 @@ export default function UploadPage() {
               background: "none", border: "none", cursor: "pointer",
               textDecoration: "underline", textUnderlineOffset: 3,
             }}>
-              Analyze another board
+              {t("Analyze another board", "Analizar otro board")}
             </button>
           </div>
 
@@ -477,10 +876,13 @@ export default function UploadPage() {
       </header>
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto w-full">
         <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
-          Upload vision board
+          {t("Upload vision board", "Sube tu vision board")}
         </h1>
         <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-          Add an image and Menti will analyze your dreams, goals, and create your action plan
+          {t(
+            "Add an image and Menti will analyze your dreams, goals, and create your action plan",
+            "Agrega una imagen y Menti analizará tus sueños, metas, y creará tu plan de acción"
+          )}
         </p>
 
         <div className="mt-8">
@@ -490,7 +892,7 @@ export default function UploadPage() {
           >
             <span className="text-4xl mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>&#8593;</span>
             <span className="font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
-              Drop an image here or click to upload
+              {t("Drop an image here or click to upload", "Arrastra una imagen aquí o haz click para subir")}
             </span>
             <span className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
               JPEG, PNG, GIF, or WebP
@@ -501,34 +903,31 @@ export default function UploadPage() {
               className="hidden"
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleFileChange}
-              disabled={loading}
             />
           </label>
         </div>
 
         {preview && (
           <div className="mt-6 flex flex-col sm:flex-row sm:items-start gap-4">
-            <div className="rounded-xl overflow-hidden shrink-0 max-w-xs" style={glassStyle}>
+            <div className="rounded-xl overflow-hidden shrink-0 max-w-xs" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}>
               <img src={preview} alt="Vision board preview" className="w-full h-auto object-cover" />
             </div>
             <div className="flex flex-col gap-3">
               <button
                 type="button"
                 onClick={handleAnalyze}
-                disabled={loading}
-                className="rounded-lg font-semibold px-5 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg font-semibold px-5 py-3 transition-colors"
                 style={{ background: "#FFFFFF", color: "#4A5C3F" }}
               >
-                Analyze with Menti
+                {t("Analyze with Menti", "Analizar con Menti")}
               </button>
               <button
                 type="button"
                 onClick={handleReset}
-                disabled={loading}
                 className="rounded-lg px-5 py-3 transition-colors"
                 style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
               >
-                Choose different image
+                {t("Choose different image", "Elegir otra imagen")}
               </button>
             </div>
           </div>

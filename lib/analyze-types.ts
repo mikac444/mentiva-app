@@ -1,5 +1,6 @@
 export type GoalWithSteps = {
   goal: string;
+  area?: string;
   steps: string[];
 };
 
