@@ -411,7 +411,7 @@ export default function UploadPage() {
   }
 
   async function handleSaveBoard() {
-    if (!savedBase64 || !analysis) return;
+    if (!savedBase64 || !analysis || saveSuccess) return;
     setSaving(true);
     setError(null);
     try {
@@ -1466,7 +1466,7 @@ export default function UploadPage() {
             </p>
             <button
               onClick={handleSaveAndChat}
-              disabled={saving}
+              disabled={saving || saveSuccess}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 padding: "1rem 2rem", background: "white", color: "#4A5C3F",
@@ -1482,7 +1482,7 @@ export default function UploadPage() {
             <br />
             <button
               onClick={handleSaveBoard}
-              disabled={saving}
+              disabled={saving || saveSuccess}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "0.85rem 1.6rem", background: "rgba(255,255,255,0.12)",
@@ -1491,7 +1491,7 @@ export default function UploadPage() {
                 border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
                 cursor: "pointer", marginTop: "0.8rem",
                 transition: "all 0.3s",
-                opacity: saving ? 0.5 : 1,
+                opacity: (saving || saveSuccess) ? 0.5 : 1,
               }}
             >
               {t("Save to my boards", "Guardar en mis boards")}
