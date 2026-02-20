@@ -98,11 +98,30 @@ export default function DashboardPage() {
       setDeleting(false);
       return;
     }
-    await supabase
+
+    // Delete the board
+    const { error } = await supabase
       .from("vision_boards")
       .delete()
       .eq("id", selectedBoard.id)
       .eq("user_id", session.user.id);
+
+    if (error) {
+      console.error("Failed to delete board:", error);
+      setDeleting(false);
+      return;
+    }
+
+    // Clean up orphaned tasks associated with this board's goals
+    const goalNames = selectedBoard.analysis?.goalsWithSteps?.map((g: any) => g.goal) || [];
+    if (goalNames.length > 0) {
+      await supabase
+        .from("daily_tasks")
+        .delete()
+        .eq("user_id", session.user.id)
+        .in("goal_name", goalNames);
+    }
+
     setBoards((prev) => prev.filter((b) => b.id !== selectedBoard.id));
     setSelectedBoard(null);
     setShowDeleteConfirm(false);

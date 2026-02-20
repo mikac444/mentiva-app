@@ -10,23 +10,23 @@ type PlannerProps = {
   onSkip: () => void;
 };
 
-const GOAL_EMOJIS: Record<string, string> = {
-  business: "💼", negocio: "💼", career: "💼", launch: "💼", lanzar: "💼",
-  health: "💪", salud: "💪", fitness: "💪", exercise: "💪",
-  relationship: "❤️", relacion: "❤️", love: "❤️", pareja: "❤️",
-  finance: "💰", finanzas: "💰", money: "💰", dinero: "💰",
-  learning: "📚", aprendizaje: "📚", read: "📚", book: "📚",
-  creative: "🎨", creatividad: "🎨",
-  routine: "🌅", rutina: "🌅", morning: "🌅", wake: "🌅", despertar: "🌅",
-  habit: "🔄", habito: "🔄",
+const GOAL_COLORS: Record<string, string> = {
+  business: "#D4BE8C", negocio: "#D4BE8C", career: "#D4BE8C", launch: "#D4BE8C", lanzar: "#D4BE8C",
+  health: "#8CB39A", salud: "#8CB39A", fitness: "#8CB39A", exercise: "#8CB39A",
+  relationship: "#C48B8B", relacion: "#C48B8B", love: "#C48B8B", pareja: "#C48B8B",
+  finance: "#B3A18C", finanzas: "#B3A18C", money: "#B3A18C", dinero: "#B3A18C",
+  learning: "#8C9EB3", aprendizaje: "#8C9EB3", read: "#8C9EB3", book: "#8C9EB3",
+  creative: "#B38CB3", creatividad: "#B38CB3",
+  routine: "#8CB3B3", rutina: "#8CB3B3", morning: "#8CB3B3", wake: "#8CB3B3", despertar: "#8CB3B3",
+  habit: "#A1B392", habito: "#A1B392",
 };
 
-function getEmoji(goalName: string): string {
+function getGoalColor(goalName: string): string {
   const lower = goalName.toLowerCase();
-  for (const [key, emoji] of Object.entries(GOAL_EMOJIS)) {
-    if (lower.includes(key)) return emoji;
+  for (const [key, color] of Object.entries(GOAL_COLORS)) {
+    if (lower.includes(key)) return color;
   }
-  return "✨";
+  return "#A1B392";
 }
 
 export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }: PlannerProps) {
@@ -81,7 +81,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
               const selected = selectedGoals.includes(g.goal);
               return (
                 <div key={g.goal} onClick={() => toggleGoal(g.goal)} style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.9rem 1rem", background: selected ? "linear-gradient(135deg, rgba(212,190,140,0.15) 0%, rgba(212,190,140,0.05) 100%)" : "rgba(255,255,255,0.05)", border: `1.5px solid ${selected ? "rgba(212,190,140,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: 14, cursor: "pointer", transition: "all 0.3s ease" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: selected ? "rgba(212,190,140,0.2)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>{getEmoji(g.goal)}</div>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: selected ? "rgba(212,190,140,0.2)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: getGoalColor(g.goal) }} /></div>
                   <div style={{ flex: 1, fontSize: "0.88rem", fontWeight: 500, color: selected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)" }}>{g.goal}</div>
                   <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selected ? "#D4BE8C" : "rgba(255,255,255,0.15)"}`, background: selected ? "#D4BE8C" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {selected && <svg viewBox="0 0 14 14" style={{ width: 10, height: 10 }}><path d="M2 7L5.5 10.5L12 3.5" fill="none" stroke="#4A5C3F" strokeWidth="2.5" strokeLinecap="round" /></svg>}
@@ -105,7 +105,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
       {step > 0 && step <= selectedGoals.length && (
         <div style={{ animation: "fadeUp 0.4s ease" }} key={`ctx-${contextStepIndex}`}>
           <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{getEmoji(currentGoalForContext)}</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.5rem" }}><span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: getGoalColor(currentGoalForContext) }} /></div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.5rem)", color: "rgba(255,255,255,0.95)", marginBottom: "0.3rem" }}>{currentGoalForContext}</h2>
             <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>{t("Where are you with this? What's next?", "¿En qué punto estás? ¿Qué sigue?")}</p>
           </div>

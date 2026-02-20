@@ -48,10 +48,10 @@ USER'S CURRENT FOCUS AREAS:
 ${ctx.focusAreas.length > 0 ? ctx.focusAreas.join(", ") : "No specific focus areas set yet. Use vision board goals."}
 
 RECENTLY COMPLETED (last 7 days):
-${completedRecently.length > 0 ? completedRecently.map(t => `✅ ${t.task_text} (${t.goal_name})`).join("\n") : "None yet - this might be their first day."}
+${completedRecently.length > 0 ? completedRecently.map(t => `[DONE] ${t.task_text} (${t.goal_name})`).join("\n") : "None yet - this might be their first day."}
 
 RECENTLY SKIPPED/NOT COMPLETED (last 7 days):
-${skippedRecently.length > 0 ? skippedRecently.map(t => `❌ ${t.task_text} (${t.goal_name})`).join("\n") : "None."}
+${skippedRecently.length > 0 ? skippedRecently.map(t => `[NOT DONE] ${t.task_text} (${t.goal_name})`).join("\n") : "None."}
 
 FREQUENTLY SKIPPED TASKS (skipped 2+ times):
 ${frequentlySkipped.length > 0 ? frequentlySkipped.join(", ") : "None."}

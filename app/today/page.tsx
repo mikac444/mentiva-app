@@ -459,8 +459,8 @@ export default function TodayPage() {
               marginTop: "1.5rem",
             }}
           >
-            <div style={{ fontSize: "2rem", marginBottom: "0.8rem" }}>
-              ✨
+            <div style={{ marginBottom: "0.8rem", display: "flex", justifyContent: "center" }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#D4BE8C" }} />
             </div>
             <h3
               style={{
@@ -544,7 +544,7 @@ export default function TodayPage() {
                 animation: "gentlePulse 2s ease-in-out infinite",
               }}
             >
-              <span style={{ fontSize: "1.8rem" }}>✨</span>
+              <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
             </div>
             <h2
               style={{
@@ -861,7 +861,7 @@ export default function TodayPage() {
                       transition: "all 0.3s",
                     }}
                   >
-                    🗓 {t2("Re-plan this week", "Re-planificar semana")}
+                    {t2("Re-plan this week", "Re-planificar semana")}
                   </button>
                 )}
 
@@ -884,7 +884,7 @@ export default function TodayPage() {
                       transition: "all 0.3s",
                     }}
                   >
-                    <span style={{ fontSize: "1.2rem" }}>🗓</span>
+                    <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#D4BE8C" }} />
                     <div style={{ textAlign: "left", flex: 1 }}>
                       <div
                         style={{
@@ -969,7 +969,7 @@ export default function TodayPage() {
                         gap: 6,
                       }}
                     >
-                      ✨ {t2("Bonus", "Bonus")}
+                      <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C" }} /> {t2("Bonus", "Bonus")}
                     </div>
                     {bonusTasks.map((task, i) => (
                       <TaskCard

@@ -50,6 +50,8 @@ Write a natural-language system prompt that tells Menti everything it needs to k
 
 The tone of the SIP itself should be instructional and clear — it's instructions for the AI, not a message to the user. But it should convey deep understanding of who this person is.
 
+CRITICAL: NEVER include emojis anywhere in the SIP. Use plain text only.
+
 Return ONLY the SIP text, no JSON wrapping, no markdown code fences.`;
 
 const SUMMARY_CARD_PROMPT = `Based on this user profile, generate a brief, warm summary card that Menti will show the user after onboarding. This is the "Here's what I learned about you" moment.
@@ -67,6 +69,7 @@ Generate a JSON object:
   "closingLine": "A warm, personalized line that transitions to the next step"
 }
 
+NEVER use emojis. Use plain text only.
 Return ONLY valid JSON.`;
 
 // --- Types ---

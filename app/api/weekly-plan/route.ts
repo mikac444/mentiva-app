@@ -63,8 +63,8 @@ export async function POST(request: Request) {
     const contextDetails = Object.entries(context || {})
       .map(([goal, detail]) => `- ${goal}: "${detail}"`).join("\n");
 
-    const recentCompleted = (recentTasks ?? []).filter(t => t.completed).map(t => `✅ ${t.task_text}`).join("\n");
-    const recentSkipped = (recentTasks ?? []).filter(t => !t.completed).map(t => `❌ ${t.task_text}`).join("\n");
+    const recentCompleted = (recentTasks ?? []).filter(t => t.completed).map(t => `[DONE] ${t.task_text}`).join("\n");
+    const recentSkipped = (recentTasks ?? []).filter(t => !t.completed).map(t => `[NOT DONE] ${t.task_text}`).join("\n");
 
     const skipCounts: Record<string, number> = {};
     for (const t of (recentTasks ?? []).filter(t => !t.completed)) {

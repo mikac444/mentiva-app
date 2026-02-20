@@ -43,20 +43,15 @@ type GoalWithArea = {
   steps: string[];
 };
 
-// Area emoji mapping
-const AREA_EMOJI: Record<string, string> = {
-  business: "💼",
-  health: "🧘",
-  finance: "💰",
-  relationships: "❤️",
-  learning: "📚",
-  creative: "🎨",
-  routine: "⏰",
-  other: "✨",
+// Area color mapping
+const AREA_COLORS: Record<string, string> = {
+  business: "#D4BE8C", health: "#8CB39A", finance: "#B3A18C",
+  relationships: "#C48B8B", learning: "#8C9EB3", creative: "#B38CB3",
+  routine: "#8CB3B3", other: "#A1B392",
 };
 
-function getAreaEmoji(area?: string) {
-  return AREA_EMOJI[area || "other"] || "✨";
+function getAreaColor(area?: string): string {
+  return AREA_COLORS[area || "other"] || "#A1B392";
 }
 
 /* ===== LOADING SCREEN ===== */
@@ -167,7 +162,7 @@ function EnhancingScreen({ t }: { t: (en: string, es: string) => string }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-mentiva-gradient">
       <div className="flex flex-col items-center text-center px-8 max-w-[380px]">
-        <div style={{ fontSize: "3rem", marginBottom: "1.5rem", animation: "glowPulse 2s ease-in-out infinite" }}>✨</div>
+        <div style={{ marginBottom: "1.5rem", animation: "glowPulse 2s ease-in-out infinite", display: "flex", justifyContent: "center" }}><span style={{ display: "inline-block", width: 16, height: 16, borderRadius: "50%", background: "#D4BE8C" }} /></div>
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
           fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.95)",
@@ -488,7 +483,7 @@ export default function UploadPage() {
                 background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
               }}>
-                {String.fromCodePoint(0x2728)}
+                <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
               </div>
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
@@ -538,7 +533,7 @@ export default function UploadPage() {
                 background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
               }}>
-                {String.fromCodePoint(0x1F331)}
+                <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
               </div>
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
@@ -604,7 +599,7 @@ export default function UploadPage() {
                 background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
               }}>
-                {String.fromCodePoint(0x1F52E)}
+                <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
               </div>
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
@@ -715,7 +710,7 @@ export default function UploadPage() {
                   background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem",
                 }}>
-                  {String.fromCodePoint(0x1F331)}
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C" }} />
                 </div>
                 <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
                   MENTI
@@ -948,7 +943,7 @@ export default function UploadPage() {
                   background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem",
                 }}>
-                  {String.fromCodePoint(0x1F52E)}
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C" }} />
                 </div>
                 <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
                   MENTI
@@ -1029,14 +1024,14 @@ export default function UploadPage() {
     const allAreas = ["business", "health", "finance", "relationships", "learning", "creative", "routine"];
     const missingAreas = allAreas.filter((a) => !boardAreas.includes(a));
 
-    const areaLabels: Record<string, { en: string; es: string; emoji: string }> = {
-      business: { en: "My career or business", es: "Mi carrera o negocio", emoji: "💼" },
-      health: { en: "Health & fitness", es: "Salud y ejercicio", emoji: "🧘" },
-      finance: { en: "Saving or finances", es: "Ahorro o finanzas", emoji: "💰" },
-      relationships: { en: "Relationships & family", es: "Relaciones y familia", emoji: "❤️" },
-      learning: { en: "Learning new skills", es: "Aprender algo nuevo", emoji: "📚" },
-      creative: { en: "Creative projects", es: "Proyectos creativos", emoji: "🎨" },
-      routine: { en: "Daily routine & habits", es: "Rutina diaria y hábitos", emoji: "⏰" },
+    const areaLabels: Record<string, { en: string; es: string; color: string }> = {
+      business: { en: "My career or business", es: "Mi carrera o negocio", color: "#D4BE8C" },
+      health: { en: "Health & fitness", es: "Salud y ejercicio", color: "#8CB39A" },
+      finance: { en: "Saving or finances", es: "Ahorro o finanzas", color: "#B3A18C" },
+      relationships: { en: "Relationships & family", es: "Relaciones y familia", color: "#C48B8B" },
+      learning: { en: "Learning new skills", es: "Aprender algo nuevo", color: "#8C9EB3" },
+      creative: { en: "Creative projects", es: "Proyectos creativos", color: "#B38CB3" },
+      routine: { en: "Daily routine & habits", es: "Rutina diaria y hábitos", color: "#8CB3B3" },
     };
 
     return (
@@ -1107,7 +1102,7 @@ export default function UploadPage() {
               <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
                 {goalsWithSteps.map((g, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                    <span>{getAreaEmoji(g.area)}</span>
+                    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: getAreaColor(g.area), flexShrink: 0 }} />
                     <span>{g.goal}</span>
                   </div>
                 ))}
@@ -1134,9 +1129,8 @@ export default function UploadPage() {
                   width: 28, height: 28, borderRadius: "50%",
                   background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.85rem",
                 }}>
-                  🌱
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C" }} />
                 </div>
                 <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
                   MENTI
@@ -1185,7 +1179,7 @@ export default function UploadPage() {
                           display: "inline-flex", alignItems: "center", gap: 6,
                         }}
                       >
-                        <span>{label.emoji}</span> {text}
+                        <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: label.color, flexShrink: 0 }} /> {text}
                       </button>
                     );
                   })}
@@ -1224,7 +1218,7 @@ export default function UploadPage() {
                   transition: "all 0.3s",
                 }}
               >
-                {t("Add to my goals ✨", "Agregar a mis metas ✨")}
+                {t("Add to my goals", "Agregar a mis metas")}
               </button>
             </div>
 
@@ -1363,9 +1357,9 @@ export default function UploadPage() {
                   width: 36, height: 36, borderRadius: 12,
                   background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.2)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.1rem", flexShrink: 0,
+                  flexShrink: 0,
                 }}>
-                  {getAreaEmoji(g.area)}
+                  <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: getAreaColor(g.area) }} />
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: "1rem", color: "rgba(255,255,255,0.9)" }}>
