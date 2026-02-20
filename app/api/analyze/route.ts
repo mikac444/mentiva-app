@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import type { AnalysisResult } from "@/lib/analyze-types";
+import { getActiveSIP } from "@/lib/sip";
 
 const ANALYSIS_PROMPT = `You are Menti, Mentiva's AI mentor. You are analyzing a vision board image. Look at the images, words, colors, and layout. Do not identify yourself as Claude or any other name—only as Menti.
 
@@ -100,6 +101,7 @@ export async function POST(request: Request) {
       enhance,
       existingGoals,
       additionalGoals,
+      userId,
     } = body as {
       image?: string;
       mediaType?: string;
@@ -107,7 +109,10 @@ export async function POST(request: Request) {
       enhance?: boolean;
       existingGoals?: string;
       additionalGoals?: string;
+      userId?: string;
     };
+
+    const sip = userId ? await getActiveSIP(userId) : null;
 
     const anthropic = new Anthropic({ apiKey });
     const langLabel = lang === "es" ? "Spanish" : "English";
@@ -119,10 +124,13 @@ export async function POST(request: Request) {
         .replace("ADDITIONAL_GOALS_PLACEHOLDER", additionalGoals)
         .replace("LANG_PLACEHOLDER", langLabel);
 
+      const enhanceSystem = sip ? `${sip}\n\n---\n\nANALYSIS INSTRUCTIONS:\n${prompt}` : prompt;
+
       const response = await anthropic.messages.create({
         model: "claude-sonnet-4-5-20250929",
         max_tokens: 2048,
-        messages: [{ role: "user", content: prompt }],
+        system: enhanceSystem,
+        messages: [{ role: "user", content: "Merge the existing goals with the additional goals as instructed." }],
       });
 
       const textBlock = response.content.find((b) => b.type === "text");
@@ -151,10 +159,12 @@ export async function POST(request: Request) {
       : "image/png";
 
     const prompt = ANALYSIS_PROMPT.replace(/LANG_PLACEHOLDER/g, langLabel);
+    const finalSystemPrompt = sip ? `${sip}\n\n---\n\nANALYSIS INSTRUCTIONS:\n${prompt}` : prompt;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5-20250929",
       max_tokens: 2048,
+      system: finalSystemPrompt,
       messages: [
         {
           role: "user",
@@ -169,7 +179,7 @@ export async function POST(request: Request) {
             },
             {
               type: "text",
-              text: prompt,
+              text: "Analyze this vision board image according to the instructions.",
             },
           ],
         },

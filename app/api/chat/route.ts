@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import type { AnalysisResult } from "@/lib/analyze-types";
+import { getActiveSIP } from "@/lib/sip";
 
 export const dynamic = "force-dynamic";
 
@@ -61,8 +62,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const sip = userId ? await getActiveSIP(userId) : null;
+
     const anthropic = new Anthropic({ apiKey });
-    const system = buildSystemPrompt(visionBoard, focusAreas, recentTasks);
+    const baseSystemPrompt = buildSystemPrompt(visionBoard, focusAreas, recentTasks);
+    const system = sip ? `${sip}\n\n---\n\nADDITIONAL CONTEXT:\n${baseSystemPrompt}` : baseSystemPrompt;
 
     const apiMessages = messages.map((m) => ({
       role: m.role as "user" | "assistant",

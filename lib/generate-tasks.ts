@@ -9,7 +9,7 @@ export type TaskGenerationContext = {
   lang: string;
 };
 
-export async function generateDailyTasks(ctx: TaskGenerationContext): Promise<{ task_text: string; goal_name: string; priority: string }[]> {
+export async function generateDailyTasks(ctx: TaskGenerationContext, sipText?: string | null): Promise<{ task_text: string; goal_name: string; priority: string }[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
@@ -71,10 +71,13 @@ CRITICAL: The goal_name must be a SHORT label (1-3 words max) in ${ctx.lang === 
 Respond ONLY with valid JSON array, no other text:
 [{"task_text": "...", "goal_name": "...", "priority": "high|medium|low"}]`;
 
+  const systemPrompt = sipText ? `${sipText}\n\n---\n\nTASK GENERATION INSTRUCTIONS:\n${prompt}` : prompt;
+
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-5-20250929",
     max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
+    system: systemPrompt,
+    messages: [{ role: "user", content: "Generate my daily tasks for today based on the instructions." }],
   });
 
   const text = response.content

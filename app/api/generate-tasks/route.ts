@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { generateDailyTasks } from "@/lib/generate-tasks";
 import type { AnalysisResult } from "@/lib/analyze-types";
+import { getActiveSIP } from "@/lib/sip";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,8 @@ export async function POST(request: Request) {
     if (!userId) {
       return NextResponse.json({ error: "userId required" }, { status: 400 });
     }
+
+    const sip = await getActiveSIP(userId);
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -67,7 +70,7 @@ export async function POST(request: Request) {
       recentTasks: recentTasks ?? [],
       userName: userName || "friend",
       lang: lang || "en",
-    });
+    }, sip);
 
     // Save to database
     const toInsert = generated.map(t => ({
