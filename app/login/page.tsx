@@ -50,6 +50,7 @@ function LoginContent() {
   }, [router]);
 
   useEffect(() => {
+    if (checking) return;
     const timers = [
       setTimeout(() => setPhase(1), 200),
       setTimeout(() => setPhase(2), 800),
@@ -58,9 +59,10 @@ function LoginContent() {
       setTimeout(() => setPhase(5), 3200),
     ];
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [checking]);
 
   useEffect(() => {
+    if (checking) return;
     const interval = setInterval(() => {
       setShowWord(false);
       setTimeout(() => {
@@ -69,7 +71,7 @@ function LoginContent() {
       }, 400);
     }, 2800);
     return () => clearInterval(interval);
-  }, [lang, words.length]);
+  }, [checking, lang, words.length]);
 
   async function handleGoogleSignIn() {
     const supabase = createClient();

@@ -288,7 +288,10 @@ export default function DashboardPage() {
                   </CollapsibleSection>
                   <CollapsibleSection title="Goals" defaultOpen={false}>
                     <ul className="space-y-2">
-                      {selectedBoard.analysis.goals?.map((g, i) => (
+                      {(selectedBoard.analysis.goals?.length
+                        ? selectedBoard.analysis.goals
+                        : selectedBoard.analysis.goalsWithSteps?.map((g) => g.goal) ?? []
+                      ).map((g, i) => (
                         <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
                           <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
                           <span>{g}</span>
@@ -308,26 +311,33 @@ export default function DashboardPage() {
                       </ul>
                     </CollapsibleSection>
                   )}
-                  {selectedBoard.analysis.actionSteps?.length > 0 && (
-                    <CollapsibleSection title="Your 5 action steps" defaultOpen={false}>
-                      <ol className="space-y-4">
-                        {selectedBoard.analysis.actionSteps.map(({ step, title, description }) => (
-                          <li key={step} className="flex gap-4">
-                            <span
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif font-medium text-sm"
-                              style={{ background: "rgba(212,190,140,0.3)", color: "#D4BE8C" }}
-                            >
-                              {step}
-                            </span>
-                            <div>
-                              <p className="font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</p>
-                              <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>{description}</p>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </CollapsibleSection>
-                  )}
+                  {(() => {
+                    const actionSteps = selectedBoard.analysis.actionSteps?.length
+                      ? selectedBoard.analysis.actionSteps
+                      : (selectedBoard.analysis.goalsWithSteps ?? []).flatMap((g, gi) =>
+                          g.steps.map((s, si) => ({ step: gi * 10 + si + 1, title: g.goal, description: s }))
+                        );
+                    return actionSteps.length > 0 ? (
+                      <CollapsibleSection title="Your action steps" defaultOpen={false}>
+                        <ol className="space-y-4">
+                          {actionSteps.map(({ step, title, description }) => (
+                            <li key={step} className="flex gap-4">
+                              <span
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif font-medium text-sm"
+                                style={{ background: "rgba(212,190,140,0.3)", color: "#D4BE8C" }}
+                              >
+                                {step}
+                              </span>
+                              <div>
+                                <p className="font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</p>
+                                <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>{description}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </CollapsibleSection>
+                    ) : null;
+                  })()}
                 </div>
               )}
             </div>

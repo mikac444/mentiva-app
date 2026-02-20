@@ -220,8 +220,18 @@ export async function POST(request: Request) {
     }
 
     // Ensure backwards compatibility
-    if (!parsed.goalsWithSteps) {
+    if (!parsed.goalsWithSteps && parsed.goals) {
       parsed.goalsWithSteps = parsed.goals.map((g) => ({ goal: g, steps: [] }));
+    }
+    if (!parsed.goalsWithSteps) {
+      parsed.goalsWithSteps = [];
+    }
+    // Populate goals from goalsWithSteps if missing
+    if (!parsed.goals) {
+      parsed.goals = parsed.goalsWithSteps.map((g) => g.goal);
+    }
+    if (!parsed.actionSteps) {
+      parsed.actionSteps = [];
     }
     if (!parsed.summary) {
       parsed.summary = lang === "es"
