@@ -83,6 +83,7 @@ export default function TodayPage() {
   const [hasWeeklyPlan, setHasWeeklyPlan] = useState(false);
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
 
   const firstName =
@@ -326,6 +327,29 @@ export default function TodayPage() {
     setAppState("planner");
   }
 
+  async function regenerateTasks() {
+    if (!user || regenerating) return;
+    setRegenerating(true);
+    try {
+      const supabase = createClient();
+      const today = new Date().toISOString().split("T")[0];
+      await supabase
+        .from("daily_tasks")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("date", today);
+      setTasks([]);
+      setAppState("generating");
+      await fallbackGenerateTasks(user.id);
+      setAppState("tasks");
+    } catch (e) {
+      console.error("Failed to regenerate tasks:", e);
+      setAppState("tasks");
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
   // ─── Toggle task completion ───
   async function toggleTask(taskId: string) {
     const task = tasks.find((t) => t.id === taskId);
@@ -459,8 +483,8 @@ export default function TodayPage() {
               marginTop: "1.5rem",
             }}
           >
-            <div style={{ fontSize: "2rem", marginBottom: "0.8rem" }}>
-              ✨
+            <div style={{ marginBottom: "0.8rem", display: "flex", justifyContent: "center" }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#D4BE8C" }} />
             </div>
             <h3
               style={{
@@ -544,7 +568,7 @@ export default function TodayPage() {
                 animation: "gentlePulse 2s ease-in-out infinite",
               }}
             >
-              <span style={{ fontSize: "1.8rem" }}>✨</span>
+              <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
             </div>
             <h2
               style={{
@@ -861,9 +885,28 @@ export default function TodayPage() {
                       transition: "all 0.3s",
                     }}
                   >
-                    🗓 {t2("Re-plan this week", "Re-planificar semana")}
+                    {t2("Re-plan this week", "Re-planificar semana")}
                   </button>
                 )}
+
+                {/* Regenerate tasks button */}
+                <button
+                  onClick={regenerateTasks}
+                  disabled={regenerating}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    width: "100%", padding: "0.45rem",
+                    background: "none", border: "none",
+                    color: "rgba(255,255,255,0.22)", fontSize: "0.7rem", fontWeight: 500,
+                    cursor: regenerating ? "default" : "pointer",
+                    marginBottom: "0.8rem", transition: "all 0.3s",
+                    opacity: regenerating ? 0.5 : 1,
+                  }}
+                >
+                  {regenerating
+                    ? t2("Regenerating...", "Regenerando...")
+                    : t2("Regenerate tasks", "Regenerar tareas")}
+                </button>
 
                 {/* Plan your week banner (if no plan but has tasks from fallback) */}
                 {!hasWeeklyPlan && total > 0 && (
@@ -884,7 +927,7 @@ export default function TodayPage() {
                       transition: "all 0.3s",
                     }}
                   >
-                    <span style={{ fontSize: "1.2rem" }}>🗓</span>
+                    <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#D4BE8C" }} />
                     <div style={{ textAlign: "left", flex: 1 }}>
                       <div
                         style={{
@@ -969,7 +1012,7 @@ export default function TodayPage() {
                         gap: 6,
                       }}
                     >
-                      ✨ {t2("Bonus", "Bonus")}
+                      <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C" }} /> {t2("Bonus", "Bonus")}
                     </div>
                     {bonusTasks.map((task, i) => (
                       <TaskCard

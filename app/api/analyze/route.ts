@@ -29,14 +29,14 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
       ]
     }
   ],
-  "blindSpots": ["1-3 things notably ABSENT from the vision board — health, relationships, finances, rest, fun, etc. Only mention if genuinely missing."],
-  "connections": ["1-2 ways the goals connect to each other that the user might not have noticed"],
+  "blindSpots": ["1-2 things notably ABSENT from the vision board — health, relationships, finances, rest, fun, etc. Only mention if genuinely missing."],
+  "connections": ["1 way the goals connect to each other that the user might not have noticed"],
   "insight": "A 2-3 sentence insight connecting the goals together. Point out how they relate to each other and suggest which goal to start with and why. Be specific and encouraging."
 }
 
 Rules:
 - Identify 2-4 overarching themes (e.g. "Travel", "Health", "Creativity")
-- Create 3-6 goals, each with 2-3 specific actionable steps in goalsWithSteps
+- Create 2-4 goals, each with 2-3 specific actionable steps in goalsWithSteps
 - Each goal MUST have an "area" field categorizing it into one of: business, health, finance, relationships, learning, creative, routine, other
 - Each goal MUST have an "emotionalWhy" field: a brief sentence about why this goal likely matters to this person based on the overall board context.
 - Note 1-3 patterns (recurring symbols, colors, or ideas)
@@ -44,9 +44,11 @@ Rules:
 - The summary should feel like a real mentor speaking — warm, specific, encouraging
 - The insight should connect dots between goals and suggest a starting point
 - Be concrete and specific, not generic. Reference what you actually see in the image.
-- Detect blind spots: identify 1-3 important life areas that are notably ABSENT from the board
-- Find connections: identify 1-2 ways the goals relate to each other that the user might not see
-- ALL TEXT must be in LANG_PLACEHOLDER language.`;
+- Detect blind spots: identify 1-2 important life areas that are notably ABSENT from the board
+- Find connections: identify 1 way the goals relate to each other that the user might not see
+- ALL TEXT must be in LANG_PLACEHOLDER language.
+- NEVER use emojis in any output. Use plain text only.
+- Be concise. Quality over quantity. Every word should matter.`;
 
 const ENHANCE_PROMPT = `You are Menti, Mentiva's AI mentor. The user uploaded a vision board and you already analyzed it. Now the user has told you about additional goals that were NOT on their board.
 
@@ -209,9 +211,7 @@ export async function POST(request: Request) {
     const parsed = JSON.parse(stripped) as AnalysisResult;
 
     if (
-      !Array.isArray(parsed.themes) ||
-      !Array.isArray(parsed.goals) ||
-      !Array.isArray(parsed.actionSteps)
+      !Array.isArray(parsed.themes)
     ) {
       return NextResponse.json(
         { error: "Invalid analysis structure from model" },
@@ -220,8 +220,18 @@ export async function POST(request: Request) {
     }
 
     // Ensure backwards compatibility
-    if (!parsed.goalsWithSteps) {
+    if (!parsed.goalsWithSteps && parsed.goals) {
       parsed.goalsWithSteps = parsed.goals.map((g) => ({ goal: g, steps: [] }));
+    }
+    if (!parsed.goalsWithSteps) {
+      parsed.goalsWithSteps = [];
+    }
+    // Populate goals from goalsWithSteps if missing
+    if (!parsed.goals) {
+      parsed.goals = parsed.goalsWithSteps.map((g) => g.goal);
+    }
+    if (!parsed.actionSteps) {
+      parsed.actionSteps = [];
     }
     if (!parsed.summary) {
       parsed.summary = lang === "es"

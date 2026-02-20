@@ -8,9 +8,9 @@ export type GoalWithSteps = {
 export type AnalysisResult = {
   summary: string;
   themes: string[];
-  goals: string[];
+  goals?: string[];            // deprecated: use goalsWithSteps instead (kept for old boards)
   patterns: string[];
-  actionSteps: { step: number; title: string; description: string }[];
+  actionSteps?: { step: number; title: string; description: string }[];  // deprecated: use goalsWithSteps instead (kept for old boards)
   goalsWithSteps: GoalWithSteps[];
   insight: string;
   blindSpots?: string[];     // what's missing from their vision

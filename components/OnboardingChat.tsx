@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/language";
 
 type OnboardingChatProps = {
   firstName: string;
@@ -20,8 +21,10 @@ const BG = "radial-gradient(ellipse 70% 50% at 75% 15%, rgba(255,255,255,0.18) 0
 
 export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingChatProps) {
   const router = useRouter();
-  const [phase, setPhase] = useState<"welcome" | "chat" | "summary">("welcome");
+  const { lang } = useLanguage();
+  const [phase, setPhase] = useState<"welcome" | "depth-choice" | "chat" | "summary">("welcome");
   const [numberRevealed, setNumberRevealed] = useState(false);
+  const [depth, setDepth] = useState<"deep" | "quick">("deep");
 
   // Chat state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -67,7 +70,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
       const res = await fetch("/api/onboarding/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, collectedData, userName: firstName }),
+        body: JSON.stringify({ messages: next, collectedData, userName: firstName, depth, lang }),
       });
       const data = await res.json();
       const assistantMsg: ChatMessage = { role: "assistant", content: data.message };
@@ -86,6 +89,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             userName: firstName,
             collectedData: data.collectedData || collectedData,
             messages: [...next, assistantMsg],
+            lang,
           }),
         });
         const completeData = await completeRes.json();
@@ -101,16 +105,17 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
     } finally {
       setLoading(false);
     }
-  }, [messages, collectedData, firstName, userId]);
+  }, [messages, collectedData, firstName, userId, depth, lang]);
 
-  function startChat() {
+  function startChat(chosenDepth: "deep" | "quick") {
+    setDepth(chosenDepth);
     setPhase("chat");
     // Send initial message to get conversation started
     setLoading(true);
     fetch("/api/onboarding/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: [], collectedData: {}, userName: firstName }),
+      body: JSON.stringify({ messages: [], collectedData: {}, userName: firstName, depth: chosenDepth, lang }),
     })
       .then((r) => r.json())
       .then((data) => {
@@ -158,7 +163,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "1.15rem", color: "rgba(255,255,255,0.45)", marginTop: "2rem", maxWidth: 320 }}>
             Let&apos;s turn your dreams into a plan.
           </p>
-          <button onClick={startChat} style={{
+          <button onClick={() => setPhase("depth-choice")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
             fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
@@ -168,6 +173,58 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
           }}>
             Let&apos;s get to know each other <span>&rarr;</span>
           </button>
+        </div>
+        <Animations />
+      </div>
+    );
+  }
+
+  // --- PHASE 1.5: Depth Choice ---
+  if (phase === "depth-choice") {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: BG, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Orbs />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem", textAlign: "center", position: "relative", zIndex: 1 }}>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+            fontSize: "clamp(1.6rem, 5vw, 2.2rem)", lineHeight: 1.25,
+            color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+            marginBottom: "2.5rem", maxWidth: 380,
+          }}>
+            How would you like us to get to know each other?
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 340 }}>
+            <button onClick={() => startChat("deep")} style={{
+              padding: "1.4rem 1.6rem",
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              borderRadius: 20, backdropFilter: "blur(12px)",
+              cursor: "pointer", textAlign: "left",
+              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.05rem", color: "rgba(255,255,255,0.95)", marginBottom: 6 }}>
+                Let&apos;s take our time
+              </div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
+                ~15-20 min &mdash; I&apos;ll really get to know you
+              </div>
+            </button>
+            <button onClick={() => startChat("quick")} style={{
+              padding: "1.4rem 1.6rem",
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              borderRadius: 20, backdropFilter: "blur(12px)",
+              cursor: "pointer", textAlign: "left",
+              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.05rem", color: "rgba(255,255,255,0.95)", marginBottom: 6 }}>
+                Quick intro
+              </div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
+                ~5 min &mdash; we can always go deeper later
+              </div>
+            </button>
+          </div>
         </div>
         <Animations />
       </div>
