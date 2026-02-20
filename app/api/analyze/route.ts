@@ -29,6 +29,8 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
       ]
     }
   ],
+  "blindSpots": ["1-3 things notably ABSENT from the vision board — health, relationships, finances, rest, fun, etc. Only mention if genuinely missing."],
+  "connections": ["1-2 ways the goals connect to each other that the user might not have noticed"],
   "insight": "A 2-3 sentence insight connecting the goals together. Point out how they relate to each other and suggest which goal to start with and why. Be specific and encouraging."
 }
 
@@ -36,11 +38,14 @@ Rules:
 - Identify 2-4 overarching themes (e.g. "Travel", "Health", "Creativity")
 - Create 3-6 goals, each with 2-3 specific actionable steps in goalsWithSteps
 - Each goal MUST have an "area" field categorizing it into one of: business, health, finance, relationships, learning, creative, routine, other
+- Each goal MUST have an "emotionalWhy" field: a brief sentence about why this goal likely matters to this person based on the overall board context.
 - Note 1-3 patterns (recurring symbols, colors, or ideas)
 - Also keep the flat actionSteps array with exactly 5 steps for backwards compatibility
 - The summary should feel like a real mentor speaking — warm, specific, encouraging
 - The insight should connect dots between goals and suggest a starting point
 - Be concrete and specific, not generic. Reference what you actually see in the image.
+- Detect blind spots: identify 1-3 important life areas that are notably ABSENT from the board
+- Find connections: identify 1-2 ways the goals relate to each other that the user might not see
 - ALL TEXT must be in LANG_PLACEHOLDER language.`;
 
 const ENHANCE_PROMPT = `You are Menti, Mentiva's AI mentor. The user uploaded a vision board and you already analyzed it. Now the user has told you about additional goals that were NOT on their board.
