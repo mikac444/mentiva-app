@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const [selectedBoard, setSelectedBoard] = useState<VisionBoardRow | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
   const [userName, setUserName] = useState("");
   const [memberNumber, setMemberNumber] = useState<number | null>(null);
   const [userId, setUserId] = useState("");
@@ -46,6 +46,7 @@ export default function DashboardPage() {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) {
+        setShowOnboarding(false);
         setLoading(false);
         return;
       }
@@ -72,6 +73,8 @@ export default function DashboardPage() {
           }
         } catch (e) {}
         setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
       }
       setLoading(false);
     })();
@@ -131,6 +134,36 @@ export default function DashboardPage() {
 
   if (showOnboarding) {
     return <OnboardingChat firstName={userName} userId={userId} memberNumber={memberNumber} />;
+  }
+
+  // Gate: don't render dashboard until we know onboarding status
+  if (showOnboarding === null) {
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+            fontSize: "2rem", color: "rgba(255,255,255,0.9)", letterSpacing: "-0.02em",
+          }}>
+            mentiva
+          </div>
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "center", gap: 6 }}>
+            {[0, 1, 2].map((d) => (
+              <span key={d} style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "rgba(255,255,255,0.4)",
+                animation: `pulse 1.2s ease-in-out ${d * 0.15}s infinite`,
+              }} />
+            ))}
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(1); } 40% { opacity: 1; transform: scale(1.3); } }`}</style>
+      </div>
+    );
   }
 
   return (
