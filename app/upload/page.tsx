@@ -666,7 +666,7 @@ export default function UploadPage() {
     const currentQuestion = questions[discoveryStep];
     const isLast = discoveryStep === totalQuestions - 1;
 
-    function handleDiscoveryNext() {
+    const handleDiscoveryNext = () => {
       const answer = currentDiscoveryAnswer.trim();
       if (!answer) return;
       const newAnswers = [...discoveryAnswers, answer];
@@ -901,7 +901,7 @@ export default function UploadPage() {
     const currentQuestion = questions[crystallizeStep];
     const isLast = crystallizeStep === totalQuestions - 1;
 
-    function handleCrystallizeNext() {
+    const handleCrystallizeNext = () => {
       const answer = currentCrystallizeAnswer.trim();
       if (!answer) return;
       const newAnswers = [...crystallizeAnswers, answer];
