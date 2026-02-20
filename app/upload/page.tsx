@@ -196,15 +196,42 @@ function EnhancingScreen({ t }: { t: (en: string, es: string) => string }) {
   );
 }
 
+/* ===== DISCOVERY QUESTIONS ===== */
+const DISCOVERY_QUESTIONS = {
+  en: [
+    "If you could wake up tomorrow with any life, what would a perfect Tuesday morning look like?",
+    "What's something you've always wanted to try but haven't started yet?",
+    "When you feel most alive and excited, what are you usually doing?",
+    "If time and money weren't barriers, what would you spend the next year building or learning?",
+  ],
+  es: [
+    "Si pudieras despertar manana con cualquier vida, ¿cómo sería un martes perfecto por la manana?",
+    "¿Qué es algo que siempre has querido intentar pero aún no has comenzado?",
+    "Cuando te sientes más vivo/a y emocionado/a, ¿qué estás haciendo normalmente?",
+    "Si el tiempo y el dinero no fueran barreras, ¿qué pasarías el próximo año construyendo o aprendiendo?",
+  ],
+};
+
+const CRYSTALLIZE_QUESTIONS = {
+  en: [
+    "You have a sense of your direction. What feels most unclear or unfinished right now?",
+    "What's the one area of your vision that, if it clicked, would unlock everything else?",
+  ],
+  es: [
+    "Tienes una idea de tu dirección. ¿Qué se siente más confuso o incompleto ahora mismo?",
+    "¿Cuál es el área de tu visión que, si encajara, desbloquearía todo lo demás?",
+  ],
+};
+
 /* ===== MAIN PAGE ===== */
-type PageState = "upload" | "analyzing" | "clarify" | "enhancing" | "results";
+type PageState = "intro" | "discovery" | "discovery-summary" | "crystallize" | "upload" | "analyzing" | "clarify" | "enhancing" | "results";
 
 export default function UploadPage() {
   const { t } = useLanguage();
-  const lang = t("en", "es");
+  const lang = t("en", "es") as "en" | "es";
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [pageState, setPageState] = useState<PageState>("upload");
+  const [pageState, setPageState] = useState<PageState>("intro");
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [savedBase64, setSavedBase64] = useState<string | null>(null);
@@ -216,6 +243,68 @@ export default function UploadPage() {
   const [skippedClarify, setSkippedClarify] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // Journey stage: determines which intro path to show
+  const [journeyStage, setJourneyStage] = useState<"exploring" | "crystallizing" | "executing">("executing");
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Discovery flow state (exploring path)
+  const [discoveryStep, setDiscoveryStep] = useState(0);
+  const [discoveryAnswers, setDiscoveryAnswers] = useState<string[]>([]);
+  const [currentDiscoveryAnswer, setCurrentDiscoveryAnswer] = useState("");
+  const [discoveryThemes, setDiscoveryThemes] = useState<string[]>([]);
+
+  // Crystallize flow state (crystallizing path)
+  const [crystallizeStep, setCrystallizeStep] = useState(0);
+  const [crystallizeAnswers, setCrystallizeAnswers] = useState<string[]>([]);
+  const [currentCrystallizeAnswer, setCurrentCrystallizeAnswer] = useState("");
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          const res = await fetch(`/api/profile?userId=${session.user.id}`);
+          const data = await res.json();
+          if (data.profile?.journey_stage) {
+            setJourneyStage(data.profile.journey_stage);
+          }
+        }
+      } catch (e) {
+        // Silently fail — default to "executing"
+      }
+      setProfileLoaded(true);
+    }
+    fetchProfile();
+  }, []);
+
+  // Extract themes from discovery answers
+  function extractThemes(answers: string[]): string[] {
+    const keywords = new Set<string>();
+    const themePatterns: Record<string, string[]> = {
+      "Career & Business": ["business", "career", "work", "job", "company", "startup", "clients", "professional", "negocio", "carrera", "trabajo"],
+      "Health & Wellness": ["health", "exercise", "fitness", "yoga", "meditation", "workout", "run", "gym", "salud", "ejercicio", "bienestar"],
+      "Creativity": ["art", "music", "write", "create", "paint", "design", "photograph", "creative", "arte", "música", "crear", "diseño"],
+      "Travel & Adventure": ["travel", "explore", "adventure", "country", "city", "trip", "world", "viajar", "explorar", "aventura"],
+      "Learning & Growth": ["learn", "study", "read", "skill", "course", "education", "grow", "aprender", "estudiar", "crecer"],
+      "Relationships & Family": ["family", "friend", "love", "relationship", "community", "children", "partner", "familia", "amigo", "relación"],
+      "Financial Freedom": ["money", "save", "invest", "financial", "income", "wealth", "retire", "dinero", "ahorrar", "financiero"],
+      "Peace & Balance": ["peace", "calm", "balance", "nature", "morning", "routine", "mindful", "paz", "calma", "equilibrio"],
+    };
+    const combined = answers.join(" ").toLowerCase();
+    for (const [theme, words] of Object.entries(themePatterns)) {
+      if (words.some((w) => combined.includes(w))) {
+        keywords.add(theme);
+      }
+    }
+    if (keywords.size === 0) {
+      keywords.add("Personal Growth");
+      keywords.add("New Beginnings");
+    }
+    return Array.from(keywords).slice(0, 5);
+  }
 
   const goalsWithSteps: GoalWithArea[] = analysis?.goalsWithSteps && analysis.goalsWithSteps.length > 0
     ? analysis.goalsWithSteps
@@ -353,8 +442,577 @@ export default function UploadPage() {
     setSavedBase64(null); setBoardTitle(""); setSaveSuccess(false);
     setError(null); setRevealedGoals([]);
     setAdditionalGoals(""); setSkippedClarify(false);
-    setPageState("upload");
+    setDiscoveryStep(0); setDiscoveryAnswers([]);
+    setCurrentDiscoveryAnswer(""); setDiscoveryThemes([]);
+    setCrystallizeStep(0); setCrystallizeAnswers([]);
+    setCurrentCrystallizeAnswer("");
+    setPageState("intro");
     if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function goToUpload() {
+    setPageState("upload");
+  }
+
+  /* ===== INTRO STATE — route based on journey stage ===== */
+  if (pageState === "intro") {
+    // While profile is loading, show a minimal loading state
+    if (!profileLoaded) {
+      return (
+        <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+          <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+            <TopNav />
+          </header>
+          <main className="flex-1 flex items-center justify-center">
+            <div style={{
+              width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C",
+              animation: "pulse 2s ease-in-out infinite",
+            }} />
+          </main>
+          <style>{`@keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }`}</style>
+        </div>
+      );
+    }
+
+    // Path A: Executing — brief intro then straight to upload
+    if (journeyStage === "executing") {
+      return (
+        <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+          <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+            <TopNav />
+          </header>
+          <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-md" style={{ animation: "riseIn 0.8s ease both" }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", margin: "0 auto 1.5rem",
+                background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
+              }}>
+                {String.fromCodePoint(0x2728)}
+              </div>
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
+                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                marginBottom: "0.6rem",
+              }}>
+                {t("Show me your vision", "Muéstrame tu visión")}
+              </h1>
+              <p style={{
+                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                marginBottom: "2rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
+              }}>
+                {t("Upload your board and Menti will turn it into a real plan.", "Sube tu board y Menti lo convertirá en un plan real.")}
+              </p>
+              <button
+                onClick={goToUpload}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.95rem",
+                  border: "none", borderRadius: 60, cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              >
+                {t("Upload my board", "Subir mi board")} <span>{String.fromCharCode(8594)}</span>
+              </button>
+            </div>
+          </main>
+          <style>{`@keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        </div>
+      );
+    }
+
+    // Path B: Exploring — discovery prompt
+    if (journeyStage === "exploring") {
+      return (
+        <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+          <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+            <TopNav />
+          </header>
+          <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-md" style={{ animation: "riseIn 0.8s ease both" }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", margin: "0 auto 1.5rem",
+                background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
+              }}>
+                {String.fromCodePoint(0x1F331)}
+              </div>
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
+                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                marginBottom: "0.6rem",
+              }}>
+                {t("Let's discover your vision together", "Descubramos tu visión juntos")}
+              </h1>
+              <p style={{
+                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                marginBottom: "2.5rem", maxWidth: 360, marginLeft: "auto", marginRight: "auto",
+              }}>
+                {t(
+                  "I'm going to ask you some questions, and we'll start to see what lights you up.",
+                  "Voy a hacerte algunas preguntas, y empezaremos a ver qué es lo que te inspira."
+                )}
+              </p>
+              <button
+                onClick={() => { setDiscoveryStep(0); setDiscoveryAnswers([]); setCurrentDiscoveryAnswer(""); setPageState("discovery"); }}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.95rem",
+                  border: "none", borderRadius: 60, cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              >
+                {t("Let's discover", "Descubramos")} <span>{String.fromCharCode(8594)}</span>
+              </button>
+              <div style={{ marginTop: "1.2rem" }}>
+                <button
+                  onClick={goToUpload}
+                  style={{
+                    background: "none", border: "none", fontSize: "0.85rem",
+                    color: "rgba(255,255,255,0.35)", cursor: "pointer",
+                    textDecoration: "underline", textUnderlineOffset: 3,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {t("I already have a board", "Ya tengo un board")} {String.fromCharCode(8594)}
+                </button>
+              </div>
+            </div>
+          </main>
+          <style>{`@keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        </div>
+      );
+    }
+
+    // Path C: Crystallizing — sharpen prompt
+    if (journeyStage === "crystallizing") {
+      return (
+        <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+          <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+            <TopNav />
+          </header>
+          <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-md" style={{ animation: "riseIn 0.8s ease both" }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", margin: "0 auto 1.5rem",
+                background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem",
+              }}>
+                {String.fromCodePoint(0x1F52E)}
+              </div>
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
+                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                marginBottom: "0.6rem",
+              }}>
+                {t("Let's sharpen your vision", "Afinemos tu visión")}
+              </h1>
+              <p style={{
+                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                marginBottom: "2.5rem", maxWidth: 360, marginLeft: "auto", marginRight: "auto",
+              }}>
+                {t(
+                  "You've got a sense of where you're headed. Let's bring it into focus.",
+                  "Tienes una idea de hacia dónde vas. Vamos a darle enfoque."
+                )}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", alignItems: "center" }}>
+                <button
+                  onClick={goToUpload}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.95rem",
+                    border: "none", borderRadius: 60, cursor: "pointer",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                >
+                  {t("Upload my vision board", "Subir mi vision board")} <span>{String.fromCharCode(8594)}</span>
+                </button>
+                <button
+                  onClick={() => { setCrystallizeStep(0); setCrystallizeAnswers([]); setCurrentCrystallizeAnswer(""); setPageState("crystallize"); }}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "0.9rem 2rem",
+                    background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)",
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: "0.9rem",
+                    border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
+                    cursor: "pointer", transition: "all 0.3s",
+                  }}
+                >
+                  {t("Help me clarify first", "Ayúdame a aclarar primero")} <span>{String.fromCharCode(8594)}</span>
+                </button>
+              </div>
+            </div>
+          </main>
+          <style>{`@keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        </div>
+      );
+    }
+  }
+
+  /* ===== DISCOVERY STATE (exploring path Q&A) ===== */
+  if (pageState === "discovery") {
+    const questions = DISCOVERY_QUESTIONS[lang] || DISCOVERY_QUESTIONS.en;
+    const totalQuestions = questions.length;
+    const currentQuestion = questions[discoveryStep];
+    const isLast = discoveryStep === totalQuestions - 1;
+
+    function handleDiscoveryNext() {
+      const answer = currentDiscoveryAnswer.trim();
+      if (!answer) return;
+      const newAnswers = [...discoveryAnswers, answer];
+      setDiscoveryAnswers(newAnswers);
+      setCurrentDiscoveryAnswer("");
+
+      if (isLast) {
+        // Done — compute themes and show summary
+        const themes = extractThemes(newAnswers);
+        setDiscoveryThemes(themes);
+        setPageState("discovery-summary");
+      } else {
+        setDiscoveryStep(discoveryStep + 1);
+      }
+    }
+
+    return (
+      <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+          <TopNav />
+        </header>
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto w-full flex flex-col justify-center">
+          <div style={{ animation: "riseIn 0.6s ease both" }}>
+            {/* Progress */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              marginBottom: "1.5rem", backdropFilter: "blur(8px)",
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C", animation: "pulse 2s ease-in-out infinite" }} />
+              {t(`Question ${discoveryStep + 1} of ${totalQuestions}`, `Pregunta ${discoveryStep + 1} de ${totalQuestions}`)}
+            </div>
+
+            {/* Menti Q card */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(212,190,140,0.1) 0%, rgba(212,190,140,0.03) 100%)",
+              border: "1px solid rgba(212,190,140,0.2)", borderRadius: 18,
+              padding: "1.5rem", marginBottom: "1.2rem",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.8rem" }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem",
+                }}>
+                  {String.fromCodePoint(0x1F331)}
+                </div>
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
+                  MENTI
+                </span>
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
+                fontSize: "1.15rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.5,
+              }}>
+                {currentQuestion}
+              </p>
+            </div>
+
+            {/* Answer input */}
+            <textarea
+              value={currentDiscoveryAnswer}
+              onChange={(e) => setCurrentDiscoveryAnswer(e.target.value)}
+              placeholder={t("Take your time... there are no wrong answers.", "Tómate tu tiempo... no hay respuestas incorrectas.")}
+              rows={4}
+              style={{
+                ...inputStyle,
+                width: "100%", borderRadius: 14, padding: "0.9rem 1rem",
+                fontSize: "0.9rem", lineHeight: 1.6, resize: "vertical",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            />
+
+            {/* Continue button */}
+            <button
+              onClick={handleDiscoveryNext}
+              disabled={!currentDiscoveryAnswer.trim()}
+              style={{
+                width: "100%", marginTop: "1rem", padding: "0.95rem 1.5rem",
+                background: currentDiscoveryAnswer.trim() ? "white" : "rgba(255,255,255,0.1)",
+                color: currentDiscoveryAnswer.trim() ? "#4A5C3F" : "rgba(255,255,255,0.3)",
+                fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
+                border: "none", borderRadius: 60, cursor: currentDiscoveryAnswer.trim() ? "pointer" : "default",
+                transition: "all 0.3s",
+              }}
+            >
+              {isLast ? t("See my themes", "Ver mis temas") : t("Continue", "Continuar")} <span>{String.fromCharCode(8594)}</span>
+            </button>
+
+            {/* Skip to upload */}
+            <button
+              onClick={goToUpload}
+              style={{
+                width: "100%", marginTop: "0.8rem", padding: "0.6rem",
+                background: "none", border: "none",
+                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {t("Skip — I'll just upload a board", "Omitir — solo subiré un board")}
+            </button>
+          </div>
+        </main>
+        <style>{`
+          @keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+        `}</style>
+      </div>
+    );
+  }
+
+  /* ===== DISCOVERY SUMMARY STATE ===== */
+  if (pageState === "discovery-summary") {
+    return (
+      <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+          <TopNav />
+        </header>
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto w-full">
+          <div style={{ animation: "riseIn 0.8s ease both" }}>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+              fontSize: "clamp(1.6rem, 5vw, 2.2rem)", lineHeight: 1.2,
+              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              marginBottom: "0.5rem", textAlign: "center",
+            }}>
+              {t("Here's what lights you up", "Esto es lo que te inspira")}
+            </h1>
+            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.4)", textAlign: "center", marginBottom: "2rem" }}>
+              {t("Themes Menti found in your answers", "Temas que Menti encontró en tus respuestas")}
+            </p>
+
+            {/* Theme tags */}
+            <div style={{
+              display: "flex", flexWrap: "wrap", gap: "0.5rem",
+              justifyContent: "center", marginBottom: "2rem",
+            }}>
+              {discoveryThemes.map((theme, i) => (
+                <span key={i} style={{
+                  padding: "8px 18px", borderRadius: 24,
+                  background: "rgba(212,190,140,0.12)", border: "1px solid rgba(212,190,140,0.25)",
+                  fontSize: "0.88rem", color: "#D4BE8C", fontWeight: 500,
+                  animation: `riseIn 0.5s ease ${0.1 + i * 0.1}s both`,
+                }}>
+                  {theme}
+                </span>
+              ))}
+            </div>
+
+            {/* Answers recap */}
+            <div style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 18, padding: "1.3rem", marginBottom: "2rem",
+              backdropFilter: "blur(8px)",
+            }}>
+              <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C", marginBottom: "0.8rem" }}>
+                {t("Your reflections", "Tus reflexiones")}
+              </div>
+              {discoveryAnswers.map((answer, i) => (
+                <div key={i} style={{
+                  fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5,
+                  paddingLeft: "0.8rem", borderLeft: "2px solid rgba(212,190,140,0.2)",
+                  marginBottom: i < discoveryAnswers.length - 1 ? "0.8rem" : 0,
+                }}>
+                  {answer}
+                </div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div style={{
+              width: "100%", height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(212,190,140,0.3), transparent)",
+              marginBottom: "2rem",
+            }} />
+
+            {/* Next steps */}
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300,
+              fontSize: "1.05rem", color: "rgba(255,255,255,0.5)", textAlign: "center",
+              marginBottom: "1.5rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
+            }}>
+              {t(
+                "Now let's turn these themes into a real plan. Upload a vision board, or continue with what you've shared.",
+                "Ahora convirtamos estos temas en un plan real. Sube un vision board, o continúa con lo que compartiste."
+              )}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8rem" }}>
+              <button
+                onClick={goToUpload}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.95rem",
+                  border: "none", borderRadius: 60, cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              >
+                {t("Upload a vision board", "Subir un vision board")} <span>{String.fromCharCode(8594)}</span>
+              </button>
+              <button
+                onClick={() => router.push("/chat")}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  padding: "0.9rem 2rem",
+                  background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: "0.9rem",
+                  border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
+                  cursor: "pointer", transition: "all 0.3s",
+                }}
+              >
+                {t("Continue with text", "Continuar con texto")} <span>{String.fromCharCode(8594)}</span>
+              </button>
+            </div>
+          </div>
+        </main>
+        <style>{`@keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      </div>
+    );
+  }
+
+  /* ===== CRYSTALLIZE STATE (crystallizing path Q&A) ===== */
+  if (pageState === "crystallize") {
+    const questions = CRYSTALLIZE_QUESTIONS[lang] || CRYSTALLIZE_QUESTIONS.en;
+    const totalQuestions = questions.length;
+    const currentQuestion = questions[crystallizeStep];
+    const isLast = crystallizeStep === totalQuestions - 1;
+
+    function handleCrystallizeNext() {
+      const answer = currentCrystallizeAnswer.trim();
+      if (!answer) return;
+      const newAnswers = [...crystallizeAnswers, answer];
+      setCrystallizeAnswers(newAnswers);
+      setCurrentCrystallizeAnswer("");
+
+      if (isLast) {
+        // Done — go to upload with context
+        goToUpload();
+      } else {
+        setCrystallizeStep(crystallizeStep + 1);
+      }
+    }
+
+    return (
+      <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+          <TopNav />
+        </header>
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-2xl mx-auto w-full flex flex-col justify-center">
+          <div style={{ animation: "riseIn 0.6s ease both" }}>
+            {/* Progress */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              marginBottom: "1.5rem", backdropFilter: "blur(8px)",
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C", animation: "pulse 2s ease-in-out infinite" }} />
+              {t(`Quick question ${crystallizeStep + 1} of ${totalQuestions}`, `Pregunta rápida ${crystallizeStep + 1} de ${totalQuestions}`)}
+            </div>
+
+            {/* Menti Q card */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(212,190,140,0.1) 0%, rgba(212,190,140,0.03) 100%)",
+              border: "1px solid rgba(212,190,140,0.2)", borderRadius: 18,
+              padding: "1.5rem", marginBottom: "1.2rem",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.8rem" }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem",
+                }}>
+                  {String.fromCodePoint(0x1F52E)}
+                </div>
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#D4BE8C" }}>
+                  MENTI
+                </span>
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
+                fontSize: "1.15rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.5,
+              }}>
+                {currentQuestion}
+              </p>
+            </div>
+
+            {/* Answer input */}
+            <textarea
+              value={currentCrystallizeAnswer}
+              onChange={(e) => setCurrentCrystallizeAnswer(e.target.value)}
+              placeholder={t("Share what comes to mind...", "Comparte lo que se te ocurra...")}
+              rows={3}
+              style={{
+                ...inputStyle,
+                width: "100%", borderRadius: 14, padding: "0.9rem 1rem",
+                fontSize: "0.9rem", lineHeight: 1.6, resize: "vertical",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            />
+
+            {/* Continue button */}
+            <button
+              onClick={handleCrystallizeNext}
+              disabled={!currentCrystallizeAnswer.trim()}
+              style={{
+                width: "100%", marginTop: "1rem", padding: "0.95rem 1.5rem",
+                background: currentCrystallizeAnswer.trim() ? "white" : "rgba(255,255,255,0.1)",
+                color: currentCrystallizeAnswer.trim() ? "#4A5C3F" : "rgba(255,255,255,0.3)",
+                fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
+                border: "none", borderRadius: 60, cursor: currentCrystallizeAnswer.trim() ? "pointer" : "default",
+                transition: "all 0.3s",
+              }}
+            >
+              {isLast ? t("Upload my board", "Subir mi board") : t("Continue", "Continuar")} <span>{String.fromCharCode(8594)}</span>
+            </button>
+
+            {/* Skip */}
+            <button
+              onClick={goToUpload}
+              style={{
+                width: "100%", marginTop: "0.8rem", padding: "0.6rem",
+                background: "none", border: "none",
+                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {t("Skip — go straight to upload", "Omitir — ir directo a subir")}
+            </button>
+          </div>
+        </main>
+        <style>{`
+          @keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+        `}</style>
+      </div>
+    );
   }
 
   /* ===== ANALYZING STATE ===== */
