@@ -48,9 +48,11 @@ OPTIONAL BUT VALUABLE:
 - definition_of_success: What success means to them personally
 - available_hours: Roughly how much free time they have per day
 
-DO NOT collect all of these mechanically. Weave them into natural conversation. Some will emerge without asking directly. It's OK to not get every optional field.`;
+DO NOT collect all of these mechanically. Weave them into natural conversation. Some will emerge without asking directly. It's OK to not get every optional field.
 
-const REQUIRED_FIELDS = [
+{depthRules}`;
+
+const REQUIRED_FIELDS_DEEP = [
   "journey_stage",
   "core_values",
   "motivations",
@@ -61,6 +63,25 @@ const REQUIRED_FIELDS = [
   "accountability_style",
   "goal_relationship",
 ];
+
+const REQUIRED_FIELDS_QUICK = [
+  "journey_stage",
+  "core_values",
+  "motivations",
+  "preferred_tone",
+  "accountability_style",
+];
+
+const DEEP_RULES = `DEPTH MODE: DEEP CONVERSATION
+- This is a deep conversation. Take your time, follow threads that reveal who they are.
+- Ask 8-12 questions total. Go deeper on what matters to them. Extract multiple fields from rich answers.
+- 15-20 min is the target. Don't rush, but don't meander either. Every question should have purpose.`;
+
+const QUICK_RULES = `DEPTH MODE: QUICK INTRO
+- This is a quick intro. Be warm but efficient.
+- Ask 4-6 questions maximum. Collect multiple fields per response when possible.
+- If their answer reveals values AND motivations, capture both without asking again.
+- 5 min is the target. Get enough to start personalizing, then let them explore.`;
 
 function buildConversationHistory(
   messages: { role: string; content: string }[]
@@ -75,9 +96,10 @@ function buildConversationHistory(
 }
 
 function getRemainingFields(
-  collected: Record<string, unknown>
+  collected: Record<string, unknown>,
+  requiredFields: string[]
 ): string[] {
-  return REQUIRED_FIELDS.filter(
+  return requiredFields.filter(
     (f) =>
       !collected[f] ||
       (Array.isArray(collected[f]) &&
@@ -88,7 +110,8 @@ function getRemainingFields(
 function buildFilledPrompt(
   collected: Record<string, unknown>,
   remaining: string[],
-  historyStr: string
+  historyStr: string,
+  depthRules: string
 ): string {
   return META_PROMPT.replace(
     "{collectedData}",
@@ -100,7 +123,8 @@ function buildFilledPrompt(
         ? remaining.join(", ")
         : "ALL REQUIRED FIELDS COLLECTED — you can set readyToComplete to true after a natural closing message."
     )
-    .replace("{conversationHistory}", historyStr);
+    .replace("{conversationHistory}", historyStr)
+    .replace("{depthRules}", depthRules);
 }
 
 function parseAIResponse(
@@ -127,7 +151,7 @@ function parseAIResponse(
 
 export async function POST(request: Request) {
   try {
-    const { messages, collectedData, userName } = await request.json();
+    const { messages, collectedData, userName, depth: rawDepth, lang } = await request.json();
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -137,10 +161,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const depthMode = rawDepth === "quick" ? "quick" : "deep";
+    const requiredFields = depthMode === "quick" ? REQUIRED_FIELDS_QUICK : REQUIRED_FIELDS_DEEP;
+    const langLabel = lang === "es" ? "Spanish" : "English";
+    const langRule = `\nLANGUAGE: Conduct this ENTIRE conversation in ${langLabel}. All messages AND suggestedResponses must be in ${langLabel}.`;
+    const depthRules = (depthMode === "quick" ? QUICK_RULES : DEEP_RULES) + langRule;
+
     const collected = collectedData || {};
-    const remaining = getRemainingFields(collected);
+    const remaining = getRemainingFields(collected, requiredFields);
     const historyStr = buildConversationHistory(messages);
-    const filledPrompt = buildFilledPrompt(collected, remaining, historyStr);
+    const filledPrompt = buildFilledPrompt(collected, remaining, historyStr, depthRules);
 
     const userContent =
       messages && messages.length > 0
