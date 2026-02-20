@@ -23,7 +23,8 @@ RULES:
 8. When you have enough information on all required fields, set "readyToComplete" to true in your response.
 9. NEVER use emojis in your messages. Use plain text only.
 10. Vary your opening phrases. Don't start multiple messages with the same phrase like "Here's what I'm curious about" -- use it once at most, then find other natural ways to transition.
-11. Your response MUST be valid JSON with this structure:
+11. When generating suggestedResponses, NEVER include options like "All of the above", "All three", or any option that references other options by position. Instead, if you want to offer a combined option, name the specific themes (e.g., instead of "All three options above", write "Proving myself, helping people, and freedom -- all of it"). Each suggested response must be self-contained and meaningful on its own.
+12. Your response MUST be valid JSON with this structure:
 {
   "message": "Your conversational message to the user",
   "suggestedResponses": ["Option 1", "Option 2", "Option 3"],
@@ -75,24 +76,49 @@ const REQUIRED_FIELDS_QUICK = [
 const DEEP_RULES = `DEPTH MODE: DEEP CONVERSATION
 - This is a deep conversation. Take your time, follow threads that reveal who they are.
 - Ask 8-12 questions total. Go deeper on what matters to them. Extract multiple fields from rich answers.
-- 15-20 min is the target. Don't rush, but don't meander either. Every question should have purpose.`;
+- 10-15 min is the target. Don't rush, but don't meander either. Every question should have purpose.
+- Extract MULTIPLE fields from each rich answer. If someone describes their life situation, capture life_context, commitments, and energy_pattern together.`;
 
 const QUICK_RULES = `DEPTH MODE: QUICK INTRO
 - This is a quick intro. Be warm but efficient.
 - Ask 4-6 questions maximum. Collect multiple fields per response when possible.
 - If their answer reveals values AND motivations, capture both without asking again.
-- 5 min is the target. Get enough to start personalizing, then let them explore.`;
+- 3-5 min is the target. Get enough to start personalizing, then let them explore.`;
 
 function buildConversationHistory(
-  messages: { role: string; content: string }[]
+  messages: { role: string; content: string }[],
+  windowSize: number = 10
 ): string {
   if (!messages || messages.length === 0) {
     return "(This is the first message. Open warmly.)";
   }
 
-  return messages
+  // If conversation fits in window, send everything
+  if (messages.length <= windowSize) {
+    return messages
+      .map((m) => `${m.role === "user" ? "User" : "Menti"}: ${m.content}`)
+      .join("\n");
+  }
+
+  // Sliding window: truncate older messages, keep recent ones in full
+  const older = messages.slice(0, messages.length - windowSize);
+  const recent = messages.slice(messages.length - windowSize);
+
+  const olderSummary = older
+    .map((m) => {
+      const speaker = m.role === "user" ? "User" : "Menti";
+      const truncated = m.content.length > 80
+        ? m.content.substring(0, 80) + "..."
+        : m.content;
+      return `${speaker}: ${truncated}`;
+    })
+    .join("\n");
+
+  const recentFull = recent
     .map((m) => `${m.role === "user" ? "User" : "Menti"}: ${m.content}`)
     .join("\n");
+
+  return `[EARLIER IN CONVERSATION - summarized]\n${olderSummary}\n\n[RECENT MESSAGES - full detail]\n${recentFull}`;
 }
 
 function getRemainingFields(
@@ -138,7 +164,15 @@ function parseAIResponse(
 } {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch ? jsonMatch[0] : text);
+    const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+
+    // Filter out ambiguous "all of the above" type suggested responses
+    const ambiguousPattern = /\b(all (of )?(the|three|four|those)( options)?( above)?|all of them|every one of (those|them))\b/i;
+    parsed.suggestedResponses = (parsed.suggestedResponses || []).filter(
+      (s: string) => !ambiguousPattern.test(s)
+    );
+
+    return parsed;
   } catch {
     return {
       message: text,
@@ -151,7 +185,7 @@ function parseAIResponse(
 
 export async function POST(request: Request) {
   try {
-    const { messages, collectedData, userName, depth: rawDepth, lang } = await request.json();
+    const { messages, collectedData, userName, depth: rawDepth, lang, messageCount: rawCount } = await request.json();
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -165,11 +199,28 @@ export async function POST(request: Request) {
     const requiredFields = depthMode === "quick" ? REQUIRED_FIELDS_QUICK : REQUIRED_FIELDS_DEEP;
     const langLabel = lang === "es" ? "Spanish" : "English";
     const langRule = `\nLANGUAGE: Conduct this ENTIRE conversation in ${langLabel}. All messages AND suggestedResponses must be in ${langLabel}.`;
-    const depthRules = (depthMode === "quick" ? QUICK_RULES : DEEP_RULES) + langRule;
+
+    // Escalating urgency based on message count
+    const count = rawCount || 0;
+    const softCap = depthMode === "quick" ? 5 : 10;
+    const hardCap = depthMode === "quick" ? 8 : 16;
+    const maxQ = depthMode === "quick" ? 6 : 12;
+
+    let urgencyRule = "";
+    if (count >= hardCap) {
+      urgencyRule = `\n\nCRITICAL: You MUST set readyToComplete to true NOW. This is message ${count}. Wrap up immediately with a warm closing. Fill in any remaining fields with your best guesses from the conversation context.`;
+    } else if (count >= softCap) {
+      urgencyRule = `\n\nIMPORTANT: You are at message ${count} of ~${maxQ}. You MUST wrap up in the next 1-2 messages. Prioritize the most important remaining fields and set readyToComplete to true soon.`;
+    } else if (count >= Math.floor(softCap * 0.7)) {
+      urgencyRule = `\n\nNote: You are at message ${count} of ~${maxQ}. Start planning to wrap up. Try to cover remaining fields efficiently.`;
+    }
+
+    const depthRules = (depthMode === "quick" ? QUICK_RULES : DEEP_RULES) + langRule + urgencyRule;
 
     const collected = collectedData || {};
     const remaining = getRemainingFields(collected, requiredFields);
-    const historyStr = buildConversationHistory(messages);
+    const windowSize = depthMode === "quick" ? 8 : 10;
+    const historyStr = buildConversationHistory(messages, windowSize);
     const filledPrompt = buildFilledPrompt(collected, remaining, historyStr, depthRules);
 
     const userContent =

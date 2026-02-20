@@ -19,6 +19,35 @@ type SummaryCard = {
 
 const BG = "radial-gradient(ellipse 70% 50% at 75% 15%, rgba(255,255,255,0.18) 0%, transparent 55%), radial-gradient(ellipse 80% 50% at 50% 0%, rgba(185,205,170,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 20% 80%, rgba(139,158,124,0.1) 0%, transparent 50%), linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%)";
 
+const HARD_CAP = { deep: 16, quick: 8 };
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 2
+): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+      // Don't retry 4xx client errors
+      if (res.status >= 400 && res.status < 500) {
+        throw new Error(`Client error: ${res.status}`);
+      }
+      // For 5xx, retry if we have attempts left
+      if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        continue;
+      }
+      throw new Error(`Server error: ${res.status}`);
+    } catch (err) {
+      if (attempt >= maxRetries) throw err;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingChatProps) {
   const router = useRouter();
   const { lang } = useLanguage();
@@ -34,6 +63,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Summary state
   const [summary, setSummary] = useState<SummaryCard | null>(null);
@@ -66,41 +96,59 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
     setInputValue("");
     setLoading(true);
 
+    const userMessageCount = next.filter(m => m.role === "user").length;
+
     try {
-      const res = await fetch("/api/onboarding/chat", {
+      const res = await fetchWithRetry("/api/onboarding/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, collectedData, userName: firstName, depth, lang }),
+        body: JSON.stringify({ messages: next, collectedData, userName: firstName, depth, lang, messageCount: userMessageCount }),
       });
+
       const data = await res.json();
+
+      if (!data.message) {
+        throw new Error("Empty response");
+      }
+
       const assistantMsg: ChatMessage = { role: "assistant", content: data.message };
       setMessages((prev) => [...prev, assistantMsg]);
       setCollectedData(data.collectedData || collectedData);
       setSuggestedResponses(data.suggestedResponses || []);
 
-      if (data.readyToComplete) {
+      // Hard cap: force completion if too many messages
+      const shouldComplete = data.readyToComplete || userMessageCount >= HARD_CAP[depth];
+
+      if (shouldComplete) {
         // Complete onboarding
         setLoading(true);
-        const completeRes = await fetch("/api/onboarding/complete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            userName: firstName,
-            collectedData: data.collectedData || collectedData,
-            messages: [...next, assistantMsg],
-            lang,
-          }),
-        });
-        const completeData = await completeRes.json();
-        setSummary(completeData.summaryCard);
-        setPhase("summary");
-        setTimeout(() => setSummaryVisible(true), 100);
+        try {
+          const completeRes = await fetchWithRetry("/api/onboarding/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId,
+              userName: firstName,
+              collectedData: data.collectedData || collectedData,
+              messages: [...next, assistantMsg],
+              lang,
+            }),
+          });
+          const completeData = await completeRes.json();
+          if (completeData.summaryCard) {
+            setSummary(completeData.summaryCard);
+            setPhase("summary");
+            setTimeout(() => setSummaryVisible(true), 100);
+          }
+        } catch {
+          // If completion fails, just continue the chat — don't crash
+          console.error("Completion failed, continuing chat");
+        }
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, something went wrong. Let me try that again..." },
+        { role: "assistant", content: "I lost my train of thought \u2014 could you repeat that last bit?" },
       ]);
     } finally {
       setLoading(false);
@@ -112,13 +160,14 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
     setPhase("chat");
     // Send initial message to get conversation started
     setLoading(true);
-    fetch("/api/onboarding/chat", {
+    fetchWithRetry("/api/onboarding/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: [], collectedData: {}, userName: firstName, depth: chosenDepth, lang }),
+      body: JSON.stringify({ messages: [], collectedData: {}, userName: firstName, depth: chosenDepth, lang, messageCount: 0 }),
     })
       .then((r) => r.json())
       .then((data) => {
+        if (!data.message) throw new Error("Empty response");
         setMessages([{ role: "assistant", content: data.message }]);
         setSuggestedResponses(data.suggestedResponses || []);
         setCollectedData(data.collectedData || {});
@@ -206,7 +255,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
                 Let&apos;s take our time
               </div>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
-                ~15-20 min &mdash; I&apos;ll really get to know you
+                ~10-15 min &mdash; I&apos;ll really get to know you
               </div>
             </button>
             <button onClick={() => startChat("quick")} style={{
@@ -221,7 +270,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
                 Quick intro
               </div>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
-                ~5 min &mdash; we can always go deeper later
+                ~3-5 min &mdash; we can always go deeper later
               </div>
             </button>
           </div>
@@ -299,7 +348,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
 
           {/* Suggested responses */}
           {!loading && suggestedResponses.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0.5rem 0 1rem", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0.5rem 0 0.5rem", justifyContent: "flex-end" }}>
               {suggestedResponses.map((s, i) => (
                 <button key={i} onClick={() => sendMessage(s)} style={{
                   padding: "0.5rem 1rem",
@@ -316,12 +365,31 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
               ))}
             </div>
           )}
+
+          {/* Hint: type your own answer */}
+          {!loading && suggestedResponses.length > 0 && (
+            <div
+              onClick={() => inputRef.current?.focus()}
+              style={{
+                textAlign: "center",
+                padding: "0 0 0.75rem",
+                fontSize: "0.72rem",
+                color: "rgba(255,255,255,0.3)",
+                fontFamily: "'DM Sans', sans-serif",
+                letterSpacing: "0.02em",
+                cursor: "pointer",
+              }}
+            >
+              or type your own answer below
+            </div>
+          )}
         </div>
 
         {/* Input */}
         <div style={{ padding: "0.75rem 1rem 1.5rem", position: "relative", zIndex: 2, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
           <form onSubmit={(e) => { e.preventDefault(); if (inputValue.trim() && !loading) sendMessage(inputValue.trim()); }} style={{ display: "flex", gap: 8 }}>
             <input
+              ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type your message..."
