@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
+import { getActiveSIP } from "@/lib/sip";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,8 @@ export async function POST(request: Request) {
     if (!userId || !focusGoals || focusGoals.length === 0) {
       return NextResponse.json({ error: "userId and focusGoals required" }, { status: 400 });
     }
+
+    const sip = await getActiveSIP(userId);
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,10 +105,13 @@ STRICT RULES:
 Respond ONLY with valid JSON array:
 [{"task_text": "...", "goal_name": "...", "priority": "high|medium|low", "type": "core|bonus"}]`;
 
+    const finalSystemPrompt = sip ? `${sip}\n\n---\n\nTASK GENERATION INSTRUCTIONS:\n${prompt}` : prompt;
+
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5-20250929",
       max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+      system: finalSystemPrompt,
+      messages: [{ role: "user", content: "Generate my daily tasks for today based on the instructions." }],
     });
 
     const text = response.content

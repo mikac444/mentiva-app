@@ -6,7 +6,7 @@ import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
 import { useLanguage } from "@/lib/language";
 import type { AnalysisResult } from "@/lib/analyze-types";
-import { Onboarding } from "@/components/Onboarding";
+import { OnboardingChat } from "@/components/OnboardingChat";
 import { TopNav } from "@/components/TopNav";
 
 type VisionBoardRow = {
@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userName, setUserName] = useState("");
   const [memberNumber, setMemberNumber] = useState<number | null>(null);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -48,6 +49,7 @@ export default function DashboardPage() {
         setLoading(false);
         return;
       }
+      setUserId(session.user.id);
       const { data } = await supabase
         .from("vision_boards")
         .select("id, user_id, image_url, analysis, title, created_at")
@@ -109,7 +111,7 @@ export default function DashboardPage() {
 
 
   if (showOnboarding) {
-    return <Onboarding firstName={userName} memberNumber={memberNumber} />;
+    return <OnboardingChat firstName={userName} userId={userId} memberNumber={memberNumber} />;
   }
 
   return (
