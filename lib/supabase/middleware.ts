@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/unauthorized"];
-const PROTECTED_PATHS = ["/dashboard", "/chat", "/upload"];
+const PROTECTED_PATHS = ["/dashboard", "/chat", "/upload", "/admin"];
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return true;
