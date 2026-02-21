@@ -219,7 +219,7 @@ const CRYSTALLIZE_QUESTIONS = {
 };
 
 /* ===== MAIN PAGE ===== */
-type PageState = "intro" | "discovery" | "discovery-summary" | "crystallize" | "upload" | "analyzing" | "clarify" | "enhancing" | "results";
+type PageState = "intro" | "discovery" | "discovery-summary" | "crystallize" | "upload" | "choose-mode" | "analyzing" | "clarify" | "enhancing" | "results";
 
 export default function UploadPage() {
   const { t } = useLanguage();
@@ -236,6 +236,7 @@ export default function UploadPage() {
   const [revealedGoals, setRevealedGoals] = useState<number[]>([]);
   const [additionalGoals, setAdditionalGoals] = useState("");
   const [skippedClarify, setSkippedClarify] = useState(false);
+  const [analysisMode, setAnalysisMode] = useState<"quick" | "full">("full");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -328,8 +329,9 @@ export default function UploadPage() {
     setPreview(URL.createObjectURL(chosen));
   }
 
-  async function handleAnalyze() {
+  async function handleAnalyze(mode: "quick" | "full" = "full") {
     if (!file) return;
+    setAnalysisMode(mode);
     setPageState("analyzing");
     setError(null);
     try {
@@ -337,7 +339,7 @@ export default function UploadPage() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, mediaType: "image/jpeg", lang }),
+        body: JSON.stringify({ image: base64, mediaType: "image/jpeg", lang, mode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Analysis failed");
@@ -347,9 +349,9 @@ export default function UploadPage() {
       setSaveSuccess(false);
       setRevealedGoals([]);
       setAdditionalGoals("");
-      setSkippedClarify(false);
-      // Go to clarifying questions step
-      setPageState("clarify");
+      setSkippedClarify(mode === "quick");
+      // Quick mode skips clarifying questions, goes straight to results
+      setPageState(mode === "quick" ? "results" : "clarify");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setPageState("upload");
@@ -436,7 +438,7 @@ export default function UploadPage() {
     setFile(null); setPreview(null); setAnalysis(null);
     setSavedBase64(null); setBoardTitle(""); setSaveSuccess(false);
     setError(null); setRevealedGoals([]);
-    setAdditionalGoals(""); setSkippedClarify(false);
+    setAdditionalGoals(""); setSkippedClarify(false); setAnalysisMode("full");
     setDiscoveryStep(0); setDiscoveryAnswers([]);
     setCurrentDiscoveryAnswer(""); setDiscoveryThemes([]);
     setCrystallizeStep(0); setCrystallizeAnswers([]);
@@ -1010,6 +1012,126 @@ export default function UploadPage() {
     );
   }
 
+  /* ===== CHOOSE MODE STATE ===== */
+  if (pageState === "choose-mode") {
+    return (
+      <div className="min-h-screen flex flex-col bg-mentiva-gradient">
+        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6" style={headerStyle}>
+          <TopNav />
+        </header>
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-lg" style={{ animation: "riseIn 0.8s ease both" }}>
+            {/* Board preview thumbnail */}
+            {preview && (
+              <div style={{
+                width: 80, height: 80, borderRadius: 16, overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.15)", margin: "0 auto 1.5rem",
+              }}>
+                <img src={preview} alt="Board" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+              fontSize: "clamp(1.6rem, 5vw, 2.2rem)", lineHeight: 1.2,
+              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              textAlign: "center", marginBottom: "0.5rem",
+            }}>
+              {t("How should Menti read this?", "¿Cómo quieres que Menti lo lea?")}
+            </h1>
+            <p style={{
+              fontSize: "0.88rem", color: "rgba(255,255,255,0.4)", textAlign: "center",
+              marginBottom: "2rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
+            }}>
+              {t("Choose the depth of your analysis", "Elige la profundidad de tu análisis")}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+              {/* Quick Look card */}
+              <button
+                onClick={() => handleAnalyze("quick")}
+                style={{
+                  width: "100%", textAlign: "left", padding: "1.3rem 1.5rem",
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: 18, cursor: "pointer", transition: "all 0.3s",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
+                    color: "rgba(255,255,255,0.9)",
+                  }}>
+                    {t("Quick look", "Vista rápida")}
+                  </span>
+                  <span style={{
+                    fontSize: "0.72rem", fontWeight: 500, color: "rgba(255,255,255,0.4)",
+                    padding: "3px 10px", background: "rgba(255,255,255,0.08)", borderRadius: 12,
+                  }}>
+                    ~10s
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.4, margin: 0 }}>
+                  {t(
+                    "Your main themes and top goals in seconds",
+                    "Tus temas principales y metas top en segundos"
+                  )}
+                </p>
+              </button>
+
+              {/* Full Analysis card */}
+              <button
+                onClick={() => handleAnalyze("full")}
+                style={{
+                  width: "100%", textAlign: "left", padding: "1.3rem 1.5rem",
+                  background: "rgba(212,190,140,0.08)", border: "1px solid rgba(212,190,140,0.2)",
+                  borderRadius: 18, cursor: "pointer", transition: "all 0.3s",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
+                    color: "#D4BE8C",
+                  }}>
+                    {t("Full analysis", "Análisis completo")}
+                  </span>
+                  <span style={{
+                    fontSize: "0.72rem", fontWeight: 500, color: "rgba(212,190,140,0.5)",
+                    padding: "3px 10px", background: "rgba(212,190,140,0.1)", borderRadius: 12,
+                  }}>
+                    ~30s
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.4, margin: 0 }}>
+                  {t(
+                    "Deep dive with patterns, action steps, and blind spots",
+                    "Análisis profundo con patrones, pasos de acción, y más"
+                  )}
+                </p>
+              </button>
+            </div>
+
+            {/* Back button */}
+            <button
+              onClick={() => setPageState("upload")}
+              style={{
+                display: "block", width: "100%", marginTop: "1.2rem", padding: "0.6rem",
+                background: "none", border: "none",
+                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
+                fontFamily: "'DM Sans', sans-serif", textAlign: "center",
+              }}
+            >
+              {t("Back", "Atrás")}
+            </button>
+          </div>
+        </main>
+        <style>{`@keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      </div>
+    );
+  }
+
   /* ===== ANALYZING STATE ===== */
   if (pageState === "analyzing") return <AnalyzingScreen t={t} />;
 
@@ -1569,7 +1691,7 @@ export default function UploadPage() {
             <div className="flex flex-col gap-3">
               <button
                 type="button"
-                onClick={handleAnalyze}
+                onClick={() => setPageState("choose-mode")}
                 className="rounded-lg font-semibold px-5 py-3 transition-colors"
                 style={{ background: "#FFFFFF", color: "#4A5C3F" }}
               >

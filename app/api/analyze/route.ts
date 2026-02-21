@@ -90,6 +90,34 @@ Return ONLY raw JSON, no markdown fences:
   "insight": "2-3 sentence insight connecting ALL goals together — how the board goals and the user's additional goals complement each other. Suggest where to start."
 }`;
 
+const QUICK_ANALYSIS_PROMPT = `You are Menti, Mentiva's AI mentor. You are doing a QUICK analysis of a vision board image. Look at the images, words, colors, and layout. Do not identify yourself as Claude or any other name—only as Menti.
+
+Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\`json or \`\`\`). Output nothing but the JSON object itself. Use this exact structure:
+{
+  "summary": "A warm, personal 1-2 sentence message about what you see. Be specific, not generic.",
+  "themes": ["theme1", "theme2", "theme3"],
+  "goalsWithSteps": [
+    {
+      "goal": "Clear goal name",
+      "area": "business|health|finance|relationships|learning|creative|routine|other",
+      "steps": ["One clear, actionable first step"],
+      "emotionalWhy": "Brief sentence about why this goal likely matters to this person"
+    }
+  ],
+  "insight": "1 sentence connecting the goals and suggesting where to start."
+}
+
+Rules:
+- Identify 2-3 overarching themes
+- Create MAX 3 goals, each with exactly 1 actionable step
+- Each goal MUST have "area" and "emotionalWhy" fields
+- Keep it SHORT. This is a quick look, not a deep dive.
+- The summary should feel warm and personal — reference what you actually see
+- ALL TEXT must be in LANG_PLACEHOLDER language
+- NEVER use emojis
+- Be concise. Every word should matter.
+- KNOW YOUR ROLE: motivational mentor, not domain expert. No specific prescriptions.`;
+
 const MEDIA_TYPES = [
   "image/jpeg",
   "image/png",
@@ -112,6 +140,7 @@ export async function POST(request: Request) {
       image,
       mediaType = "image/png",
       lang = "en",
+      mode = "full",
       enhance,
       existingGoals,
       additionalGoals,
@@ -120,6 +149,7 @@ export async function POST(request: Request) {
       image?: string;
       mediaType?: string;
       lang?: string;
+      mode?: "quick" | "full";
       enhance?: boolean;
       existingGoals?: string;
       additionalGoals?: string;
@@ -172,12 +202,13 @@ export async function POST(request: Request) {
       ? (mediaType as (typeof MEDIA_TYPES)[number])
       : "image/png";
 
-    const prompt = ANALYSIS_PROMPT.replace(/LANG_PLACEHOLDER/g, langLabel);
+    const basePrompt = mode === "quick" ? QUICK_ANALYSIS_PROMPT : ANALYSIS_PROMPT;
+    const prompt = basePrompt.replace(/LANG_PLACEHOLDER/g, langLabel);
     const finalSystemPrompt = sip ? `${sip}\n\n---\n\nANALYSIS INSTRUCTIONS:\n${prompt}` : prompt;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5-20250929",
-      max_tokens: 2048,
+      max_tokens: mode === "quick" ? 1024 : 2048,
       system: finalSystemPrompt,
       messages: [
         {
