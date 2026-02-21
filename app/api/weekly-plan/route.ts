@@ -96,11 +96,13 @@ STRICT RULES:
 1. Generate exactly 3 NON-NEGOTIABLE tasks (type: "core") + 2 BONUS tasks (type: "bonus"). On weekends: 2 core + 1 bonus.
 2. Tasks MUST directly relate to the user's chosen focus goals and their specific context. NEVER generate tasks for life areas or categories the user did not explicitly choose.
 3. VARIETY: Spread tasks across the selected focus goals only — do not add tasks from other areas.
-4. Each task must include a time estimate in parentheses.
-5. If a task has been frequently skipped, make it SMALLER.
-6. goal_name must be SHORT (1-3 words) in the SAME language as tasks.
-7. ALL text in ${lang === "es" ? "SPANISH" : "ENGLISH"}.
-8. Include at least one quick win (under 5 min) in core tasks.
+4. NEVER create a "Relationship" or "Relaciones" category unless the user EXPLICITLY chose it as a focus goal. Mentioning a partner casually is NOT a relationship goal.
+5. Balance tasks across ALL selected goals equally. Don't make multiple tasks about one narrow sub-topic (e.g. don't make 3 tasks all about "first class flights").
+6. Each task must include a time estimate in parentheses.
+7. If a task has been frequently skipped, make it SMALLER.
+8. goal_name must be SHORT (1-3 words) in the SAME language as tasks.
+9. ALL text in ${lang === "es" ? "SPANISH" : "ENGLISH"}.
+10. Include at least one quick win (under 5 min) in core tasks.
 
 Respond ONLY with valid JSON array:
 [{"task_text": "...", "goal_name": "...", "priority": "high|medium|low", "type": "core|bonus"}]`;

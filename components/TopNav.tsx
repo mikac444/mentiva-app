@@ -94,20 +94,20 @@ export function TopNav() {
             {dropOpen && (
               <div style={{
                 position: "absolute", right: 0, top: "calc(100% + 6px)",
-                minWidth: 200, borderRadius: 14, padding: "0.5rem 0",
+                minWidth: 200, maxWidth: "calc(100vw - 32px)", borderRadius: 14, padding: "0.5rem 0",
                 background: "rgba(80,100,70,0.97)", border: "1px solid rgba(255,255,255,0.15)",
                 backdropFilter: "blur(20px)", boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
-                zIndex: 100,
+                zIndex: 100, overflow: "hidden",
               }}>
                 {firstName && (
-                  <div style={{ padding: "0.6rem 1rem 0.7rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                     <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{firstName}</div>
-                    <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{user.email}</div>
+                    <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
                   </div>
                 )}
                 <button onClick={() => { setLang(lang === "en" ? "es" : "en"); setDropOpen(false); }} style={{
                   display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
-                  padding: "0.6rem 1rem", fontSize: "0.82rem",
+                  padding: "0.75rem 1rem", fontSize: "0.82rem", minHeight: 44,
                   color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer",
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -117,7 +117,7 @@ export function TopNav() {
                   {lang === "en" ? "Espa\u00f1ol" : "English"}
                 </button>
                 <a href="mailto:mika@mentiva.app" onClick={() => setDropOpen(false)} style={{
-                  display: "block", padding: "0.6rem 1rem", fontSize: "0.82rem",
+                  display: "flex", alignItems: "center", padding: "0.75rem 1rem", fontSize: "0.82rem", minHeight: 44,
                   color: "rgba(255,255,255,0.6)", textDecoration: "none",
                 }}>{t("Send feedback", "Enviar comentarios")}</a>
                 <button onClick={async () => {
@@ -126,8 +126,8 @@ export function TopNav() {
                   await supabase.auth.signOut({ scope: "global" });
                   window.location.href = "/login";
                 }} style={{
-                  display: "block", width: "100%", textAlign: "left",
-                  padding: "0.6rem 1rem", fontSize: "0.82rem",
+                  display: "flex", alignItems: "center", width: "100%", textAlign: "left",
+                  padding: "0.75rem 1rem", fontSize: "0.82rem", minHeight: 44,
                   color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer",
                 }}>{t("Sign out", "Cerrar sesi\u00f3n")}</button>
               </div>

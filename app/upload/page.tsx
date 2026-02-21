@@ -45,9 +45,14 @@ type GoalWithArea = {
 
 // Area color mapping
 const AREA_COLORS: Record<string, string> = {
-  business: "#D4BE8C", health: "#8CB39A", finance: "#B3A18C",
-  relationships: "#C48B8B", learning: "#8C9EB3", creative: "#B38CB3",
-  routine: "#8CB3B3", other: "#A1B392",
+  business: "#D4BE8C", negocio: "#D4BE8C",
+  health: "#8CB39A", salud: "#8CB39A",
+  finance: "#B3A18C", finanzas: "#B3A18C",
+  relationships: "#C48B8B", relaciones: "#C48B8B",
+  learning: "#8C9EB3", aprendizaje: "#8C9EB3",
+  creative: "#B38CB3", creativo: "#B38CB3",
+  routine: "#8CB3B3", rutina: "#8CB3B3",
+  other: "#A1B392", otro: "#A1B392",
 };
 
 function getAreaColor(area?: string): string {
@@ -116,10 +121,10 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
           fontSize: "clamp(1.6rem, 5vw, 2.2rem)", color: "rgba(255,255,255,0.95)",
           lineHeight: 1.25, letterSpacing: "-0.02em", marginBottom: "1rem",
         }}>
-          Menti is reading<br />your dreams...
+          {t("Menti is reading", "Menti est\u00e1 leyendo")}<br />{t("your dreams...", "tus sue\u00f1os...")}
         </h1>
         <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5, maxWidth: 280 }}>
-          Analyzing your vision board to create your personalized roadmap
+          {t("Analyzing your vision board to create your personalized roadmap", "Analizando tu tablero de visi\u00f3n para crear tu hoja de ruta personalizada")}
         </p>
 
         <div style={{ marginTop: "2.5rem", height: 24, position: "relative", width: "100%" }}>

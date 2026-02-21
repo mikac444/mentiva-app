@@ -8,18 +8,11 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error && session?.user?.email) {
-      const { data } = await supabase
-        .from("allowed_emails")
-        .select("email")
-        .eq("email", session.user.email.toLowerCase())
-        .single();
-
-      if (!data) {
-        return NextResponse.redirect(new URL("/unauthorized", origin));
-      }
+    if (!error) {
+      // Middleware handles allowed_emails check on /dashboard
+      // Keeping this callback lean avoids cookie-commit race conditions
       return NextResponse.redirect(new URL(redirectTo, origin));
     }
   }

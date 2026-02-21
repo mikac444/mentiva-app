@@ -21,7 +21,7 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
   "goalsWithSteps": [
     {
       "goal": "Clear goal name (e.g. Launch my business)",
-      "area": "business|health|finance|relationships|learning|creative|routine|other",
+      "area": "AREA_PLACEHOLDER",
       "steps": [
         "Actionable step focused on commitment/consistency (not domain-specific prescriptions)",
         "Actionable step 2",
@@ -37,13 +37,14 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
 Rules:
 - Identify 2-4 overarching themes (e.g. "Travel", "Health", "Creativity")
 - Create 2-4 goals, each with 2-3 specific actionable steps in goalsWithSteps
-- Each goal MUST have an "area" field categorizing it into one of: business, health, finance, relationships, learning, creative, routine, other
+- Each goal MUST have an "area" field categorizing it into one of: AREA_PLACEHOLDER
 - Each goal MUST have an "emotionalWhy" field: a brief sentence about why this goal likely matters to this person based on the overall board context.
 - Note 1-3 patterns (recurring symbols, colors, or ideas)
 - Also keep the flat actionSteps array with exactly 5 steps for backwards compatibility
 - The summary should feel like a real mentor speaking — warm, specific, encouraging
 - The insight should connect dots between goals and suggest a starting point
 - Be concrete and specific, not generic. Reference what you actually see in the image.
+- BALANCE: Don't overweight a single image. If you see one photo of a first-class seat, that's a hint about travel style — not a primary goal on its own. Distribute goals across what the FULL board communicates.
 - Detect blind spots: identify 1-2 important life areas that are notably ABSENT from the board
 - Find connections: identify 1 way the goals relate to each other that the user might not see
 - ALL TEXT must be in LANG_PLACEHOLDER language.
@@ -70,7 +71,7 @@ Rules:
 - Keep ALL existing goals from the board (do not remove any)
 - ADD new goals based on what the user shared — interpret their words generously and create clear, actionable goals
 - Each goal must have 2-3 specific, actionable steps
-- Each goal must have an "area" field: business|health|finance|relationships|learning|creative|routine|other
+- Each goal must have an "area" field: AREA_PLACEHOLDER
 - Steps should be specific and personal — use the user's own words when possible
 - ALL TEXT must be in LANG_PLACEHOLDER language
 - Return 4-8 goals total
@@ -99,7 +100,7 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
   "goalsWithSteps": [
     {
       "goal": "Clear goal name",
-      "area": "business|health|finance|relationships|learning|creative|routine|other",
+      "area": "AREA_PLACEHOLDER",
       "steps": ["One clear, actionable first step"],
       "emotionalWhy": "Brief sentence about why this goal likely matters to this person"
     }
@@ -160,13 +161,17 @@ export async function POST(request: Request) {
 
     const anthropic = new Anthropic({ apiKey });
     const langLabel = lang === "es" ? "Spanish" : "English";
+    const areaOptions = lang === "es"
+      ? "negocio|salud|finanzas|relaciones|aprendizaje|creativo|rutina|otro"
+      : "business|health|finance|relationships|learning|creative|routine|other";
 
     // ─── ENHANCE MODE: Merge existing + new goals ───
     if (enhance && existingGoals && additionalGoals) {
       const prompt = ENHANCE_PROMPT
         .replace("EXISTING_GOALS_PLACEHOLDER", existingGoals)
         .replace("ADDITIONAL_GOALS_PLACEHOLDER", additionalGoals)
-        .replace("LANG_PLACEHOLDER", langLabel);
+        .replace("LANG_PLACEHOLDER", langLabel)
+        .replace(/AREA_PLACEHOLDER/g, areaOptions);
 
       const enhanceSystem = sip ? `${sip}\n\n---\n\nANALYSIS INSTRUCTIONS:\n${prompt}` : prompt;
 
@@ -203,7 +208,7 @@ export async function POST(request: Request) {
       : "image/png";
 
     const basePrompt = mode === "quick" ? QUICK_ANALYSIS_PROMPT : ANALYSIS_PROMPT;
-    const prompt = basePrompt.replace(/LANG_PLACEHOLDER/g, langLabel);
+    const prompt = basePrompt.replace(/LANG_PLACEHOLDER/g, langLabel).replace(/AREA_PLACEHOLDER/g, areaOptions);
     const finalSystemPrompt = sip ? `${sip}\n\n---\n\nANALYSIS INSTRUCTIONS:\n${prompt}` : prompt;
 
     const response = await anthropic.messages.create({
