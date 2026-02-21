@@ -4,7 +4,7 @@
   "description": "Turn your vision board into an actionable plan with AI-powered mentoring.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0a0f0c",
+  "background_color": "#A1B392",
   "theme_color": "#9CAF88",
   "orientation": "portrait-primary",
   "icons": [
@@ -12,13 +12,31 @@
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
