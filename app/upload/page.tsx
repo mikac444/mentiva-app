@@ -434,6 +434,11 @@ export default function UploadPage() {
     }
   }
 
+  async function handleSaveAndGoToMissions() {
+    await handleSaveBoard();
+    router.push("/today");
+  }
+
   async function handleSaveAndChat() {
     await handleSaveBoard();
     router.push("/chat");
@@ -1585,10 +1590,10 @@ export default function UploadPage() {
               fontSize: "1.1rem", color: "rgba(255,255,255,0.5)", marginBottom: "1.5rem",
               maxWidth: 320, marginLeft: "auto", marginRight: "auto",
             }}>
-              {t("Your roadmap is ready. Want to dive deeper with Menti?", "Tu hoja de ruta está lista. ¿Quieres profundizar con Menti?")}
+              {t("Your roadmap is ready. Set your North Star and start your missions.", "Tu hoja de ruta esta lista. Establece tu North Star y comienza tus misiones.")}
             </p>
             <button
-              onClick={handleSaveAndChat}
+              onClick={handleSaveAndGoToMissions}
               disabled={saving || saveSuccess}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
@@ -1600,11 +1605,11 @@ export default function UploadPage() {
                 opacity: saving ? 0.5 : 1,
               }}
             >
-              {saving ? t("Saving...", "Guardando...") : t("Save & Chat with Menti", "Guardar y chatear con Menti")} <span>&rarr;</span>
+              {saving ? t("Saving...", "Guardando...") : t("Start my missions", "Comenzar mis misiones")} <span>&rarr;</span>
             </button>
             <br />
             <button
-              onClick={handleSaveBoard}
+              onClick={handleSaveAndChat}
               disabled={saving || saveSuccess}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
@@ -1617,7 +1622,7 @@ export default function UploadPage() {
                 opacity: (saving || saveSuccess) ? 0.5 : 1,
               }}
             >
-              {t("Save to my boards", "Guardar en mis boards")}
+              {t("Save & Chat with Menti", "Guardar y chatear con Menti")}
             </button>
             {saveSuccess && (
               <p style={{ color: "#D4BE8C", fontSize: "0.85rem", marginTop: "1rem" }}>
