@@ -164,7 +164,7 @@ function LoginContent() {
           color: "rgba(255,255,255,0.3)", marginBottom: 12, height: 20,
           opacity: phase >= 2 ? 1 : 0, transition: "opacity 0.8s ease",
         }}>
-          {lang === "en" ? "Stop " : "Deja de "}
+          {lang === "en" ? "Beyond just " : "M\u00e1s que solo "}
           <span style={{
             display: "inline-block", color: "rgba(212,190,140,0.7)", fontWeight: 600,
             opacity: showWord ? 1 : 0, transform: showWord ? "translateY(0)" : "translateY(8px)",

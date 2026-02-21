@@ -49,6 +49,8 @@ export function TopNav() {
       background: "rgba(255,255,255,0.06)",
       borderBottom: "1px solid rgba(255,255,255,0.1)",
       backdropFilter: "blur(10px)",
+      position: "relative",
+      zIndex: 50,
     }}>
       <Link href="/dashboard" style={{
         fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem",

@@ -92,43 +92,36 @@ export default function DashboardPage() {
     }
   }
 
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   async function handleDeleteBoard() {
     if (!selectedBoard) return;
     setDeleting(true);
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) {
+    setDeleteError(null);
+
+    try {
+      const res = await fetch("/api/boards", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boardId: selectedBoard.id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setDeleteError(data.error || "Failed to delete board");
+        setDeleting(false);
+        return;
+      }
+
+      // Server confirmed deletion — now update UI
+      setBoards((prev) => prev.filter((b) => b.id !== selectedBoard.id));
+      setSelectedBoard(null);
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      setDeleteError("Network error. Please try again.");
+    } finally {
       setDeleting(false);
-      return;
     }
-
-    // Delete the board
-    const { error } = await supabase
-      .from("vision_boards")
-      .delete()
-      .eq("id", selectedBoard.id)
-      .eq("user_id", session.user.id);
-
-    if (error) {
-      console.error("Failed to delete board:", error);
-      setDeleting(false);
-      return;
-    }
-
-    // Clean up orphaned tasks associated with this board's goals
-    const goalNames = selectedBoard.analysis?.goalsWithSteps?.map((g: any) => g.goal) || [];
-    if (goalNames.length > 0) {
-      await supabase
-        .from("daily_tasks")
-        .delete()
-        .eq("user_id", session.user.id)
-        .in("goal_name", goalNames);
-    }
-
-    setBoards((prev) => prev.filter((b) => b.id !== selectedBoard.id));
-    setSelectedBoard(null);
-    setShowDeleteConfirm(false);
-    setDeleting(false);
   }
 
 
@@ -273,17 +266,20 @@ export default function DashboardPage() {
               <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
                 <div className="rounded-xl p-5 max-w-sm w-full shadow-xl" style={glassStyle}>
                   <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>
-                    Are you sure you want to delete this board?
+                    {t("Are you sure you want to delete this board?", "\u00bfSeguro que quieres eliminar este tablero?")}
                   </p>
+                  {deleteError && (
+                    <p className="mt-2 text-sm" style={{ color: "#e57373" }}>{deleteError}</p>
+                  )}
                   <div className="mt-4 flex gap-3 justify-end">
                     <button
                       type="button"
-                      onClick={() => setShowDeleteConfirm(false)}
+                      onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
                       disabled={deleting}
                       className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                       style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
                     >
-                      Cancel
+                      {t("Cancel", "Cancelar")}
                     </button>
                     <button
                       type="button"
@@ -291,7 +287,7 @@ export default function DashboardPage() {
                       disabled={deleting}
                       className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors disabled:opacity-50"
                     >
-                      {deleting ? "Deleting…" : "Delete"}
+                      {deleting ? t("Deleting...", "Eliminando...") : t("Delete", "Eliminar")}
                     </button>
                   </div>
                 </div>
