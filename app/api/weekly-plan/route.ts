@@ -94,8 +94,8 @@ ${isWeekend ? "TODAY IS A WEEKEND — lighter tasks, max 3 total." : ""}
 
 STRICT RULES:
 1. Generate exactly 3 NON-NEGOTIABLE tasks (type: "core") + 2 BONUS tasks (type: "bonus"). On weekends: 2 core + 1 bonus.
-2. Tasks MUST directly relate to the user's chosen focus goals and their specific context.
-3. VARIETY: Spread tasks across the selected focus goals.
+2. Tasks MUST directly relate to the user's chosen focus goals and their specific context. NEVER generate tasks for life areas or categories the user did not explicitly choose.
+3. VARIETY: Spread tasks across the selected focus goals only — do not add tasks from other areas.
 4. Each task must include a time estimate in parentheses.
 5. If a task has been frequently skipped, make it SMALLER.
 6. goal_name must be SHORT (1-3 words) in the SAME language as tasks.

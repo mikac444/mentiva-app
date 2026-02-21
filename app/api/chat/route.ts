@@ -16,7 +16,12 @@ FORMATTING RULES:
 - If you want to emphasize something, use CAPS sparingly or rephrase to make the point stand out naturally.
 - If you want to list things, write them as short sentences or separate them with line breaks — not as formatted lists.
 - NEVER use emojis.
-- KNOW YOUR ROLE: You are a motivational mentor, not a domain expert. You CAN mention general well-known concepts but NEVER prescribe specific quantities, routines, exercises, diets, investment amounts, or professional-grade advice. Focus on commitment, consistency, and habits. If domain-specific details matter, suggest they consult a professional.`;
+- KNOW YOUR ROLE: You are a motivational mentor, not a domain expert. You CAN mention general well-known concepts but NEVER prescribe specific quantities, routines, exercises, diets, investment amounts, or professional-grade advice. Focus on commitment, consistency, and habits. If domain-specific details matter, suggest they consult a professional.
+
+YOUR CAPABILITIES:
+- This is a text-only chat. You CANNOT receive or view images, screenshots, photos, or files of any kind.
+- NEVER ask the user to "show me", "share a screenshot", "send a photo", or upload anything. The chat does not support this.
+- Instead, ask users to DESCRIBE what they see, type out numbers, or summarize information in text. For example, instead of "Can you show me your screen time?", say "What do your screen time numbers look like? Which apps are using the most time?"`;
 
   if (visionBoard && (visionBoard.themes?.length || visionBoard.goals?.length || visionBoard.actionSteps?.length)) {
     prompt += `\n\nThe user has shared their vision board analysis. When relevant, reference their themes, goals, or action steps to personalize your advice:\n`;
@@ -98,17 +103,33 @@ export async function POST(request: Request) {
       const lastUserMsg = messages[messages.length - 1];
       if (lastUserMsg.role === "user") {
         try {
+          const recentContext = messages.slice(-4).map(m => `${m.role}: ${m.content}`).join("\n");
           const focusDetector = await anthropic.messages.create({
             model: "claude-sonnet-4-5-20250929",
             max_tokens: 200,
             messages: [{
               role: "user",
-              content: `Analyze this message and determine if the user is expressing priorities, goals, or focus areas for their life.
+              content: `Analyze this message and determine if the user is EXPLICITLY setting goals or declaring priorities they want to actively work on.
 
-Message: "${lastUserMsg.content}"
+ONLY detect focus areas when the user is:
+- Directly stating "I want to focus on...", "My goal is...", "I'm working on..."
+- Explicitly asking for help with a specific life area AS A GOAL
+- Clearly declaring priorities for their personal development
 
-If YES, respond with ONLY a JSON array of short focus area labels in the SAME language as the message. Examples: ["Negocio", "Salud"], ["Business", "Morning routine"], ["Fitness", "Relaciones"]
-If NO (just casual chat, questions, etc.), respond with exactly: []
+DO NOT detect focus areas from:
+- Casual mentions of topics ("I'm engaged" does NOT mean "Relationships" is a focus area)
+- Discussing hobbies or interests without goal-setting intent ("I listen to podcasts" is NOT a focus area)
+- Answering questions about their life context or current situation
+- Mentioning activities without expressing a desire to improve them
+- Complaining about something without stating intent to change it
+
+Recent conversation:
+${recentContext}
+
+Latest message: "${lastUserMsg.content}"
+
+If the user is EXPLICITLY declaring goals they want to work on, respond with ONLY a JSON array of short labels in the SAME language. Examples: ["Negocio", "Salud"], ["Fitness", "Morning routine"]
+Otherwise (the MORE COMMON case — err on the side of returning empty): []
 
 Respond with ONLY the JSON array, nothing else.`
             }],
@@ -118,17 +139,26 @@ Respond with ONLY the JSON array, nothing else.`
             .map(b => b.text).join("").trim();
           const parsed = JSON.parse(focusText.replace(/\`\`\`json\n?/g, "").replace(/\`\`\`\n?/g, "").trim());
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Save focus areas
+            // Additive save: only insert focus areas that don't already exist.
+            // The weekly planner is the authoritative source for full replacement.
+            // Chat detection should only ADD areas, never remove existing ones.
             const { createClient } = await import("@supabase/supabase-js");
             const supabase = createClient(
               process.env.NEXT_PUBLIC_SUPABASE_URL!,
               process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
             );
-            await supabase.from("user_focus_areas").delete().eq("user_id", userId);
-            await supabase.from("user_focus_areas").insert(
-              parsed.map((a: string) => ({ user_id: userId, area: String(a) }))
-            );
-            console.log("Focus areas saved:", parsed);
+            const { data: existingAreas } = await supabase
+              .from("user_focus_areas")
+              .select("area")
+              .eq("user_id", userId);
+            const existingSet = new Set((existingAreas ?? []).map(f => f.area.toLowerCase()));
+            const newAreas = parsed.filter((a: string) => !existingSet.has(String(a).toLowerCase()));
+            if (newAreas.length > 0) {
+              await supabase.from("user_focus_areas").insert(
+                newAreas.map((a: string) => ({ user_id: userId, area: String(a) }))
+              );
+              console.log("Focus areas added:", newAreas);
+            }
           }
         } catch (e) {
           console.error("Focus detection failed:", e);

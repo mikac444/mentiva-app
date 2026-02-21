@@ -60,10 +60,10 @@ RULES:
 1. Generate 3-5 tasks. On weekends (${isWeekend ? "TODAY IS A WEEKEND" : "today is a weekday"}), lean toward 3 lighter tasks.
 2. Each task must be specific and completable today (not "work on business" but "spend 20 min researching LLC requirements").
 3. If a task has been skipped 2+ times, make it SMALLER and EASIER. Example: "30 min exercise" → "10 min walk outside".
-4. Mix tasks from different life areas for balance, but prioritize the user's focus areas.
+4. CRITICAL: ONLY generate tasks that directly relate to the user's vision board goals listed above OR their explicitly stated focus areas. Do NOT invent new life areas or categories the user has not set as goals. If focus areas are empty, use ONLY the vision board goals.
 5. Include at least one quick win (something that takes under 5 minutes) to build momentum.
-6. Don't repeat the exact same tam yesterday if it was completed — move to the next step.
-7. Each task needs a goal_name (the life area it belongs to) and priority (high/medium/low).
+6. Don't repeat the exact same task from yesterday if it was completed — move to the next step.
+7. Each task needs a goal_name (the life area it belongs to) and priority (high/medium/low). The goal_name MUST match one of the user's vision board goals or focus areas — never invent a new category.
 8. Language: respond in ${ctx.lang === "es" ? "Spanish" : "English"}.
 
 CRITICAL: The goal_name must be a SHORT label (1-3 words max) in ${ctx.lang === "es" ? "SPANISH" : "ENGLISH"}. Translate if needed. Examples: "Negocio", "Salud", "Rutina matutina", "Finanzas", "Relaciones".
