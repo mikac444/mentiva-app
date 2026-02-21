@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -7,13 +8,33 @@ export async function GET(request: Request) {
   const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
 
   if (code) {
-    const supabase = await createClient();
+    const cookieStore = await cookies();
+    const cookiesToSet: { name: string; value: string; options: CookieOptions }[] = [];
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookies: { name: string; value: string; options: CookieOptions }[]) {
+            cookiesToSet.push(...cookies);
+          },
+        },
+      }
+    );
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Middleware handles allowed_emails check on /dashboard
-      // Keeping this callback lean avoids cookie-commit race conditions
-      return NextResponse.redirect(new URL(redirectTo, origin));
+      const response = NextResponse.redirect(new URL(redirectTo, origin));
+      // Explicitly set all auth cookies on the redirect response
+      for (const { name, value, options } of cookiesToSet) {
+        response.cookies.set(name, value, options);
+      }
+      return response;
     }
   }
 

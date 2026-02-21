@@ -16,4 +16,5 @@ export type AnalysisResult = {
   blindSpots?: string[];     // what's missing from their vision
   connections?: string[];     // how their goals connect
   visionType?: string;        // 'board_upload' | 'guided_discovery' | 'hybrid'
+  _lang?: string;             // language the analysis was generated in ('en' | 'es')
 };

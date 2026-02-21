@@ -30,7 +30,7 @@ const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgb
 const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 
 export default function DashboardPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [boards, setBoards] = useState<VisionBoardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBoard, setSelectedBoard] = useState<VisionBoardRow | null>(null);
@@ -305,6 +305,13 @@ export default function DashboardPage() {
               )}
               {selectedBoard.analysis && (
                 <div className="space-y-4">
+                  {selectedBoard.analysis._lang && selectedBoard.analysis._lang !== lang && (
+                    <div className="text-xs px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>
+                      {lang === "en"
+                        ? `This board was analyzed in ${selectedBoard.analysis._lang === "es" ? "Spanish" : "English"}`
+                        : `Este tablero fue analizado en ${selectedBoard.analysis._lang === "es" ? "espa\u00f1ol" : "ingl\u00e9s"}`}
+                    </div>
+                  )}
                   <CollapsibleSection title="Themes" defaultOpen>
                     <ul className="space-y-2">
                       {selectedBoard.analysis.themes?.map((t, i) => (
@@ -343,9 +350,12 @@ export default function DashboardPage() {
                   {(() => {
                     const actionSteps = selectedBoard.analysis.actionSteps?.length
                       ? selectedBoard.analysis.actionSteps
-                      : (selectedBoard.analysis.goalsWithSteps ?? []).flatMap((g, gi) =>
-                          g.steps.map((s, si) => ({ step: gi * 10 + si + 1, title: g.goal, description: s }))
-                        );
+                      : (() => {
+                          let counter = 0;
+                          return (selectedBoard.analysis.goalsWithSteps ?? []).flatMap((g) =>
+                            g.steps.map((s) => ({ step: ++counter, title: g.goal, description: s }))
+                          );
+                        })();
                     return actionSteps.length > 0 ? (
                       <CollapsibleSection title="Your action steps" defaultOpen={false}>
                         <ol className="space-y-4">

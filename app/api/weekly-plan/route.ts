@@ -73,7 +73,9 @@ export async function POST(request: Request) {
     }
     const frequentlySkipped = Object.entries(skipCounts).filter(([, c]) => c >= 2).map(([t]) => t);
 
-    const prompt = `You are Menti, an AI life mentor. Generate daily tasks for ${userName} for today (${dayOfWeek}).
+    const prompt = `You are Menti, an AI life mentor. CRITICAL: ALL output must be in ${lang === "es" ? "SPANISH" : "ENGLISH"} — every task_text and goal_name must be in ${lang === "es" ? "SPANISH" : "ENGLISH"}, no exceptions.
+
+Generate daily tasks for ${userName} for today (${dayOfWeek}).
 
 THE USER CHOSE THESE FOCUS GOALS FOR THIS WEEK:
 ${focusGoals.join(", ")}

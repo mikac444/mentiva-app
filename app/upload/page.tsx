@@ -423,7 +423,7 @@ export default function UploadPage() {
       await supabase.from("vision_boards").insert({
         user_id: session.user.id,
         image_url: savedBase64,
-        analysis,
+        analysis: { ...analysis, _lang: lang },
         title: boardTitle.trim() || t("Untitled board", "Board sin título"),
       });
       setSaveSuccess(true);

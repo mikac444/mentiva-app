@@ -39,7 +39,9 @@ export async function generateDailyTasks(ctx: TaskGenerationContext, sipText?: s
   const dayOfWeek = today.toLocaleDateString("en-US", { weekday: "long" });
   const isWeekend = today.getDay() === 0 || today.getDay() === 6;
 
-  const prompt = `You are Menti, an AI life mentor. Generate exactly 3-5 daily tasks for ${ctx.userName} for today (${dayOfWeek}).
+  const prompt = `You are Menti, an AI life mentor. IMPORTANT: ALL output must be in ${ctx.lang === "es" ? "SPANISH" : "ENGLISH"} — every task_text and goal_name must be in ${ctx.lang === "es" ? "SPANISH" : "ENGLISH"}, no exceptions.
+
+Generate exactly 3-5 daily tasks for ${ctx.userName} for today (${dayOfWeek}).
 
 USER'S VISION BOARD GOALS:
 ${allGoals.length > 0 ? allGoals.join("\n") : "No vision board uploaded yet."}
