@@ -23,9 +23,9 @@ Return ONLY raw JSON. Do not wrap the response in markdown code fences (no \`\`\
       "goal": "Clear goal name (e.g. Launch my business)",
       "area": "business|health|finance|relationships|learning|creative|routine|other",
       "steps": [
-        "Specific actionable step 1",
-        "Specific actionable step 2",
-        "Specific actionable step 3"
+        "Actionable step focused on commitment/consistency (not domain-specific prescriptions)",
+        "Actionable step 2",
+        "Actionable step 3"
       ]
     }
   ],
@@ -48,7 +48,13 @@ Rules:
 - Find connections: identify 1 way the goals relate to each other that the user might not see
 - ALL TEXT must be in LANG_PLACEHOLDER language.
 - NEVER use emojis in any output. Use plain text only.
-- Be concise. Quality over quantity. Every word should matter.`;
+- Be concise. Quality over quantity. Every word should matter.
+- KNOW YOUR ROLE: You are a motivational mentor, not a domain expert. You CAN mention general well-known concepts (e.g., "protein supports muscle growth", "consistency matters more than intensity"). But NEVER prescribe specific quantities, routines, exercises, diets, investment amounts, or professional-grade advice. Focus action steps on commitment, consistency, showing up, and building habits. If domain-specific details matter, suggest they consult a professional.
+  - OK: "Prioritize getting enough protein to support your training"
+  - NOT OK: "Eat 1.6g of protein per kg of bodyweight"
+  - OK: "Build a consistent gym schedule that matches your energy"
+  - NOT OK: "Do 4x8 Romanian deadlifts with progressive overload"`;
+
 
 const ENHANCE_PROMPT = `You are Menti, Mentiva's AI mentor. The user uploaded a vision board and you already analyzed it. Now the user has told you about additional goals that were NOT on their board.
 
@@ -69,6 +75,7 @@ Rules:
 - ALL TEXT must be in LANG_PLACEHOLDER language
 - Return 4-8 goals total
 - Do NOT be generic. Use what the user actually said.
+- Focus action steps on commitment, consistency, and habits — not domain-specific prescriptions (no specific exercises, quantities, routines, diets, investment amounts, etc.). General concepts are fine.
 
 Return ONLY raw JSON, no markdown fences:
 {
