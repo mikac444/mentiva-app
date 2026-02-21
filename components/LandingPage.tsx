@@ -128,7 +128,20 @@ export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [lang, setLang] = useState<"en" | "es">("en");
   const router = useRouter();
+
+  function t(en: string, es: string) { return lang === "es" ? es : en; }
+
+  useEffect(() => {
+    // Detect language from localStorage or browser
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mentiva-lang");
+      if (saved === "es" || saved === "en") { setLang(saved); }
+      else if (navigator.language.startsWith("es")) { setLang("es"); }
+    }
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -145,6 +158,10 @@ export default function LandingPage() {
       if (event === 'SIGNED_IN' && session?.user) {
         router.replace('/dashboard');
       }
+    });
+    // Fetch member count
+    supabase.from("allowed_emails").select("id", { count: "exact", head: true }).then(({ count }) => {
+      if (count !== null) setMemberCount(count);
     });
     return () => subscription.unsubscribe();
   }, [router]);
@@ -227,13 +244,25 @@ export default function LandingPage() {
 
 
       <FloatingVisionCards />
-            <header className="relative z-10 pt-8 pb-4">
+      <header className="relative z-10 pt-8 pb-4 flex items-center justify-center">
         <p
           className="text-center font-serif font-light tracking-[0.35em] uppercase"
           style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}
         >
           MENTIVA
         </p>
+        {/* Language toggle */}
+        <button
+          onClick={() => {
+            const next = lang === "en" ? "es" : "en";
+            setLang(next);
+            if (typeof window !== "undefined") localStorage.setItem("mentiva-lang", next);
+          }}
+          className="absolute right-4 sm:right-8 font-sans text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
+          style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.6)" }}
+        >
+          {lang === "en" ? "ES" : "EN"}
+        </button>
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-12">
@@ -245,21 +274,27 @@ export default function LandingPage() {
               color: "rgba(255,255,255,0.95)",
             }}
           >
-            Your vision board, with a brain.
+            {t("Your vision board, with a brain.", "Tu vision board, con cerebro.")}
           </h1>
 
           <p
             className="font-serif italic font-light"
             style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.125rem" }}
           >
-            Dreams don&apos;t need more pins. They need a mentor.
+            {t(
+              "Dreams don\u2019t need more pins. They need a mentor.",
+              "Los sue\u00f1os no necesitan m\u00e1s pines. Necesitan un mentor."
+            )}
           </p>
 
           <p
             className="font-sans font-light max-w-lg mx-auto"
             style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", lineHeight: 1.6 }}
           >
-            Upload photos of your dream life. AI turns them into a personalized action plan and coaches you there daily.
+            {t(
+              "Upload photos of your dream life. AI turns them into a personalized action plan and coaches you there daily.",
+              "Sube fotos de tu vida so\u00f1ada. La IA las convierte en un plan de acci\u00f3n personalizado y te gu\u00eda todos los d\u00edas."
+            )}
           </p>
 
           <form
@@ -270,7 +305,7 @@ export default function LandingPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t("Enter your email", "Ingresa tu email")}
               required
               className="flex-1 min-w-0 px-5 py-3.5 rounded-full bg-white/15 backdrop-blur-md border border-white/40 text-white placeholder-white/60 font-sans text-sm outline-none focus:ring-2 focus:ring-white/30"
             />
@@ -279,7 +314,7 @@ export default function LandingPage() {
               disabled={isSubmitting}
               className="shrink-0 px-6 py-3.5 rounded-full bg-white/20 backdrop-blur-md border border-white/40 text-white font-sans font-medium text-sm hover:bg-white/30 transition-colors disabled:opacity-70"
             >
-              Get Early Access →
+              {t("Get Early Access", "Acceso Anticipado")} {String.fromCharCode(8594)}
             </button>
           </form>
 
@@ -288,11 +323,24 @@ export default function LandingPage() {
             style={{ color: "rgba(255,255,255,0.75)" }}
           >
             <span>
-              <span className="line-through opacity-70">$99/yr</span>{" "}
-              <span className="font-medium">$10 forever</span>
+              <span className="line-through opacity-70">$99/{t("yr", "a\u00f1o")}</span>{" "}
+              <span className="font-medium">$10 {t("forever", "para siempre")}</span>
             </span>
-            <span>Founding members only</span>
-            <span>23 of 3,000 spots claimed</span>
+            <span>{t("Founding members only", "Solo miembros fundadores")}</span>
+            {memberCount !== null && (
+              <span>{memberCount} {t("of 30 spots claimed", "de 30 lugares tomados")}</span>
+            )}
+          </div>
+
+          {/* Login link for existing members */}
+          <div className="animate-[rise_0.8s_ease-out_0.35s_both]">
+            <a
+              href="/login"
+              className="inline-block font-sans text-sm transition-colors"
+              style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+            >
+              {t("Already a member? Sign in", "Ya eres miembro? Inicia sesi\u00f3n")}
+            </a>
           </div>
         </div>
       </main>
@@ -301,7 +349,7 @@ export default function LandingPage() {
         className="relative z-10 py-6 text-center font-sans text-sm animate-[rise_0.8s_ease-out_0.4s_both]"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
-        © 2026 Mentiva
+        {String.fromCharCode(169)} 2026 Mentiva
       </footer>
 
       <style>{`
