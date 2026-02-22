@@ -61,18 +61,31 @@ export default function DashboardPage() {
       const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? session.user.email?.split("@")[0] ?? "friend";
       setUserName(name.split(/\s+/)[0]);
       if (!localStorage.getItem("mentiva_onboarding_done")) {
-        // Get member number
-        try {
-          const { data: members } = await supabase
-            .from("allowed_emails")
-            .select("email")
-            .order("created_at", { ascending: true });
-          if (members) {
-            const pos = members.findIndex((m: any) => m.email === session.user.email?.toLowerCase());
-            setMemberNumber(pos >= 0 ? pos + 1 : members.length);
-          }
-        } catch (e) {}
-        setShowOnboarding(true);
+        // Check database — maybe completed on another device
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed_at")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (profile?.onboarding_completed_at) {
+          // Already completed on another device — sync localStorage
+          localStorage.setItem("mentiva_onboarding_done", "true");
+          setShowOnboarding(false);
+        } else {
+          // Truly not completed — show onboarding
+          try {
+            const { data: members } = await supabase
+              .from("allowed_emails")
+              .select("email")
+              .order("created_at", { ascending: true });
+            if (members) {
+              const pos = members.findIndex((m: any) => m.email === session.user.email?.toLowerCase());
+              setMemberNumber(pos >= 0 ? pos + 1 : members.length);
+            }
+          } catch (e) {}
+          setShowOnboarding(true);
+        }
       } else {
         setShowOnboarding(false);
       }
