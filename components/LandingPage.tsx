@@ -332,16 +332,6 @@ export default function LandingPage() {
             )}
           </div>
 
-          {/* Login link for existing members */}
-          <div className="animate-[rise_0.8s_ease-out_0.35s_both]">
-            <a
-              href="/login"
-              className="inline-block font-sans text-sm transition-colors"
-              style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px" }}
-            >
-              {t("Already a member? Sign in", "Ya eres miembro? Inicia sesi\u00f3n")}
-            </a>
-          </div>
         </div>
       </main>
 
