@@ -326,10 +326,10 @@ export default function LandingPage() {
               <span className="line-through opacity-70">$99/{t("yr", "a\u00f1o")}</span>{" "}
               <span className="font-medium">$10 {t("forever", "para siempre")}</span>
             </span>
-            <span>{t("Founding members only", "Solo miembros fundadores")}</span>
             {memberCount !== null && (
-              <span>{memberCount} {t("founding members already in", "miembros fundadores ya dentro")}</span>
+              <span>{memberCount}+ {t("already in", "ya dentro")}</span>
             )}
+            <span>{t("$10 price won\u2019t last", "El precio de $10 no durar\u00e1")}</span>
           </div>
 
         </div>
