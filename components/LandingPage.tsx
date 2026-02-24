@@ -328,7 +328,7 @@ export default function LandingPage() {
             </span>
             <span>{t("Founding members only", "Solo miembros fundadores")}</span>
             {memberCount !== null && (
-              <span>{memberCount} {t("of 30 spots claimed", "de 30 lugares tomados")}</span>
+              <span>{memberCount} {t("founding members already in", "miembros fundadores ya dentro")}</span>
             )}
           </div>
 
