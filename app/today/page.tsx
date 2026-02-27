@@ -179,13 +179,13 @@ export default function TodayPage() {
   // Auth check
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
         router.replace("/login");
         return;
       }
-      setUser(session.user);
-      initialize(session.user.id);
+      setUser(user);
+      initialize(user.id);
     });
   }, [router, initialize]);
 

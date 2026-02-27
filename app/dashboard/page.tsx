@@ -44,28 +44,28 @@ export default function DashboardPage() {
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) {
         setShowOnboarding(false);
         setLoading(false);
         return;
       }
-      setUserId(session.user.id);
+      setUserId(user.id);
       const { data } = await supabase
         .from("vision_boards")
         .select("id, user_id, image_url, analysis, title, created_at")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       setBoards((data as VisionBoardRow[]) ?? []);
       // Onboarding check
-      const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? session.user.email?.split("@")[0] ?? "friend";
+      const name = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "friend";
       setUserName(name.split(/\s+/)[0]);
       if (!localStorage.getItem("mentiva_onboarding_done")) {
         // Check database — maybe completed on another device
         const { data: profile } = await supabase
           .from("user_profiles")
           .select("onboarding_completed_at")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .maybeSingle();
 
         if (profile?.onboarding_completed_at) {
@@ -80,7 +80,7 @@ export default function DashboardPage() {
               .select("email")
               .order("created_at", { ascending: true });
             if (members) {
-              const pos = members.findIndex((m: any) => m.email === session.user.email?.toLowerCase());
+              const pos = members.findIndex((m: any) => m.email === user.email?.toLowerCase());
               setMemberNumber(pos >= 0 ? pos + 1 : members.length);
             }
           } catch (e) {}

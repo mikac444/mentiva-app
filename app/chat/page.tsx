@@ -82,18 +82,52 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load focus areas and recent tasks for Menti context
+  const [northStar, setNorthStar] = useState<string | null>(null);
+  const [streakCount, setStreakCount] = useState(0);
+
+  // Load focus areas, recent tasks, North Star, enfoques, streak for Menti context
   useEffect(() => {
     async function loadContext() {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) return;
-      // Focus areas
-      const { data: fa } = await supabase.from("user_focus_areas").select("area").eq("user_id", session.user.id);
-      if (fa) setFocusAreas(fa.map(f => f.area));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
+
+      // Weekly enfoques (user-chosen focus areas)
+      const now = new Date();
+      const day = now.getDay();
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - ((day + 6) % 7));
+      const weekStart = monday.toISOString().split("T")[0];
+      const { data: enf } = await supabase.from("enfoques").select("name").eq("user_id", user.id).eq("week_start", weekStart);
+      if (enf && enf.length > 0) {
+        setFocusAreas(enf.map((e: { name: string }) => e.name));
+      } else {
+        // Fallback to AI-detected focus areas
+        const { data: fa } = await supabase.from("user_focus_areas").select("area").eq("user_id", user.id);
+        if (fa) setFocusAreas(fa.map(f => f.area));
+      }
+
+      // North Star
+      const { data: ns } = await supabase.from("north_stars").select("goal_text").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (ns?.goal_text) setNorthStar(ns.goal_text);
+
+      // Streak
+      const { data: streak } = await supabase.from("streaks").select("date, non_negotiable_completed").eq("user_id", user.id).order("date", { ascending: false }).limit(30);
+      if (streak && streak.length > 0) {
+        let count = 0;
+        const today = new Date().toISOString().split("T")[0];
+        const sorted = (streak as { date: string; non_negotiable_completed: boolean }[]).sort((a, b) => b.date.localeCompare(a.date));
+        for (const s of sorted) {
+          if (s.non_negotiable_completed) count++;
+          else if (s.date !== today) break;
+          else break;
+        }
+        setStreakCount(count);
+      }
+
       // Recent tasks (7 days)
       const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-      const { data: rt } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", session.user.id).gte("date", weekAgo.toISOString().split("T")[0]);
+      const { data: rt } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", user.id).gte("date", weekAgo.toISOString().split("T")[0]);
       if (rt) setRecentTasks(rt);
     }
     loadContext();
@@ -101,12 +135,12 @@ export default function ChatPage() {
 
   const fetchConversations = useCallback(async () => {
     const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
     const { data } = await supabase
       .from("chat_conversations")
       .select("id, user_id, title, created_at, updated_at")
-      .eq("user_id", session.user.id)
+      .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
     setConversations((data as Conversation[]) ?? []);
   }, []);
@@ -134,8 +168,8 @@ export default function ChatPage() {
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) {
         setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
         setLoadingHistory(false);
         return;
@@ -143,7 +177,7 @@ export default function ChatPage() {
       const { data: boardRows } = await supabase
         .from("vision_boards")
         .select("analysis")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1);
       if (boardRows?.[0]?.analysis) {
@@ -152,20 +186,20 @@ export default function ChatPage() {
       const { data: convRows } = await supabase
         .from("chat_conversations")
         .select("id, user_id, title, created_at, updated_at")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
       const convs = (convRows as Conversation[]) ?? [];
       setConversations(convs);
       if (convs.length === 0) {
         const { data: newConv } = await supabase
           .from("chat_conversations")
-          .insert({ user_id: session.user.id, title: "New chat" })
+          .insert({ user_id: user.id, title: "New chat" })
           .select("id")
           .single();
         if (newConv?.id) {
           setCurrentConversationId(newConv.id);
           setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
-          setConversations((prev) => [{ id: newConv.id, user_id: session.user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
+          setConversations((prev) => [{ id: newConv.id, user_id: user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
         }
       } else {
         setCurrentConversationId(convs[0].id);
@@ -195,11 +229,11 @@ export default function ChatPage() {
 
   async function handleNewChat() {
     const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
     const { data } = await supabase
       .from("chat_conversations")
-      .insert({ user_id: session.user.id, title: "New chat" })
+      .insert({ user_id: user.id, title: "New chat" })
       .select("id, user_id, title, created_at, updated_at")
       .single();
     if (data) {
@@ -222,15 +256,15 @@ export default function ChatPage() {
     if (!conversationToDelete) return;
     setDeletingConversation(true);
     const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) {
       setDeletingConversation(false);
       setConversationToDelete(null);
       return;
     }
     const id = conversationToDelete.id;
     await supabase.from("chat_messages").delete().eq("conversation_id", id);
-    await supabase.from("chat_conversations").delete().eq("id", id).eq("user_id", session.user.id);
+    await supabase.from("chat_conversations").delete().eq("id", id).eq("user_id", user.id);
     const nextConvs = conversations.filter((c) => c.id !== id);
     setConversations(nextConvs);
     setConversationToDelete(null);
@@ -240,7 +274,7 @@ export default function ChatPage() {
       if (nextConvs.length === 0) {
         const { data: newConv } = await supabase
           .from("chat_conversations")
-          .insert({ user_id: session.user.id, title: "New chat" })
+          .insert({ user_id: user.id, title: "New chat" })
           .select("id, user_id, title, created_at, updated_at")
           .single();
         if (newConv) {
@@ -270,8 +304,8 @@ export default function ChatPage() {
     setIsLoading(true);
 
     const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) {
       setError("Sign in to chat.");
       setIsLoading(false);
       return;
@@ -283,7 +317,7 @@ export default function ChatPage() {
     if (!convId) {
       const { data: newConv } = await supabase
         .from("chat_conversations")
-        .insert({ user_id: session.user.id, title: "New chat" })
+        .insert({ user_id: user.id, title: "New chat" })
         .select("id")
         .single();
       if (!newConv?.id) {
@@ -293,7 +327,7 @@ export default function ChatPage() {
       }
       convId = newConv.id;
       setCurrentConversationId(convId);
-      setConversations((prev) => [{ id: convId!, user_id: session.user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
+      setConversations((prev) => [{ id: convId!, user_id: user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
     }
 
     const title = text.length > 30 ? text.slice(0, 30) + "…" : text;
@@ -307,7 +341,7 @@ export default function ChatPage() {
 
     await supabase.from("chat_messages").insert({
       conversation_id: convId,
-      user_id: session.user.id,
+      user_id: user.id,
       role: "user",
       content: text,
     });
@@ -322,7 +356,9 @@ export default function ChatPage() {
           visionBoard: visionBoard ?? undefined,
           focusAreas: focusAreas ?? [],
           recentTasks: recentTasks ?? [],
-          userId: session?.user?.id ?? null,
+          userId: user.id,
+          northStar: northStar ?? undefined,
+          streakCount,
         }),
       });
 
@@ -337,7 +373,7 @@ export default function ChatPage() {
 
       await supabase.from("chat_messages").insert({
         conversation_id: convId,
-        user_id: session.user.id,
+        user_id: user.id,
         role: "assistant",
         content: reply,
       });

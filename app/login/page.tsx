@@ -37,13 +37,22 @@ function LoginContent() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Loop-break: if we've been redirected here too many times, just show login
+        const redirectCount = parseInt(sessionStorage.getItem("mentiva_login_redirects") ?? "0");
+        if (redirectCount >= 2) {
+          sessionStorage.removeItem("mentiva_login_redirects");
+          setChecking(false);
+          return;
+        }
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          sessionStorage.setItem("mentiva_login_redirects", String(redirectCount + 1));
           router.replace('/dashboard');
           return;
         }
       } catch (e) {}
+      sessionStorage.removeItem("mentiva_login_redirects");
       setChecking(false);
     };
     checkAuth();

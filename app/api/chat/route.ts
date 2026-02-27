@@ -5,7 +5,13 @@ import { getActiveSIP } from "@/lib/sip";
 
 export const dynamic = "force-dynamic";
 
-function buildSystemPrompt(visionBoard?: AnalysisResult | null, focusAreas?: string[], recentTasks?: { task_text: string; completed: boolean; date: string }[]): string {
+function buildSystemPrompt(
+  visionBoard?: AnalysisResult | null,
+  focusAreas?: string[],
+  recentTasks?: { task_text: string; completed: boolean; date: string }[],
+  northStar?: string | null,
+  streakCount?: number
+): string {
   let prompt = `You are Menti, a warm, motivational AI mentor and life coach for the Mentiva vision board app. Your role is to help users turn their vision board dreams into reality.
 
 Be encouraging but practical. Give actionable advice, ask thoughtful follow-up questions, and help users break big goals into small steps. Use a friendly, conversational tone—like a supportive friend who's also a great coach. Keep responses focused and not overly long unless the user asks for more.
@@ -23,6 +29,21 @@ YOUR CAPABILITIES:
 - NEVER ask the user to "show me", "share a screenshot", "send a photo", or upload anything. The chat does not support this.
 - Instead, ask users to DESCRIBE what they see, type out numbers, or summarize information in text. For example, instead of "Can you show me your screen time?", say "What do your screen time numbers look like? Which apps are using the most time?"`;
 
+  // North Star — the user's #1 goal
+  if (northStar) {
+    prompt += `\n\nThe user's NORTH STAR (their #1 overarching goal) is: "${northStar}". This is their main direction — keep it in mind when coaching.`;
+  }
+
+  // Weekly focus areas (enfoques)
+  if (focusAreas && focusAreas.length > 0) {
+    prompt += `\n\nTheir weekly focus areas are: ${focusAreas.join(", ")}. Align your coaching toward these priorities when relevant.`;
+  }
+
+  // Streak
+  if (streakCount && streakCount > 0) {
+    prompt += `\n\nThe user is on a ${streakCount}-day streak of completing their non-negotiable daily mission. Acknowledge this naturally if it comes up, and help protect their momentum.`;
+  }
+
   if (visionBoard && (visionBoard.themes?.length || visionBoard.goals?.length || visionBoard.actionSteps?.length)) {
     prompt += `\n\nThe user has shared their vision board analysis. When relevant, reference their themes, goals, or action steps to personalize your advice:\n`;
     if (visionBoard.themes?.length) {
@@ -35,6 +56,37 @@ YOUR CAPABILITIES:
       prompt += `\nAction steps they're considering: ${visionBoard.actionSteps.map((s) => s.title).join("; ")}`;
     }
     prompt += `\n\nUse this context to give more tailored, relevant guidance when it fits the conversation.`;
+  }
+
+  // Today's missions and recent task history
+  if (recentTasks && recentTasks.length > 0) {
+    const today = new Date().toISOString().split("T")[0];
+    const todayTasks = recentTasks.filter(t => t.date === today);
+    const pastTasks = recentTasks.filter(t => t.date !== today);
+
+    if (todayTasks.length > 0) {
+      const completed = todayTasks.filter(t => t.completed);
+      const pending = todayTasks.filter(t => !t.completed);
+      prompt += `\n\nTODAY'S MISSIONS:`;
+      if (completed.length > 0) {
+        prompt += `\nCompleted today: ${completed.map(t => t.task_text).join(", ")}`;
+      }
+      if (pending.length > 0) {
+        prompt += `\nStill to do today: ${pending.map(t => t.task_text).join(", ")}`;
+      }
+      prompt += `\n\nReference these tasks naturally when coaching. Celebrate completed tasks. If the user seems stuck on a pending task, help them think through it.`;
+    }
+
+    if (pastTasks.length > 0) {
+      const recentCompleted = pastTasks.filter(t => t.completed).slice(0, 5);
+      const recentSkipped = pastTasks.filter(t => !t.completed).slice(0, 3);
+      if (recentCompleted.length > 0) {
+        prompt += `\nRecently completed (past 7 days): ${recentCompleted.map(t => t.task_text).join(", ")}`;
+      }
+      if (recentSkipped.length > 0) {
+        prompt += `\nRecently skipped: ${recentSkipped.map(t => t.task_text).join(", ")}. If resistance to these comes up, explore it gently.`;
+      }
+    }
   }
 
   return prompt;
@@ -60,12 +112,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { messages = [], visionBoard = null, focusAreas = [], recentTasks = [], userId = null } = body as {
+    const { messages = [], visionBoard = null, focusAreas = [], recentTasks = [], userId = null, northStar = null, streakCount = 0 } = body as {
       messages?: ChatMessage[];
       visionBoard?: AnalysisResult | null;
       focusAreas?: string[];
       recentTasks?: { task_text: string; completed: boolean; date: string }[];
       userId?: string | null;
+      northStar?: string | null;
+      streakCount?: number;
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -78,7 +132,7 @@ export async function POST(request: Request) {
     const sip = userId ? await getActiveSIP(userId) : null;
 
     const anthropic = new Anthropic({ apiKey });
-    const baseSystemPrompt = buildSystemPrompt(visionBoard, focusAreas, recentTasks);
+    const baseSystemPrompt = buildSystemPrompt(visionBoard, focusAreas, recentTasks, northStar, streakCount);
     const system = sip ? `${sip}\n\n---\n\nADDITIONAL CONTEXT:\n${baseSystemPrompt}` : baseSystemPrompt;
 
     const apiMessages = messages.map((m) => ({
