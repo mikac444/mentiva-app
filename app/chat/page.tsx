@@ -88,47 +88,55 @@ export default function ChatPage() {
   // Load focus areas, recent tasks, North Star, enfoques, streak for Menti context
   useEffect(() => {
     async function loadContext() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.id) return;
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.id) return;
 
-      // Weekly enfoques (user-chosen focus areas)
-      const now = new Date();
-      const day = now.getDay();
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - ((day + 6) % 7));
-      const weekStart = monday.toISOString().split("T")[0];
-      const { data: enf } = await supabase.from("enfoques").select("name").eq("user_id", user.id).eq("week_start", weekStart);
-      if (enf && enf.length > 0) {
-        setFocusAreas(enf.map((e: { name: string }) => e.name));
-      } else {
-        // Fallback to AI-detected focus areas
-        const { data: fa } = await supabase.from("user_focus_areas").select("area").eq("user_id", user.id);
-        if (fa) setFocusAreas(fa.map(f => f.area));
-      }
-
-      // North Star
-      const { data: ns } = await supabase.from("north_stars").select("goal_text").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
-      if (ns?.goal_text) setNorthStar(ns.goal_text);
-
-      // Streak
-      const { data: streak } = await supabase.from("streaks").select("date, non_negotiable_completed").eq("user_id", user.id).order("date", { ascending: false }).limit(30);
-      if (streak && streak.length > 0) {
-        let count = 0;
-        const today = new Date().toISOString().split("T")[0];
-        const sorted = (streak as { date: string; non_negotiable_completed: boolean }[]).sort((a, b) => b.date.localeCompare(a.date));
-        for (const s of sorted) {
-          if (s.non_negotiable_completed) count++;
-          else if (s.date !== today) break;
-          else break;
+        // Weekly enfoques (user-chosen focus areas)
+        const now = new Date();
+        const day = now.getDay();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((day + 6) % 7));
+        const weekStart = monday.toISOString().split("T")[0];
+        const { data: enf, error: enfErr } = await supabase.from("enfoques").select("name").eq("user_id", user.id).eq("week_start", weekStart);
+        if (enfErr) console.error("Enfoques fetch error:", enfErr);
+        if (enf && enf.length > 0) {
+          setFocusAreas(enf.map((e: { name: string }) => e.name));
+        } else {
+          // Fallback to AI-detected focus areas
+          const { data: fa } = await supabase.from("user_focus_areas").select("area").eq("user_id", user.id);
+          if (fa) setFocusAreas(fa.map(f => f.area));
         }
-        setStreakCount(count);
-      }
 
-      // Recent tasks (7 days)
-      const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-      const { data: rt } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", user.id).gte("date", weekAgo.toISOString().split("T")[0]);
-      if (rt) setRecentTasks(rt);
+        // North Star (only active one)
+        const { data: ns, error: nsErr } = await supabase.from("north_stars").select("goal_text").eq("user_id", user.id).eq("is_active", true).maybeSingle();
+        if (nsErr) console.error("North Star fetch error:", nsErr);
+        if (ns?.goal_text) setNorthStar(ns.goal_text);
+
+        // Streak
+        const { data: streak, error: streakErr } = await supabase.from("streaks").select("date, non_negotiable_completed").eq("user_id", user.id).order("date", { ascending: false }).limit(30);
+        if (streakErr) console.error("Streak fetch error:", streakErr);
+        if (streak && streak.length > 0) {
+          let count = 0;
+          const today = new Date().toISOString().split("T")[0];
+          const sorted = (streak as { date: string; non_negotiable_completed: boolean }[]).sort((a, b) => b.date.localeCompare(a.date));
+          for (const s of sorted) {
+            if (s.non_negotiable_completed) count++;
+            else if (s.date !== today) break;
+            else break;
+          }
+          setStreakCount(count);
+        }
+
+        // Recent tasks (7 days)
+        const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+        const { data: rt, error: rtErr } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", user.id).gte("date", weekAgo.toISOString().split("T")[0]);
+        if (rtErr) console.error("Recent tasks fetch error:", rtErr);
+        if (rt) setRecentTasks(rt);
+      } catch (e) {
+        console.error("loadContext error:", e);
+      }
     }
     loadContext();
   }, []);
