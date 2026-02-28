@@ -68,7 +68,9 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
       {step === 0 && (
         <div style={{ animation: "fadeUp 0.4s ease" }}>
           <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "1.8rem", marginBottom: "0.5rem" }}>🗓</div>
+            <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#D4BE8C" }} />
+            </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.95)", marginBottom: "0.3rem" }}>
               {t("Let's plan your week,", "Planifiquemos tu semana,")} <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{userName}</em>
             </h2>
@@ -122,7 +124,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.8rem" }}>
             <button onClick={() => { setCurrentContext(""); setStep(step - 1); }} style={{ padding: "0.8rem 1.2rem", background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", fontWeight: 600, fontSize: "0.85rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, cursor: "pointer" }}>← {t("Back", "Atrás")}</button>
             <button onClick={nextFromContext} style={{ flex: 1, padding: "0.8rem", background: "linear-gradient(135deg, #D4BE8C, #C4A86B)", color: "#3A4A2F", fontWeight: 700, fontSize: "0.85rem", border: "none", borderRadius: 12, cursor: "pointer" }}>
-              {isLastContext ? t("Create my plan", "Crear mi plan") + " ✨" : t("Next", "Siguiente") + " →"}
+              {isLastContext ? t("Create my plan", "Crear mi plan") : t("Next", "Siguiente")} {String.fromCharCode(8594)}
             </button>
           </div>
         </div>
@@ -132,7 +134,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
       {step > selectedGoals.length && (
         <div style={{ animation: "fadeUp 0.4s ease", textAlign: "center", padding: "2rem 0" }}>
           <div style={{ width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,190,140,0.4) 0%, transparent 70%)", border: "1px solid rgba(212,190,140,0.25)", margin: "0 auto 1.5rem", display: "flex", alignItems: "center", justifyContent: "center", animation: "gentlePulse 2s ease-in-out infinite" }}>
-            <span style={{ fontSize: "1.8rem" }}>✨</span>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
           </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)", marginBottom: "0.5rem" }}>{t("Creating your plan...", "Creando tu plan...")}</h2>
           <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5, maxWidth: 280, margin: "0 auto" }}>{t("Menti is building your personalized tasks.", "Menti está construyendo tus tareas personalizadas.")}</p>

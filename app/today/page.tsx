@@ -604,10 +604,12 @@ export default function TodayPage() {
             animation: "celebPop 0.5s ease",
           }}>
             <div style={{
-              fontSize: "3rem", marginBottom: "1rem",
+              marginBottom: "1rem",
               animation: "celebBounce 0.6s ease",
             }}>
-              {String.fromCodePoint(0x1F389)}
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D4BE8C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
             <h2 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,

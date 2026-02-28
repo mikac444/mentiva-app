@@ -24,11 +24,10 @@ export default function StreakCounter({ streak, t }: Props) {
       marginBottom: "0.6rem",
     }}>
       <span style={{
-        fontSize: "0.85rem",
-        filter: isImpressive ? "none" : "grayscale(0.5)",
-      }}>
-        {isImpressive ? "\u{1F525}" : "\u{1F525}"}
-      </span>
+        display: "inline-block",
+        width: 8, height: 8, borderRadius: "50%",
+        background: isImpressive ? "#D4BE8C" : "rgba(255,255,255,0.3)",
+      }} />
       <span style={{
         fontSize: "0.78rem", fontWeight: 600,
         color: isImpressive ? "#D4BE8C" : "rgba(255,255,255,0.5)",

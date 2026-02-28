@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { GoalWithSteps } from "@/lib/analyze-types";
-import { getEmoji, getEnfoqueColor } from "@/lib/ui-helpers";
+import { getEnfoqueColor } from "@/lib/ui-helpers";
 
 type Props = {
   goals: GoalWithSteps[];
@@ -123,7 +123,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
                 opacity: !isSelected && !canAdd ? 0.4 : 1,
               }}
             >
-              {getEmoji(name)} {name}
+              {name}
               {isSelected && (
                 <span style={{ marginLeft: 2, fontSize: "0.7rem" }}>&#10005;</span>
               )}

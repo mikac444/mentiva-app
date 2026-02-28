@@ -48,6 +48,11 @@ export async function generateMissionTasks(
   const langName = ctx.lang === "es" ? "SPANISH" : "ENGLISH";
   const enfoqueList = ctx.enfoques.map(e => e.name).join(", ");
 
+  // Assign one enfoque per mission type so all enfoques are represented
+  const enf0 = ctx.enfoques[0]?.name || "General";
+  const enf1 = ctx.enfoques[1]?.name || enf0;
+  const enf2 = ctx.enfoques[2]?.name || enf1;
+
   const prompt = `You are Menti, an AI life mentor. CRITICAL: ALL output must be in ${langName} — every task_text, enfoque_name, and motivational_pulse must be in ${langName}, no exceptions.
 
 NORTH STAR (the user's overarching life goal):
@@ -66,32 +71,33 @@ ${completedRecently.length > 0 ? completedRecently.slice(0, 10).map(t => `[DONE]
 RECENTLY SKIPPED (last 7 days):
 ${skippedRecently.length > 0 ? skippedRecently.slice(0, 5).map(t => `[SKIPPED] ${t.task_text}`).join("\n") : "None."}
 
-GENERATE EXACTLY 3 MISSIONS:
+GENERATE EXACTLY 3 MISSIONS. EACH MISSION MUST USE A DIFFERENT ENFOQUE:
 
 1. NON-NEGOTIABLE (task_type: "non_negotiable")
+   - enfoque_name: MUST be "${enf0}"
    - The MOST important task advancing their North Star
    - 15-30 minutes${isWeekend ? " (or lighter, 10-15 min)" : ""}
    - Must feel meaningful and achievable
    - If they do NOTHING else today, this is the one
-   - Connect it to one of their enfoques
 
 2. SECONDARY (task_type: "secondary")
-   - Supporting task for a DIFFERENT enfoque than the non-negotiable
+   - enfoque_name: MUST be "${enf1}"
+   - Supporting task for this enfoque
    - 10-20 minutes
    - Should feel productive but not overwhelming
 
 3. MICRO WIN (task_type: "micro")
+   - enfoque_name: MUST be "${enf2}"
    - Quick task, UNDER 5 minutes
    - Builds momentum, easy dopamine hit
-   - Can be any enfoque
    - Examples: "Send that one message", "Do 10 pushups", "Write 3 gratitude items"
 
 Also generate a MOTIVATIONAL PULSE — a 1-2 sentence message from Menti for the bottom of the Today page. Make it warm, specific to their North Star or current streak. Not generic motivational quotes — reference THEIR goals.
 
 RULES:
 - Each task MUST include estimated_minutes (integer)
-- Each task MUST include enfoque_name (which focus area it serves — use their enfoque names, 1-3 words)
-- Spread tasks across different enfoques when possible
+- Each task MUST include enfoque_name — use EXACTLY the enfoque names assigned above for each mission
+- EVERY enfoque must appear exactly once — do NOT repeat the same enfoque
 - If they skipped a similar task before, make it SMALLER
 - Be specific: not "work on business" but "spend 20 min outlining 3 product features"
 - ALL text in ${langName}
@@ -100,9 +106,9 @@ RULES:
 Respond ONLY with valid JSON, no other text:
 {
   "missions": [
-    {"task_text": "...", "task_type": "non_negotiable", "enfoque_name": "...", "estimated_minutes": 25},
-    {"task_text": "...", "task_type": "secondary", "enfoque_name": "...", "estimated_minutes": 15},
-    {"task_text": "...", "task_type": "micro", "enfoque_name": "...", "estimated_minutes": 5}
+    {"task_text": "...", "task_type": "non_negotiable", "enfoque_name": "${enf0}", "estimated_minutes": 25},
+    {"task_text": "...", "task_type": "secondary", "enfoque_name": "${enf1}", "estimated_minutes": 15},
+    {"task_text": "...", "task_type": "micro", "enfoque_name": "${enf2}", "estimated_minutes": 5}
   ],
   "motivational_pulse": "..."
 }`;
@@ -134,10 +140,10 @@ Respond ONLY with valid JSON, no other text:
     const validTypes = ["non_negotiable", "secondary", "micro"];
     const missions: GeneratedMission[] = result.missions
       .filter((m: Record<string, unknown>) => m.task_text && validTypes.includes(m.task_type as string))
-      .map((m: Record<string, unknown>) => ({
+      .map((m: Record<string, unknown>, i: number) => ({
         task_text: String(m.task_text),
         task_type: m.task_type as "non_negotiable" | "secondary" | "micro",
-        enfoque_name: String(m.enfoque_name || ctx.enfoques[0]?.name || "General"),
+        enfoque_name: String(m.enfoque_name || ctx.enfoques[i % ctx.enfoques.length]?.name || "General"),
         estimated_minutes: Math.max(1, Math.min(60, Number(m.estimated_minutes) || 15)),
       }));
 

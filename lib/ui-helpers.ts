@@ -1,22 +1,23 @@
-export const AREA_EMOJI: Record<string, string> = {
-  business: "\u{1F4BC}", negocio: "\u{1F4BC}",
-  health: "\u{1F4AA}", salud: "\u{1F4AA}",
-  finance: "\u{1F4B0}", finanzas: "\u{1F4B0}",
-  relationships: "\u2764\uFE0F", relaciones: "\u2764\uFE0F",
-  learning: "\u{1F4DA}", aprendizaje: "\u{1F4DA}",
-  creative: "\u{1F3A8}", creativo: "\u{1F3A8}",
-  routine: "\u{1F305}", rutina: "\u{1F305}",
-  wellness: "\u{1F9D8}", bienestar: "\u{1F9D8}",
-  career: "\u{1F4C8}", carrera: "\u{1F4C8}",
-  spiritual: "\u{1F64F}", espiritual: "\u{1F64F}",
-  travel: "\u2708\uFE0F", viajes: "\u2708\uFE0F",
-  home: "\u{1F3E0}", hogar: "\u{1F3E0}",
-  other: "\u2728", otro: "\u2728",
+// Area colors for dot indicators (replaces emojis)
+export const AREA_COLORS: Record<string, string> = {
+  business: "#D4BE8C", negocio: "#D4BE8C",
+  health: "#8CB39A", salud: "#8CB39A",
+  finance: "#C4A86B", finanzas: "#C4A86B",
+  relationships: "#B3A18C", relaciones: "#B3A18C",
+  learning: "#A1B392", aprendizaje: "#A1B392",
+  creative: "#9CAF88", creativo: "#9CAF88",
+  routine: "#D4BE8C", rutina: "#D4BE8C",
+  wellness: "#8CB39A", bienestar: "#8CB39A",
+  career: "#C4A86B", carrera: "#C4A86B",
+  spiritual: "#B3A18C", espiritual: "#B3A18C",
+  travel: "#A1B392", viajes: "#A1B392",
+  home: "#9CAF88", hogar: "#9CAF88",
+  other: "#D4BE8C", otro: "#D4BE8C",
 };
 
-export function getEmoji(area: string): string {
+export function getAreaColor(area: string): string {
   const key = area.toLowerCase().trim();
-  return AREA_EMOJI[key] ?? "\u2728";
+  return AREA_COLORS[key] ?? "#D4BE8C";
 }
 
 export const ENFOQUE_COLORS = [
