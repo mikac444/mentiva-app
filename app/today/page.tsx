@@ -23,6 +23,8 @@ type AppState =
   | "generating"
   | "missions";
 
+const MAX_TASKS = 5;
+
 function getGreeting(lang: string) {
   const h = new Date().getHours();
   if (lang === "es") {
@@ -402,7 +404,7 @@ export default function TodayPage() {
 
   // ─── Add custom task ───
   async function addTask() {
-    if (!user?.id) return;
+    if (!user?.id || missions.length >= MAX_TASKS) return;
     const supabase = createClient();
     const today = new Date().toISOString().split("T")[0];
 
@@ -781,8 +783,8 @@ export default function TodayPage() {
                   </div>
                 )}
 
-                {/* Add task button */}
-                <button
+                {/* Add task button — hidden at MAX_TASKS */}
+                {missions.length < MAX_TASKS && <button
                   onClick={addTask}
                   style={{
                     width: "100%", padding: "0.75rem",
@@ -799,7 +801,7 @@ export default function TodayPage() {
                   }}
                 >
                   + {t("Add task", "Agregar tarea")}
-                </button>
+                </button>}
 
                 {/* Reset / change focus */}
                 <div style={{ textAlign: "center", marginTop: "1.5rem", paddingBottom: "1rem" }}>
