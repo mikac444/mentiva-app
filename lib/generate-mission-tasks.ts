@@ -7,6 +7,7 @@ export type MissionTaskContext = {
   userName: string;
   lang: string;
   currentStreak: number;
+  goalSteps?: { goal: string; steps: string[]; emotionalWhy?: string }[];
 };
 
 export type GeneratedMission = {
@@ -52,6 +53,16 @@ export async function generateMissionTasks(
   const enf0 = ctx.enfoques[0]?.name || "General";
   const enf1 = ctx.enfoques[1]?.name || (ctx.enfoques[0]?.name || "General");
 
+  // Build goal steps context from vision board analysis
+  const goalStepsBlock = (ctx.goalSteps && ctx.goalSteps.length > 0)
+    ? ctx.goalSteps.map(g => {
+        let block = `- ${g.goal}`;
+        if (g.steps.length > 0) block += `\n  Next steps: ${g.steps.join("; ")}`;
+        if (g.emotionalWhy) block += `\n  Why it matters: ${g.emotionalWhy}`;
+        return block;
+      }).join("\n")
+    : "";
+
   const prompt = `You are Menti, an AI life mentor. CRITICAL: ALL output must be in ${langName} — every task_text, enfoque_name, and motivational_pulse must be in ${langName}, no exceptions.
 
 NORTH STAR (the user's #1 overarching life goal):
@@ -59,7 +70,10 @@ ${ctx.northStar}
 
 WEEKLY FOCUSES (enfoques the user chose to work on):
 ${enfoqueList || "Not set yet — use the North Star to guide tasks."}
-
+${goalStepsBlock ? `
+VISION BOARD GOALS & NEXT STEPS (from the user's vision board — use these to make missions specific and relevant):
+${goalStepsBlock}
+` : ""}
 TODAY: ${dayOfWeek} ${isWeekend ? "(WEEKEND — lighter, more personal tasks)" : ""}
 CURRENT STREAK: ${ctx.currentStreak} consecutive days${ctx.currentStreak >= 7 ? " — impressive! Acknowledge this." : ""}
 ${nnSkippedYesterday ? "NOTE: Yesterday's non-negotiable was SKIPPED. Make today's slightly easier to rebuild momentum." : ""}
@@ -95,6 +109,8 @@ Also generate a MOTIVATIONAL PULSE — a 1-2 sentence message from Menti for the
 RULES:
 - Each task MUST include estimated_minutes (integer)
 - Each task MUST include enfoque_name as specified above
+- When vision board goals have specific next steps listed above, use those steps to inform your task suggestions — they reflect what the user actually wants to work on
+- Prioritize steps the user HASN'T done recently (check the completed/skipped lists above)
 - Be clear about WHAT to do, but NOT how or for how long — let the user decide the specifics
   GOOD: "Practice sign language"
   BAD: "Watch a 20-minute beginner sign language video on YouTube"

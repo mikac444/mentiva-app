@@ -125,6 +125,23 @@ export async function POST(request: NextRequest) {
     const currentStreak = await getStreak(supabase, userId);
     const sip = await getActiveSIP(userId);
 
+    // Fetch vision board analysis for goal-specific steps
+    const { data: board } = await supabase
+      .from("vision_boards")
+      .select("analysis")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const goalSteps = (board?.analysis?.goalsWithSteps ?? []).map(
+      (g: { goal: string; steps?: string[]; emotionalWhy?: string }) => ({
+        goal: g.goal,
+        steps: g.steps || [],
+        emotionalWhy: g.emotionalWhy,
+      })
+    );
+
     const result = await generateMissionTasks({
       northStar: northStar.goal_text,
       enfoques: enfoques.map((e: { name: string; id: string }) => ({ name: e.name, id: e.id })),
@@ -137,6 +154,7 @@ export async function POST(request: NextRequest) {
       userName,
       lang: lang || "en",
       currentStreak,
+      goalSteps,
     }, sip);
 
     const sortOrderMap: Record<string, number> = { non_negotiable: 0, secondary: 1, micro: 2 };
