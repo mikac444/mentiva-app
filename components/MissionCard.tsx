@@ -16,6 +16,7 @@ type Props = {
   onToggle: (id: string) => void;
   onEdit?: (id: string, newText: string) => void;
   onSwap?: (id: string) => void;
+  onDelete?: (id: string) => void;
   swapping?: boolean;
   justCompleted?: boolean;
   autoEdit?: boolean;
@@ -32,6 +33,7 @@ export default function MissionCard({
   onToggle,
   onEdit,
   onSwap,
+  onDelete,
   swapping,
   justCompleted,
   autoEdit,
@@ -101,12 +103,31 @@ export default function MissionCard({
         }}>
           {typeLabel}
         </span>
-        <span style={{
-          fontSize: "0.7rem", color: "rgba(255,255,255,0.3)",
-          fontWeight: 500,
-        }}>
-          {estimatedMinutes} min
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{
+            fontSize: "0.7rem", color: "rgba(255,255,255,0.3)",
+            fontWeight: 500,
+          }}>
+            {estimatedMinutes} min
+          </span>
+          {onDelete && !completed && (
+            <button
+              onClick={() => onDelete(id)}
+              style={{
+                background: "none", border: "none", padding: "2px",
+                cursor: "pointer", display: "flex", alignItems: "center",
+                color: "rgba(255,255,255,0.2)",
+                transition: "color 0.2s",
+              }}
+              aria-label={lang === "es" ? "Eliminar tarea" : "Delete task"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Task text + checkbox row */}

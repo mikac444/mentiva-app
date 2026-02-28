@@ -250,6 +250,13 @@ export default function TodayPage() {
     await supabase.from("daily_tasks").update({ task_text: newText }).eq("id", taskId);
   }
 
+  // ─── Delete task ───
+  async function deleteTask(taskId: string) {
+    setMissions((prev) => prev.filter((m) => m.id !== taskId));
+    const supabase = createClient();
+    await supabase.from("daily_tasks").delete().eq("id", taskId);
+  }
+
   // ─── Toggle task completion ───
   async function toggleTask(taskId: string) {
     const task = missions.find((m) => m.id === taskId);
@@ -724,6 +731,7 @@ export default function TodayPage() {
                         onToggle={toggleTask}
                         onEdit={editTask}
                         onSwap={swapTask}
+                        onDelete={deleteTask}
                         swapping={swappingId === m.id}
                         justCompleted={justCompleted === m.id}
                       />
