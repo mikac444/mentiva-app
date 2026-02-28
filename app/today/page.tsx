@@ -70,6 +70,7 @@ export default function TodayPage() {
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [swappingId, setSwappingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -251,16 +252,16 @@ export default function TodayPage() {
   }
 
   // ─── Delete task ───
-  async function deleteTask(taskId: string) {
-    const ok = window.confirm(
-      lang === "es"
-        ? "Estas segura de que quieres eliminar esta tarea?"
-        : "Are you sure you want to delete this task?"
-    );
-    if (!ok) return;
-    setMissions((prev) => prev.filter((m) => m.id !== taskId));
+  function deleteTask(taskId: string) {
+    setConfirmDeleteId(taskId);
+  }
+  async function confirmDelete() {
+    if (!confirmDeleteId) return;
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
+    setMissions((prev) => prev.filter((m) => m.id !== id));
     const supabase = createClient();
-    await supabase.from("daily_tasks").delete().eq("id", taskId);
+    await supabase.from("daily_tasks").delete().eq("id", id);
   }
 
   // ─── Toggle task completion ───
@@ -846,6 +847,66 @@ export default function TodayPage() {
           </>
         )}
       </div>
+
+      {/* ─── Delete confirmation modal ─── */}
+      {confirmDeleteId && (
+        <div
+          onClick={() => setConfirmDeleteId(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 60,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)",
+            animation: "fadeIn 0.2s ease",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 16, padding: "1.5rem", maxWidth: 300, width: "85%",
+              textAlign: "center",
+              animation: "celebPop 0.25s ease",
+            }}
+          >
+            <p style={{
+              fontSize: "0.9rem", color: "rgba(255,255,255,0.85)",
+              lineHeight: 1.5, marginBottom: "1.2rem", marginTop: 0,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              {t(
+                "Delete this task?",
+                "Eliminar esta tarea?"
+              )}
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                style={{
+                  flex: 1, padding: "0.65rem",
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 10, color: "rgba(255,255,255,0.6)",
+                  fontSize: "0.82rem", fontWeight: 500, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {t("Cancel", "Cancelar")}
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  flex: 1, padding: "0.65rem",
+                  background: "rgba(200,60,60,0.2)", border: "1px solid rgba(200,60,60,0.3)",
+                  borderRadius: 10, color: "#e06060",
+                  fontSize: "0.82rem", fontWeight: 600, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {t("Delete", "Eliminar")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Celebration overlay ─── */}
       {showCelebration && (
