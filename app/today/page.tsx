@@ -854,59 +854,82 @@ export default function TodayPage() {
           onClick={() => setConfirmDeleteId(null)}
           style={{
             position: "fixed", inset: 0, zIndex: 60,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            background: "rgba(10,10,12,0.5)", backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             animation: "fadeIn 0.2s ease",
+            padding: "1.5rem",
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 16, padding: "1.5rem", maxWidth: 300, width: "85%",
+              background: "linear-gradient(145deg, rgba(30,28,33,0.97), rgba(20,18,24,0.98))",
+              border: "1px solid rgba(212,190,140,0.12)",
+              borderRadius: 20, padding: "1.8rem 1.5rem 1.5rem", maxWidth: 340, width: "100%",
               textAlign: "center",
-              animation: "celebPop 0.25s ease",
+              animation: "slideUp 0.3s ease",
+              boxShadow: "0 -4px 40px rgba(0,0,0,0.4)",
             }}
           >
+            {/* Icon */}
+            <div style={{ marginBottom: "0.8rem" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(212,190,140,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </div>
+            <h3 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 400,
+              fontSize: "1.15rem", color: "rgba(255,255,255,0.9)",
+              margin: "0 0 0.4rem",
+            }}>
+              {t("Remove this task?", "Eliminar esta tarea?")}
+            </h3>
             <p style={{
-              fontSize: "0.9rem", color: "rgba(255,255,255,0.85)",
-              lineHeight: 1.5, marginBottom: "1.2rem", marginTop: 0,
+              fontSize: "0.78rem", color: "rgba(255,255,255,0.35)",
+              lineHeight: 1.5, margin: "0 0 1.3rem",
               fontFamily: "'DM Sans', sans-serif",
             }}>
-              {t(
-                "Delete this task?",
-                "Eliminar esta tarea?"
-              )}
+              {t("This action can't be undone.", "Esta accion no se puede deshacer.")}
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  width: "100%", padding: "0.75rem",
+                  background: "rgba(212,190,140,0.1)", border: "1px solid rgba(212,190,140,0.2)",
+                  borderRadius: 12, color: "#D4BE8C",
+                  fontSize: "0.84rem", fontWeight: 600, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {t("Yes, remove", "Si, eliminar")}
+              </button>
               <button
                 onClick={() => setConfirmDeleteId(null)}
                 style={{
-                  flex: 1, padding: "0.65rem",
-                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 10, color: "rgba(255,255,255,0.6)",
+                  width: "100%", padding: "0.75rem",
+                  background: "transparent", border: "none",
+                  borderRadius: 12, color: "rgba(255,255,255,0.4)",
                   fontSize: "0.82rem", fontWeight: 500, cursor: "pointer",
                   fontFamily: "'DM Sans', sans-serif",
                 }}
               >
                 {t("Cancel", "Cancelar")}
               </button>
-              <button
-                onClick={confirmDelete}
-                style={{
-                  flex: 1, padding: "0.65rem",
-                  background: "rgba(200,60,60,0.2)", border: "1px solid rgba(200,60,60,0.3)",
-                  borderRadius: 10, color: "#e06060",
-                  fontSize: "0.82rem", fontWeight: 600, cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
-                {t("Delete", "Eliminar")}
-              </button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       {/* ─── Celebration overlay ─── */}
       {showCelebration && (
