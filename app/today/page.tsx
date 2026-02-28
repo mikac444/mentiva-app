@@ -252,6 +252,12 @@ export default function TodayPage() {
 
   // ─── Delete task ───
   async function deleteTask(taskId: string) {
+    const ok = window.confirm(
+      lang === "es"
+        ? "Estas segura de que quieres eliminar esta tarea?"
+        : "Are you sure you want to delete this task?"
+    );
+    if (!ok) return;
     setMissions((prev) => prev.filter((m) => m.id !== taskId));
     const supabase = createClient();
     await supabase.from("daily_tasks").delete().eq("id", taskId);
