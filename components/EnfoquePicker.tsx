@@ -20,7 +20,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
   // Filter out the North Star from the suggestions (it's already chosen)
   const suggestions = goals
     .filter(g => g.goal !== northStarGoal)
-    .map(g => g.area || g.goal.split(" ").slice(0, 3).join(" "));
+    .map(g => g.goal);
 
   // Deduplicate
   const uniqueSuggestions = suggestions.filter((s, i) => suggestions.indexOf(s) === i);
@@ -102,7 +102,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
       </div>
 
       {/* Suggestion chips */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: "1rem" }}>
         {uniqueSuggestions.map((name, i) => {
           const isSelected = selected.includes(i);
           const color = getEnfoqueColor(i);
@@ -112,15 +112,16 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
               onClick={() => toggleSuggestion(i)}
               disabled={!isSelected && !canAdd}
               style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "0.55rem 1rem",
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "0.7rem 1rem",
                 background: isSelected ? `${color}22` : "rgba(255,255,255,0.05)",
                 border: isSelected ? `1.5px solid ${color}` : "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 30, cursor: isSelected || canAdd ? "pointer" : "default",
+                borderRadius: 12, cursor: isSelected || canAdd ? "pointer" : "default",
                 fontSize: "0.82rem", fontWeight: 500,
                 color: isSelected ? color : "rgba(255,255,255,0.6)",
                 transition: "all 0.2s",
                 opacity: !isSelected && !canAdd ? 0.4 : 1,
+                textAlign: "left",
               }}
             >
               {name}

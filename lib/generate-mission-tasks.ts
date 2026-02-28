@@ -48,17 +48,16 @@ export async function generateMissionTasks(
   const langName = ctx.lang === "es" ? "SPANISH" : "ENGLISH";
   const enfoqueList = ctx.enfoques.map(e => e.name).join(", ");
 
-  // Assign one enfoque per mission type so all enfoques are represented
+  // Enfoques for secondary + micro missions (North Star drives the non-negotiable)
   const enf0 = ctx.enfoques[0]?.name || "General";
-  const enf1 = ctx.enfoques[1]?.name || enf0;
-  const enf2 = ctx.enfoques[2]?.name || enf1;
+  const enf1 = ctx.enfoques[1]?.name || (ctx.enfoques[0]?.name || "General");
 
   const prompt = `You are Menti, an AI life mentor. CRITICAL: ALL output must be in ${langName} — every task_text, enfoque_name, and motivational_pulse must be in ${langName}, no exceptions.
 
-NORTH STAR (the user's overarching life goal):
+NORTH STAR (the user's #1 overarching life goal):
 ${ctx.northStar}
 
-WEEKLY FOCUSES (enfoques):
+WEEKLY FOCUSES (enfoques the user chose to work on):
 ${enfoqueList || "Not set yet — use the North Star to guide tasks."}
 
 TODAY: ${dayOfWeek} ${isWeekend ? "(WEEKEND — lighter, more personal tasks)" : ""}
@@ -71,44 +70,48 @@ ${completedRecently.length > 0 ? completedRecently.slice(0, 10).map(t => `[DONE]
 RECENTLY SKIPPED (last 7 days):
 ${skippedRecently.length > 0 ? skippedRecently.slice(0, 5).map(t => `[SKIPPED] ${t.task_text}`).join("\n") : "None."}
 
-GENERATE EXACTLY 3 MISSIONS. EACH MISSION MUST USE A DIFFERENT ENFOQUE:
+GENERATE EXACTLY 3 MISSIONS:
 
 1. NON-NEGOTIABLE (task_type: "non_negotiable")
-   - enfoque_name: MUST be "${enf0}"
-   - The MOST important task advancing their North Star
-   - 15-30 minutes${isWeekend ? " (or lighter, 10-15 min)" : ""}
-   - Must feel meaningful and achievable
+   - enfoque_name: "${ctx.northStar}"
+   - This task MUST directly advance the NORTH STAR: "${ctx.northStar}"
+   - The single most important action today for their #1 goal
    - If they do NOTHING else today, this is the one
+   - estimated_minutes: 15-30${isWeekend ? " (or lighter, 10-15 min)" : ""}
 
 2. SECONDARY (task_type: "secondary")
-   - enfoque_name: MUST be "${enf1}"
-   - Supporting task for this enfoque
-   - 10-20 minutes
+   - enfoque_name: MUST be "${enf0}"
+   - A task for this weekly focus area
+   - estimated_minutes: 10-20
    - Should feel productive but not overwhelming
 
 3. MICRO WIN (task_type: "micro")
-   - enfoque_name: MUST be "${enf2}"
-   - Quick task, UNDER 5 minutes
+   - enfoque_name: MUST be "${enf1}"
+   - Quick task for this weekly focus area, UNDER 5 minutes
    - Builds momentum, easy dopamine hit
-   - Examples: "Send that one message", "Do 10 pushups", "Write 3 gratitude items"
 
 Also generate a MOTIVATIONAL PULSE — a 1-2 sentence message from Menti for the bottom of the Today page. Make it warm, specific to their North Star or current streak. Not generic motivational quotes — reference THEIR goals.
 
 RULES:
 - Each task MUST include estimated_minutes (integer)
-- Each task MUST include enfoque_name — use EXACTLY the enfoque names assigned above for each mission
-- EVERY enfoque must appear exactly once — do NOT repeat the same enfoque
-- If they skipped a similar task before, make it SMALLER
-- Be specific: not "work on business" but "spend 20 min outlining 3 product features"
+- Each task MUST include enfoque_name as specified above
+- Be clear about WHAT to do, but NOT how or for how long — let the user decide the specifics
+  GOOD: "Practice sign language"
+  BAD: "Watch a 20-minute beginner sign language video on YouTube"
+  GOOD: "Go for a run with your dog"
+  BAD: "Take your dog for a 20-minute walk then do a 5-minute jog around the block"
+- Use the user's OWN WORDS from their enfoque names when possible
+- Do NOT assume specific apps, tools, methods, locations, or durations
+- If they skipped a similar task before, make it SMALLER or different
 - ALL text in ${langName}
 - NO emojis in task text or pulse
 
 Respond ONLY with valid JSON, no other text:
 {
   "missions": [
-    {"task_text": "...", "task_type": "non_negotiable", "enfoque_name": "${enf0}", "estimated_minutes": 25},
-    {"task_text": "...", "task_type": "secondary", "enfoque_name": "${enf1}", "estimated_minutes": 15},
-    {"task_text": "...", "task_type": "micro", "enfoque_name": "${enf2}", "estimated_minutes": 5}
+    {"task_text": "...", "task_type": "non_negotiable", "enfoque_name": "${ctx.northStar}", "estimated_minutes": 25},
+    {"task_text": "...", "task_type": "secondary", "enfoque_name": "${enf0}", "estimated_minutes": 15},
+    {"task_text": "...", "task_type": "micro", "enfoque_name": "${enf1}", "estimated_minutes": 5}
   ],
   "motivational_pulse": "..."
 }`;
@@ -138,12 +141,19 @@ Respond ONLY with valid JSON, no other text:
     }
 
     const validTypes = ["non_negotiable", "secondary", "micro"];
+    // Fallback enfoque mapping: non_negotiable=North Star, secondary=enf[0], micro=enf[1]
+    const fallbackEnfoque = (taskType: string, index: number) => {
+      if (taskType === "non_negotiable") return ctx.northStar;
+      if (taskType === "secondary") return ctx.enfoques[0]?.name || "General";
+      if (taskType === "micro") return ctx.enfoques[1]?.name || ctx.enfoques[0]?.name || "General";
+      return ctx.enfoques[index % ctx.enfoques.length]?.name || "General";
+    };
     const missions: GeneratedMission[] = result.missions
       .filter((m: Record<string, unknown>) => m.task_text && validTypes.includes(m.task_type as string))
       .map((m: Record<string, unknown>, i: number) => ({
         task_text: String(m.task_text),
         task_type: m.task_type as "non_negotiable" | "secondary" | "micro",
-        enfoque_name: String(m.enfoque_name || ctx.enfoques[i % ctx.enfoques.length]?.name || "General"),
+        enfoque_name: String(m.enfoque_name || fallbackEnfoque(String(m.task_type), i)),
         estimated_minutes: Math.max(1, Math.min(60, Number(m.estimated_minutes) || 15)),
       }));
 

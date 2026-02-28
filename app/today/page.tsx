@@ -19,6 +19,7 @@ type AppState =
   | "no-board"
   | "no-north-star"
   | "no-enfoques"
+  | "choose-mode"
   | "generating"
   | "missions";
 
@@ -238,6 +239,15 @@ export default function TodayPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
+  // ─── Edit task text ───
+  async function editTask(taskId: string, newText: string) {
+    setMissions((prev) =>
+      prev.map((m) => (m.id === taskId ? { ...m, task_text: newText } : m))
+    );
+    const supabase = createClient();
+    await supabase.from("daily_tasks").update({ task_text: newText }).eq("id", taskId);
+  }
+
   // ─── Toggle task completion ───
   async function toggleTask(taskId: string) {
     const task = missions.find((m) => m.id === taskId);
@@ -341,10 +351,74 @@ export default function TodayPage() {
         body: JSON.stringify({ enfoqueNames, northStarId }),
       });
 
-      // Now generate missions
-      await loadMissions(false);
+      // Show choice: Menti suggests vs write your own
+      setAppState("choose-mode");
     } catch (err) {
       console.error("Failed to save enfoques:", err);
+    }
+  }
+
+  // ─── Choose mode handlers ───
+  async function chooseMentiSuggests() {
+    await loadMissions(false);
+  }
+
+  async function chooseWriteOwn() {
+    if (!user?.id) return;
+    const supabase = createClient();
+    const today = new Date().toISOString().split("T")[0];
+
+    // Create 3 empty tasks for the user to fill in
+    const types = ["non_negotiable", "secondary", "micro"] as const;
+    const enfoques = [northStarGoal, ...(await getEnfoqueNames())];
+
+    const inserts = types.map((taskType, i) => ({
+      user_id: user.id,
+      task_text: "",
+      task_type: taskType,
+      enfoque_name: enfoques[i] || enfoques[0] || "General",
+      estimated_minutes: taskType === "non_negotiable" ? 25 : taskType === "secondary" ? 15 : 5,
+      completed: false,
+      date: today,
+      goal_name: enfoques[i] || enfoques[0] || "General",
+    }));
+
+    const { data } = await supabase.from("daily_tasks").insert(inserts).select();
+    if (data) {
+      setMissions(data as MissionTask[]);
+    }
+    setAppState("missions");
+  }
+
+  async function getEnfoqueNames(): Promise<string[]> {
+    try {
+      const res = await fetch("/api/enfoques");
+      const data = await res.json();
+      return (data.enfoques || []).map((e: { name: string }) => e.name);
+    } catch {
+      return [];
+    }
+  }
+
+  // ─── Add custom task ───
+  async function addTask() {
+    if (!user?.id) return;
+    const supabase = createClient();
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data } = await supabase.from("daily_tasks").insert({
+      user_id: user.id,
+      task_text: "",
+      task_type: "secondary",
+      enfoque_name: "General",
+      estimated_minutes: 15,
+      completed: false,
+      date: today,
+      goal_name: "General",
+    }).select().single();
+
+    if (data) {
+      setMissions((prev) => [...prev, data as MissionTask]);
     }
   }
 
@@ -457,6 +531,100 @@ export default function TodayPage() {
           </div>
         )}
 
+        {/* ─── CHOOSE MODE ─── */}
+        {appState === "choose-mode" && (
+          <div style={{ animation: "fadeIn 0.3s ease", marginTop: "1.5rem" }}>
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: "50%", margin: "0 auto 1rem",
+                background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.3)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#D4BE8C" }} />
+              </div>
+              <h2 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)",
+                lineHeight: 1.2, marginBottom: "0.4rem",
+              }}>
+                {t("How do you want to start today?", "Como quieres empezar hoy?")}
+              </h2>
+              <p style={{
+                fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
+                maxWidth: 300, margin: "0 auto",
+              }}>
+                {t(
+                  "Choose how you'd like to plan your day.",
+                  "Elige como quieres planificar tu dia."
+                )}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 340, margin: "0 auto" }}>
+              {/* Option 1: Menti suggests */}
+              <button
+                onClick={chooseMentiSuggests}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "1.1rem 1.2rem", textAlign: "left",
+                  background: "rgba(212,190,140,0.1)",
+                  border: "1.5px solid rgba(212,190,140,0.3)",
+                  borderRadius: 14, cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: "rgba(212,190,140,0.15)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: "0.92rem", fontWeight: 600, color: "rgba(255,255,255,0.9)", marginBottom: 2 }}>
+                    {t("Menti plans my day", "Menti planifica mi dia")}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
+                    {t("Get personalized task suggestions", "Recibe sugerencias personalizadas")}
+                  </div>
+                </div>
+              </button>
+
+              {/* Option 2: Write your own */}
+              <button
+                onClick={chooseWriteOwn}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "1.1rem 1.2rem", textAlign: "left",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 14, cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: "rgba(255,255,255,0.06)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: "0.92rem", fontWeight: 600, color: "rgba(255,255,255,0.9)", marginBottom: 2 }}>
+                    {t("I'll write my own", "Yo escribo las mias")}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
+                    {t("Set your own tasks for today", "Define tus propias tareas de hoy")}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ─── GENERATING ─── */}
         {appState === "generating" && (
           <div style={{ textAlign: "center", padding: "3rem 1rem", marginTop: "1.5rem" }}>
@@ -552,6 +720,7 @@ export default function TodayPage() {
                         completed={m.completed}
                         lang={lang}
                         onToggle={toggleTask}
+                        onEdit={editTask}
                         onSwap={swapTask}
                         swapping={swappingId === m.id}
                         justCompleted={justCompleted === m.id}
@@ -611,6 +780,26 @@ export default function TodayPage() {
                     {completed}/{total} {t("completed", "completadas")}
                   </div>
                 )}
+
+                {/* Add task button */}
+                <button
+                  onClick={addTask}
+                  style={{
+                    width: "100%", padding: "0.75rem",
+                    marginTop: "0.8rem",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px dashed rgba(255,255,255,0.12)",
+                    borderRadius: 12,
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "0.82rem", fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "all 0.2s",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}
+                >
+                  + {t("Add task", "Agregar tarea")}
+                </button>
 
                 {/* Reset / change focus */}
                 <div style={{ textAlign: "center", marginTop: "1.5rem", paddingBottom: "1rem" }}>

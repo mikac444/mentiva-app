@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { TASK_TYPE_CONFIG } from "@/lib/ui-helpers";
 
 type TaskType = "non_negotiable" | "secondary" | "micro";
@@ -13,9 +14,11 @@ type Props = {
   completed: boolean;
   lang: string;
   onToggle: (id: string) => void;
+  onEdit?: (id: string, newText: string) => void;
   onSwap?: (id: string) => void;
   swapping?: boolean;
   justCompleted?: boolean;
+  autoEdit?: boolean;
 };
 
 export default function MissionCard({
@@ -27,13 +30,45 @@ export default function MissionCard({
   completed,
   lang,
   onToggle,
+  onEdit,
   onSwap,
   swapping,
   justCompleted,
+  autoEdit,
 }: Props) {
   const config = TASK_TYPE_CONFIG[taskType];
   const typeLabel = lang === "es" ? config.labelEs : config.labelEn;
   const canSwap = taskType !== "non_negotiable" && !completed && onSwap;
+
+  const [editing, setEditing] = useState(autoEdit ?? false);
+  const [editText, setEditText] = useState(taskText);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(editText.length, editText.length);
+    }
+  }, [editing, editText.length]);
+
+  function startEdit() {
+    if (completed || !onEdit) return;
+    setEditText(taskText);
+    setEditing(true);
+  }
+
+  function saveEdit() {
+    const trimmed = editText.trim();
+    if (trimmed && trimmed !== taskText && onEdit) {
+      onEdit(id, trimmed);
+    }
+    setEditing(false);
+  }
+
+  function cancelEdit() {
+    setEditText(taskText);
+    setEditing(false);
+  }
 
   return (
     <div
@@ -101,16 +136,47 @@ export default function MissionCard({
           )}
         </button>
 
-        {/* Task text */}
-        <p style={{
-          flex: 1, margin: 0,
-          fontSize: "0.88rem", lineHeight: 1.45,
-          color: completed ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.88)",
-          textDecoration: completed ? "line-through" : "none",
-          fontWeight: 400,
-        }}>
-          {taskText}
-        </p>
+        {/* Task text — tap to edit */}
+        {editing ? (
+          <textarea
+            ref={inputRef}
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onBlur={saveEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveEdit(); }
+              if (e.key === "Escape") cancelEdit();
+            }}
+            style={{
+              flex: 1, margin: 0, padding: "0 0 4px",
+              fontSize: "0.88rem", lineHeight: 1.45,
+              color: "rgba(255,255,255,0.95)",
+              fontWeight: 400,
+              background: "transparent",
+              border: "none",
+              borderBottom: "1px solid rgba(212,190,140,0.4)",
+              outline: "none",
+              fontFamily: "inherit",
+              resize: "none",
+              minHeight: 24,
+            }}
+            rows={2}
+          />
+        ) : (
+          <p
+            onClick={startEdit}
+            style={{
+              flex: 1, margin: 0,
+              fontSize: "0.88rem", lineHeight: 1.45,
+              color: completed ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.88)",
+              textDecoration: completed ? "line-through" : "none",
+              fontWeight: 400,
+              cursor: !completed && onEdit ? "text" : "default",
+            }}
+          >
+            {taskText || (lang === "es" ? "Toca para escribir tu tarea..." : "Tap to write your task...")}
+          </p>
+        )}
       </div>
 
       {/* Bottom row: enfoque + swap */}
