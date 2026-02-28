@@ -189,6 +189,45 @@ export default function TodayPage() {
     });
   }, [router, initialize]);
 
+  // Reset week — go back to North Star picker
+  async function resetWeek() {
+    if (!user?.id) return;
+    const supabase = createClient();
+
+    // Deactivate current North Star
+    await supabase
+      .from("north_stars")
+      .update({ is_active: false })
+      .eq("user_id", user.id)
+      .eq("is_active", true);
+
+    // Delete this week's enfoques
+    const now = new Date();
+    const day = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((day + 6) % 7));
+    const weekStart = monday.toISOString().split("T")[0];
+    await supabase
+      .from("enfoques")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("week_start", weekStart);
+
+    // Delete today's missions
+    const today = now.toISOString().split("T")[0];
+    await supabase
+      .from("daily_tasks")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("date", today);
+
+    // Reset state
+    setMissions([]);
+    setNorthStarGoal("");
+    setMotivationalPulse("");
+    setAppState("no-north-star");
+  }
+
   // Language change detection — regenerate if needed
   useEffect(() => {
     if (appState !== "missions" || missions.length === 0) return;
@@ -572,6 +611,21 @@ export default function TodayPage() {
                     {completed}/{total} {t("completed", "completadas")}
                   </div>
                 )}
+
+                {/* Reset / change focus */}
+                <div style={{ textAlign: "center", marginTop: "1.5rem", paddingBottom: "1rem" }}>
+                  <button
+                    onClick={resetWeek}
+                    style={{
+                      background: "none", border: "none",
+                      fontSize: "0.75rem", color: "rgba(255,255,255,0.2)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      textDecoration: "underline", textUnderlineOffset: 3,
+                    }}
+                  >
+                    {t("Change my focus", "Cambiar mi enfoque")}
+                  </button>
+                </div>
               </div>
             )}
 
