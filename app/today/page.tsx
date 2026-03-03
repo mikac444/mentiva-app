@@ -101,13 +101,29 @@ export default function TodayPage() {
       return;
     }
 
-    // Combine goals from ALL vision boards
+    // Combine goals from ALL vision boards, deduplicate, and limit for NorthStarPicker
     const allGoals: GoalWithSteps[] = [];
     for (const board of boards) {
       const goals: GoalWithSteps[] = board.analysis?.goalsWithSteps ?? [];
       allGoals.push(...goals);
     }
-    setBoardGoals(allGoals);
+
+    // Deduplicate by normalized goal text and pick diverse set (max 5)
+    const seen = new Set<string>();
+    const areaCounts: Record<string, number> = {};
+    const curated: GoalWithSteps[] = [];
+    for (const g of allGoals) {
+      const key = g.goal.toLowerCase().trim();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const area = g.area || "general";
+      const count = areaCounts[area] || 0;
+      if (count >= 2) continue; // max 2 per area for diversity
+      areaCounts[area] = count + 1;
+      curated.push(g);
+      if (curated.length >= 5) break;
+    }
+    setBoardGoals(curated);
     setBoardId(boards[0].id);
 
     // 2. Check if user has a North Star
