@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { getActiveSIP } from "@/lib/sip";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 const ANALYSIS_PROMPT = `You are Menti, Mentiva's AI mentor. You are analyzing a vision board image. Look at the images, words, colors, and layout. Do not identify yourself as Claude or any other name—only as Menti.
 
@@ -128,6 +129,10 @@ const MEDIA_TYPES = [
 
 export async function POST(request: Request) {
   try {
+    const serverSupabase = await createServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -145,7 +150,6 @@ export async function POST(request: Request) {
       enhance,
       existingGoals,
       additionalGoals,
-      userId,
     } = body as {
       image?: string;
       mediaType?: string;
@@ -154,10 +158,9 @@ export async function POST(request: Request) {
       enhance?: boolean;
       existingGoals?: string;
       additionalGoals?: string;
-      userId?: string;
     };
 
-    const sip = userId ? await getActiveSIP(userId) : null;
+    const sip = await getActiveSIP(user.id);
 
     const anthropic = new Anthropic({ apiKey });
     const langLabel = lang === "es" ? "Spanish" : "English";

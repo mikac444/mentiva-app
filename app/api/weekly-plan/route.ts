@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getActiveSIP } from "@/lib/sip";
 
@@ -15,12 +16,16 @@ function getMondayDate(): string {
 
 export async function POST(request: Request) {
   try {
-    const { userId, userName, lang, focusGoals, context, weekStart } = await request.json();
-    if (!userId || !focusGoals || focusGoals.length === 0) {
-      return NextResponse.json({ error: "userId and focusGoals required" }, { status: 400 });
+    const serverSupabase = await createServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { userName, lang, focusGoals, context, weekStart } = await request.json();
+    if (!focusGoals || focusGoals.length === 0) {
+      return NextResponse.json({ error: "focusGoals required" }, { status: 400 });
     }
 
-    const sip = await getActiveSIP(userId);
+    const sip = await getActiveSIP(user.id);
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,16 +35,16 @@ export async function POST(request: Request) {
     // Save weekly plan
     const mondayDate = weekStart || getMondayDate();
     await supabase.from("weekly_plans").upsert({
-      user_id: userId,
+      user_id: user.id,
       week_start: mondayDate,
       focus_goals: focusGoals,
       context: context || {},
     }, { onConflict: "user_id,week_start" });
 
     // Update focus areas
-    await supabase.from("user_focus_areas").delete().eq("user_id", userId);
+    await supabase.from("user_focus_areas").delete().eq("user_id", user.id);
     await supabase.from("user_focus_areas").insert(
-      focusGoals.map((g: string) => ({ user_id: userId, area: g }))
+      focusGoals.map((g: string) => ({ user_id: user.id, area: g }))
     );
 
     // Get recent tasks
@@ -47,11 +52,11 @@ export async function POST(request: Request) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const { data: recentTasks } = await supabase
       .from("daily_tasks").select("task_text, goal_name, completed, date")
-      .eq("user_id", userId).gte("date", weekAgo.toISOString().split("T")[0]);
+      .eq("user_id", user.id).gte("date", weekAgo.toISOString().split("T")[0]);
 
     // Delete today's tasks and regenerate
     const today = new Date().toISOString().split("T")[0];
-    await supabase.from("daily_tasks").delete().eq("user_id", userId).eq("date", today);
+    await supabase.from("daily_tasks").delete().eq("user_id", user.id).eq("date", today);
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
@@ -137,7 +142,7 @@ Respond ONLY with valid JSON array:
     const orderedTasks = [...coreTasks, ...bonusTasks];
 
     const toInsert = orderedTasks.map((t: any) => ({
-      user_id: userId,
+      user_id: user.id,
       task_text: String(t.task_text || ""),
       goal_name: String(t.goal_name || "General"),
       completed: false,

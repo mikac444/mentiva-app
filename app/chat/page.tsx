@@ -21,16 +21,16 @@ type Conversation = {
   updated_at: string;
 };
 
-function formatConversationDate(iso: string) {
+function formatConversationDate(iso: string, lang: string) {
   try {
     const d = new Date(iso);
     const now = new Date();
     const sameDay = d.toDateString() === now.toDateString();
-    if (sameDay) return "Today";
+    if (sameDay) return lang === "es" ? "Hoy" : "Today";
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+    if (d.toDateString() === yesterday.toDateString()) return lang === "es" ? "Ayer" : "Yesterday";
+    return d.toLocaleDateString(lang === "es" ? "es" : "en", { month: "short", day: "numeric", year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
   } catch {
     return iso;
   }
@@ -65,7 +65,7 @@ function BouncingDots() {
 
 export default function ChatPage() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -444,7 +444,7 @@ export default function ChatPage() {
                   style={{ color: currentConversationId === conv.id ? "white" : "rgba(255,255,255,0.7)" }}
                 >
                   <p className="truncate font-medium">{conv.title || t("New chat", "Nuevo chat")}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{formatConversationDate(conv.updated_at)}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{formatConversationDate(conv.updated_at, lang)}</p>
                 </button>
                 <button
                   type="button"
@@ -454,7 +454,7 @@ export default function ChatPage() {
                   }}
                   className="shrink-0 p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ color: "#e57373" }}
-                  title="Delete conversation"
+                  title={t("Delete conversation", "Eliminar conversaci\u00f3n")}
                 >
                   <TrashIcon className="w-4 h-4" />
                 </button>
@@ -481,7 +481,7 @@ export default function ChatPage() {
         {conversationToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)" }}>
             <div className="rounded-xl p-5 shadow-xl max-w-sm w-full" style={glassStyle}>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>Delete this conversation?</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>{t("Delete this conversation?", "\u00bfEliminar esta conversaci\u00f3n?")}</p>
               <div className="mt-4 flex gap-3 justify-end">
                 <button
                   type="button"
@@ -490,7 +490,7 @@ export default function ChatPage() {
                   className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                   style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
                 >
-                  Cancel
+                  {t("Cancel", "Cancelar")}
                 </button>
                 <button
                   type="button"
@@ -498,7 +498,7 @@ export default function ChatPage() {
                   disabled={deletingConversation}
                   className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors disabled:opacity-50"
                 >
-                  {deletingConversation ? "Deleting…" : "Delete"}
+                  {deletingConversation ? t("Deleting...", "Eliminando...") : t("Delete", "Eliminar")}
                 </button>
               </div>
             </div>
@@ -518,7 +518,7 @@ export default function ChatPage() {
           <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4 min-h-0">
             {loadingHistory ? (
               <div className="flex items-center justify-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-                Loading…
+                {t("Loading...", "Cargando...")}
               </div>
             ) : (
               <>
@@ -540,7 +540,7 @@ export default function ChatPage() {
                       }}
                     >
                       <p className="text-sm font-medium mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>
-                        {msg.role === "user" ? "You" : "Menti"}
+                        {msg.role === "user" ? t("You", "T\u00fa") : "Menti"}
                       </p>
                       <p className="text-sm sm:text-base whitespace-pre-wrap break-words">
                         {msg.content}
@@ -597,7 +597,7 @@ export default function ChatPage() {
               className="shrink-0 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
               style={{ background: "#FFFFFF", color: "#4A5C3F" }}
             >
-              Send
+              {t("Send", "Enviar")}
             </button>
           </form>
         </main>

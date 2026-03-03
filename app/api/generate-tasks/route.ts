@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import { generateDailyTasks } from "@/lib/generate-tasks";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { getActiveSIP } from "@/lib/sip";
@@ -8,12 +9,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { userId, userName, lang } = await request.json();
-    if (!userId) {
-      return NextResponse.json({ error: "userId required" }, { status: 400 });
-    }
+    const serverSupabase = await createServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const sip = await getActiveSIP(userId);
+    const { userName, lang } = await request.json();
+
+    const sip = await getActiveSIP(user.id);
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
     const { data: existingTasks } = await supabase
       .from("daily_tasks")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .eq("date", today);
 
     if (existingTasks && existingTasks.length > 0) {
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
     const { data: boards } = await supabase
       .from("vision_boards")
       .select("analysis")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(5);
 
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
     const { data: focusData } = await supabase
       .from("user_focus_areas")
       .select("area")
-      .eq("user_id", userId);
+      .eq("user_id", user.id);
 
     const focusAreas = (focusData ?? []).map(f => f.area);
 
@@ -59,7 +61,7 @@ export async function POST(request: Request) {
     const { data: recentTasks } = await supabase
       .from("daily_tasks")
       .select("task_text, goal_name, completed, date")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .gte("date", weekAgo.toISOString().split("T")[0])
       .order("date", { ascending: false });
 
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
 
     // Save to database
     const toInsert = generated.map(t => ({
-      user_id: userId,
+      user_id: user.id,
       task_text: t.task_text,
       goal_name: t.goal_name,
       completed: false,

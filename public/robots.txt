@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /chat
+Disallow: /today
+Disallow: /upload
+Disallow: /welcome
+
+Sitemap: https://mentiva.app/sitemap.xml

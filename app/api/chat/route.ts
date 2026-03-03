@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { getActiveSIP } from "@/lib/sip";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -103,6 +104,10 @@ export function GET() {
 
 export async function POST(request: Request) {
   try {
+    const serverSupabase = await createServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -112,12 +117,11 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { messages = [], visionBoard = null, focusAreas = [], recentTasks = [], userId = null, northStar = null, streakCount = 0 } = body as {
+    const { messages = [], visionBoard = null, focusAreas = [], recentTasks = [], northStar = null, streakCount = 0 } = body as {
       messages?: ChatMessage[];
       visionBoard?: AnalysisResult | null;
       focusAreas?: string[];
       recentTasks?: { task_text: string; completed: boolean; date: string }[];
-      userId?: string | null;
       northStar?: string | null;
       streakCount?: number;
     };
@@ -129,7 +133,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const sip = userId ? await getActiveSIP(userId) : null;
+    const sip = await getActiveSIP(user.id);
 
     const anthropic = new Anthropic({ apiKey });
     const baseSystemPrompt = buildSystemPrompt(visionBoard, focusAreas, recentTasks, northStar, streakCount);
@@ -153,7 +157,7 @@ export async function POST(request: Request) {
       .join("");
 
     // Detect focus areas from the user's latest message
-    if (userId && messages.length > 0) {
+    if (user.id && messages.length > 0) {
       const lastUserMsg = messages[messages.length - 1];
       if (lastUserMsg.role === "user") {
         try {
@@ -204,12 +208,12 @@ Respond with ONLY the JSON array, nothing else.`
             const { data: existingAreas } = await supabase
               .from("user_focus_areas")
               .select("area")
-              .eq("user_id", userId);
+              .eq("user_id", user.id);
             const existingSet = new Set((existingAreas ?? []).map(f => f.area.toLowerCase()));
             const newAreas = parsed.filter((a: string) => !existingSet.has(String(a).toLowerCase()));
             if (newAreas.length > 0) {
               await supabase.from("user_focus_areas").insert(
-                newAreas.map((a: string) => ({ user_id: userId, area: String(a) }))
+                newAreas.map((a: string) => ({ user_id: user.id, area: String(a) }))
               );
               console.log("Focus areas added:", newAreas);
             }

@@ -267,7 +267,7 @@ export default function UploadPage() {
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.id) {
-          const res = await fetch(`/api/profile?userId=${session.user.id}`);
+          const res = await fetch(`/api/profile`);
           const data = await res.json();
           if (data.profile?.journey_stage) {
             setJourneyStage(data.profile.journey_stage);

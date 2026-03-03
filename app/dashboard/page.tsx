@@ -197,7 +197,16 @@ export default function DashboardPage() {
           </Link>
           {loading ? (
             <div className="col-span-full flex items-center justify-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Loading…
+              {t("Loading...", "Cargando...")}
+            </div>
+          ) : boards.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center space-y-3">
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {t("No vision boards yet.", "A\u00fan no tienes tableros.")}
+              </p>
+              <p className="text-xs max-w-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {t("Upload your first vision board to get started with Mentiva.", "Sube tu primer tablero de visi\u00f3n para comenzar con Mentiva.")}
+              </p>
             </div>
           ) : (
             boards.map((board) => (
@@ -223,7 +232,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-2 min-h-0 flex flex-col justify-center">
                   <p className="text-sm font-medium truncate" style={{ color: "rgba(255,255,255,0.9)" }} title={board.title || "Untitled"}>
-                    {board.title || "Untitled board"}
+                    {board.title || t("Untitled board", "Tablero sin t\u00edtulo")}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
                     {formatDate(board.created_at)}
@@ -249,7 +258,7 @@ export default function DashboardPage() {
             <div className="sticky top-0 flex items-center justify-between gap-4 p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
               <div className="min-w-0">
                 <p className="font-medium truncate" style={{ color: "rgba(255,255,255,0.9)" }}>
-                  {selectedBoard.title || "Untitled board"}
+                  {selectedBoard.title || t("Untitled board", "Tablero sin t\u00edtulo")}
                 </p>
                 <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                   {formatDate(selectedBoard.created_at)}
@@ -261,7 +270,7 @@ export default function DashboardPage() {
                   onClick={() => setShowDeleteConfirm(true)}
                   className="p-2 rounded-lg transition-colors"
                   style={{ color: "#e57373" }}
-                  title="Delete board"
+                  title={t("Delete board", "Eliminar tablero")}
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -271,7 +280,7 @@ export default function DashboardPage() {
                   className="transition-colors"
                   style={{ color: "rgba(255,255,255,0.55)" }}
                 >
-                  Close
+                  {t("Close", "Cerrar")}
                 </button>
               </div>
             </div>
@@ -325,7 +334,7 @@ export default function DashboardPage() {
                         : `Este tablero fue analizado en ${selectedBoard.analysis._lang === "es" ? "espa\u00f1ol" : "ingl\u00e9s"}`}
                     </div>
                   )}
-                  <CollapsibleSection title="Themes" defaultOpen>
+                  <CollapsibleSection title={t("Themes", "Temas")} defaultOpen>
                     <ul className="space-y-2">
                       {selectedBoard.analysis.themes?.map((t, i) => (
                         <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
@@ -335,7 +344,7 @@ export default function DashboardPage() {
                       ))}
                     </ul>
                   </CollapsibleSection>
-                  <CollapsibleSection title="Goals" defaultOpen={false}>
+                  <CollapsibleSection title={t("Goals", "Metas")} defaultOpen={false}>
                     <ul className="space-y-2">
                       {(selectedBoard.analysis.goals?.length
                         ? selectedBoard.analysis.goals
@@ -349,7 +358,7 @@ export default function DashboardPage() {
                     </ul>
                   </CollapsibleSection>
                   {selectedBoard.analysis.patterns?.length > 0 && (
-                    <CollapsibleSection title="Patterns" defaultOpen={false}>
+                    <CollapsibleSection title={t("Patterns", "Patrones")} defaultOpen={false}>
                       <ul className="space-y-2">
                         {selectedBoard.analysis.patterns.map((p, i) => (
                           <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
@@ -370,7 +379,7 @@ export default function DashboardPage() {
                           );
                         })();
                     return actionSteps.length > 0 ? (
-                      <CollapsibleSection title="Your action steps" defaultOpen={false}>
+                      <CollapsibleSection title={t("Your action steps", "Tus pasos de acci\u00f3n")} defaultOpen={false}>
                         <ol className="space-y-4">
                           {actionSteps.map(({ step, title, description }) => (
                             <li key={step} className="flex gap-4">
