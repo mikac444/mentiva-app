@@ -140,6 +140,13 @@ export default function LandingPage() {
       const saved = localStorage.getItem("mentiva-lang");
       if (saved === "es" || saved === "en") { setLang(saved); }
       else if (navigator.language.startsWith("es")) { setLang("es"); }
+
+      // Capture referral code and UTM params from URL
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
+      const utmSource = params.get("utm_source");
+      if (ref) localStorage.setItem("mentiva_ref", ref);
+      if (utmSource) localStorage.setItem("mentiva_utm_source", utmSource);
     }
   }, []);
 
@@ -173,7 +180,20 @@ export default function LandingPage() {
     setIsSubmitting(true);
     if (typeof window !== "undefined") {
       localStorage.setItem("mentiva_early_access_email", trimmed);
-      window.location.href = `${STRIPE_URL}?prefilled_email=${encodeURIComponent(trimmed)}`;
+
+      // Build Stripe URL with tracking params
+      let checkoutUrl = `${STRIPE_URL}?prefilled_email=${encodeURIComponent(trimmed)}`;
+
+      // Pass referral code or UTM source as client_reference_id (Stripe supports this)
+      const ref = localStorage.getItem("mentiva_ref");
+      const utmSource = localStorage.getItem("mentiva_utm_source");
+      if (ref) {
+        checkoutUrl += `&client_reference_id=ref_${ref}`;
+      } else if (utmSource) {
+        checkoutUrl += `&client_reference_id=utm_${utmSource}`;
+      }
+
+      window.location.href = checkoutUrl;
     }
   }
 

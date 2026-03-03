@@ -38,12 +38,15 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const email = session.customer_email || session.customer_details?.email;
     const customerName = session.customer_details?.name || "";
+    const clientRefId = session.client_reference_id || "";
 
     if (email) {
+      const normalizedEmail = email.toLowerCase();
+
       // 1. Add to Supabase allowlist
       const { error } = await supabaseAdmin
         .from("allowed_emails")
-        .upsert({ email: email.toLowerCase() }, { onConflict: "email" });
+        .upsert({ email: normalizedEmail }, { onConflict: "email" });
 
       if (error) {
         console.error("Failed to add email:", error);
@@ -51,13 +54,48 @@ export async function POST(req: NextRequest) {
         console.log("Added email to allowlist:", email);
       }
 
-      // 2. Add to Brevo "Founding Members" list
+      // 2. Credit referrer if this purchase came from a referral link
+      if (clientRefId.startsWith("ref_")) {
+        const refCode = clientRefId.replace("ref_", "");
+        try {
+          // Update existing "clicked" referral to "converted", or insert new one
+          const { data: existing } = await supabaseAdmin
+            .from("referrals")
+            .select("id")
+            .eq("referrer_code", refCode)
+            .eq("referred_email", normalizedEmail)
+            .single();
+
+          if (existing) {
+            await supabaseAdmin
+              .from("referrals")
+              .update({ status: "converted" })
+              .eq("id", existing.id);
+          } else {
+            await supabaseAdmin
+              .from("referrals")
+              .insert({
+                referrer_code: refCode,
+                referred_email: normalizedEmail,
+                status: "converted",
+              });
+          }
+          console.log("Referral conversion tracked:", refCode, "->", normalizedEmail);
+        } catch (refErr) {
+          console.error("Referral tracking failed:", refErr);
+        }
+      }
+
+      // 3. Add to Brevo "Founding Members" list
       const brevoKey = process.env.BREVO_API_KEY;
       if (brevoKey) {
         try {
           const firstName = customerName
             ? customerName.split(/\s+/)[0]
             : email.split("@")[0];
+
+          // Include UTM source if available
+          const utmSource = clientRefId.startsWith("utm_") ? clientRefId.replace("utm_", "") : "";
 
           const brevoRes = await fetch("https://api.brevo.com/v3/contacts", {
             method: "POST",
@@ -66,8 +104,11 @@ export async function POST(req: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: email.toLowerCase(),
-              attributes: { FIRSTNAME: firstName },
+              email: normalizedEmail,
+              attributes: {
+                FIRSTNAME: firstName,
+                ...(utmSource ? { UTM_SOURCE: utmSource } : {}),
+              },
               listIds: [3],
               updateEnabled: true,
             }),

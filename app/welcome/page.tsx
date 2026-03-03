@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase";
+import { useLanguage } from "@/lib/language";
 
 const MENTIVA_URL = "https://mentiva.app";
 
@@ -20,48 +22,53 @@ function referralCodeFromEmail(email: string): string {
 }
 
 export default function WelcomePage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>("M----");
   const [memberNumber, setMemberNumber] = useState<number | null>(null);
   const [spotsClaimed, setSpotsClaimed] = useState<number>(0);
-  const [referralCount] = useState<number>(0);
+  const [referralCount, setReferralCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("mentiva_early_access_email") : null;
-    if (stored) {
-      setEmail(stored);
-      setReferralCode(referralCodeFromEmail(stored));
-    }
-
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) {
-      setLoading(false);
-      if (!stored) setMemberNumber(null);
-      return;
-    }
-
     (async () => {
-      try {
-        const emailsRes = await fetch(
-          `${url}/rest/v1/allowed_emails?order=created_at.asc&select=email`,
-          { headers: { apikey: key, Authorization: `Bearer ${key}` } }
-        );
-        if (!emailsRes.ok) {
-          setLoading(false);
-          return;
-        }
-        const emails = await emailsRes.json() as { email: string }[];
-        setSpotsClaimed(emails.length);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email || localStorage.getItem("mentiva_early_access_email");
 
-        if (stored) {
-          const normalized = stored.toLowerCase();
-          const index = emails.findIndex((r) => r.email.toLowerCase() === normalized);
-          setMemberNumber(index >= 0 ? index + 1 : null);
-        } else {
-          setMemberNumber(null);
+      if (userEmail) {
+        setEmail(userEmail);
+        setReferralCode(referralCodeFromEmail(userEmail));
+      }
+
+      // Fetch member data
+      try {
+        const { data: emails } = await supabase
+          .from("allowed_emails")
+          .select("email")
+          .order("created_at", { ascending: true });
+
+        if (emails) {
+          setSpotsClaimed(emails.length);
+          if (userEmail) {
+            const normalized = userEmail.toLowerCase();
+            const index = emails.findIndex((r) => r.email.toLowerCase() === normalized);
+            setMemberNumber(index >= 0 ? index + 1 : null);
+          }
+        }
+
+        // Fetch referral count
+        if (userEmail) {
+          const code = referralCodeFromEmail(userEmail);
+          const { data: referrals, error: refError } = await supabase
+            .from("referrals")
+            .select("id")
+            .eq("referrer_code", code)
+            .eq("status", "converted");
+          if (!refError && referrals) {
+            setReferralCount(referrals.length);
+          }
         }
       } catch (e) {
         console.error("Failed to load member data:", e);
@@ -79,14 +86,17 @@ export default function WelcomePage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const shareText = encodeURIComponent("I just joined Mentiva - turn your vision board into an actionable plan with AI. Founding members: $10 forever.");
+  const shareTextEn = `I just joined Mentiva - turn your vision board into an actionable plan with AI. Founding members: $10 forever. ${referralLink}`;
+  const shareTextEs = `Me uni a Mentiva - convierte tu vision board en un plan de accion con IA. Miembros fundadores: $10 para siempre. ${referralLink}`;
+  const shareText = encodeURIComponent(t(shareTextEn, shareTextEs));
   const shareUrl = encodeURIComponent(referralLink);
+
   const shareButtons = [
-    { label: "Text", url: `sms:?body=${shareText}` },
     { label: "WhatsApp", url: `https://wa.me/?text=${shareText}` },
-    { label: "IG Story", url: `https://www.instagram.com/stories/create` },
-    { label: "X Post", url: `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}` },
-    { label: "Email", url: `mailto:?subject=Mentiva - Vision board with a brain&body=${shareText}%20${shareUrl}` },
+    { label: "X", url: `https://twitter.com/intent/tweet?text=${shareText}` },
+    { label: t("Text", "SMS"), url: `sms:?body=${shareText}` },
+    { label: "Email", url: `mailto:?subject=Mentiva&body=${shareText}` },
+    { label: "LinkedIn", url: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}` },
   ];
 
   if (loading) {
@@ -117,10 +127,10 @@ export default function WelcomePage() {
         </p>
       </header>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-12">
-        <div className="max-w-xl mx-auto text-center space-y-8 animate-[rise_0.8s_ease-out_both]">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8">
+        <div className="max-w-xl mx-auto text-center space-y-6 animate-[rise_0.8s_ease-out_both]">
           <h1 className="font-serif font-light text-3xl sm:text-4xl" style={{ color: "rgba(255,255,255,0.95)" }}>
-            Welcome, Founding Member.
+            {t("Welcome, Founding Member.", "Bienvenido/a, Miembro Fundador.")}
           </h1>
 
           <div className="animate-[scaleIn_0.6s_ease-out_0.3s_both]" style={{ color: "#D4BE8C" }}>
@@ -129,7 +139,7 @@ export default function WelcomePage() {
 
           <div className="space-y-2">
             <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
-              {spotsClaimed} of 3,000 spots claimed
+              {spotsClaimed} {t("of 3,000 spots claimed", "de 3,000 lugares ocupados")}
             </p>
             <div className="h-1 rounded-full bg-white/20 max-w-xs mx-auto overflow-hidden">
               <div
@@ -140,12 +150,16 @@ export default function WelcomePage() {
           </div>
 
           <p className="font-serif italic font-light" style={{ color: "rgba(255,255,255,0.8)" }}>
-            You&apos;re one of the first. Now help us spread the vision.
+            {t(
+              "You\u2019re one of the first. Now help us spread the vision.",
+              "Eres de los primeros. Ahora ayudanos a compartir la vision."
+            )}
           </p>
 
+          {/* Referral link */}
           <div className="space-y-3">
             <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-              Your referral link:
+              {t("Your referral link:", "Tu link de referidos:")}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 px-4 py-3 rounded-full bg-white/15 backdrop-blur-md border border-white/40 font-sans text-sm text-white truncate">
@@ -156,11 +170,12 @@ export default function WelcomePage() {
                 onClick={copyLink}
                 className="shrink-0 px-5 py-3 rounded-full bg-white/20 backdrop-blur-md border border-white/40 text-white font-sans text-sm hover:bg-white/30 transition-colors"
               >
-                {copied ? "Copied" : "Copy Link"}
+                {copied ? t("Copied!", "Copiado!") : t("Copy Link", "Copiar Link")}
               </button>
             </div>
           </div>
 
+          {/* Share buttons */}
           <div className="flex flex-wrap justify-center gap-2">
             {shareButtons.map((b) => (
               <a
@@ -175,32 +190,48 @@ export default function WelcomePage() {
             ))}
           </div>
 
-          <div className="pt-6 space-y-4 text-left max-w-sm mx-auto">
+          {/* Referral tiers */}
+          <div className="pt-4 space-y-3 text-left max-w-sm mx-auto">
             <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">3 referrals</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>Get your $10 back</p>
-              <p className="font-serif italic text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>Refer 3 friends, lifetime access for free</p>
+              <p className="font-sans font-medium text-sm text-white">3 {t("referrals", "referidos")}</p>
+              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+                {t("Get your $10 back", "Recupera tus $10")}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">5 referrals</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>Gift a free membership</p>
-              <p className="font-serif italic text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>Give lifetime access to someone you love</p>
+              <p className="font-sans font-medium text-sm text-white">5 {t("referrals", "referidos")}</p>
+              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+                {t("Gift a free lifetime membership", "Regala una membresia gratis")}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">10 referrals</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>1-on-1 vision session</p>
-              <p className="font-serif italic text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>30-minute private session with our founder</p>
+              <p className="font-sans font-medium text-sm text-white">10 {t("referrals", "referidos")}</p>
+              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+                {t("1-on-1 vision session with founder", "Sesion 1-a-1 con la fundadora")}
+              </p>
             </div>
           </div>
 
           <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-            You&apos;ve referred {referralCount} {referralCount === 1 ? "person" : "people"} so far
+            {referralCount > 0
+              ? `${referralCount} ${t("referrals so far", "referidos hasta ahora")}`
+              : t("Share to start earning rewards", "Comparte para empezar a ganar")}
           </p>
+
+          {/* Continue button */}
+          <div className="pt-4">
+            <a
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-[#4A5C3F] font-sans font-semibold text-sm hover:bg-white/90 transition-colors"
+            >
+              {t("Continue to Mentiva", "Continuar a Mentiva")} {String.fromCharCode(8594)}
+            </a>
+          </div>
         </div>
       </main>
 
       <footer className="relative z-10 py-6 text-center font-sans text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-        © 2026 Mentiva · Austin, TX
+        {String.fromCharCode(169)} 2026 Mentiva
       </footer>
 
       <style>{`

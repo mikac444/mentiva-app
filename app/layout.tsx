@@ -18,7 +18,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Mentiva — Your vision board, with a brain",
   description:
-    "Create and refine your vision boards with AI. Mentiva helps you clarify goals and bring your vision to life.",
+    "Upload your vision board. AI turns it into daily missions and coaches you there. Founding members: $10 forever.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-192x192.png",
@@ -28,6 +28,20 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Mentiva",
+  },
+  metadataBase: new URL("https://mentiva.app"),
+  openGraph: {
+    title: "Mentiva — Your vision board, with a brain",
+    description: "Upload your vision board. AI turns it into daily missions and coaches you there. Founding members: $10 forever.",
+    url: "https://mentiva.app",
+    siteName: "Mentiva",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mentiva — Your vision board, with a brain",
+    description: "Upload your vision board. AI turns it into daily missions and coaches you there. Founding members: $10 forever.",
   },
 };
 
