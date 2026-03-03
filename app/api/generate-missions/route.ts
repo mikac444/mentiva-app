@@ -125,22 +125,24 @@ export async function POST(request: NextRequest) {
     const currentStreak = await getStreak(supabase, userId);
     const sip = await getActiveSIP(userId);
 
-    // Fetch vision board analysis for goal-specific steps
-    const { data: board } = await supabase
+    // Fetch ALL vision board analyses for goal-specific steps
+    const { data: allBoards } = await supabase
       .from("vision_boards")
       .select("analysis")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("created_at", { ascending: false });
 
-    const goalSteps = (board?.analysis?.goalsWithSteps ?? []).map(
-      (g: { goal: string; steps?: string[]; emotionalWhy?: string }) => ({
-        goal: g.goal,
-        steps: g.steps || [],
-        emotionalWhy: g.emotionalWhy,
-      })
-    );
+    const goalSteps: { goal: string; steps: string[]; emotionalWhy?: string }[] = [];
+    for (const board of allBoards ?? []) {
+      const goals = board?.analysis?.goalsWithSteps ?? [];
+      for (const g of goals as { goal: string; steps?: string[]; emotionalWhy?: string }[]) {
+        goalSteps.push({
+          goal: g.goal,
+          steps: g.steps || [],
+          emotionalWhy: g.emotionalWhy,
+        });
+      }
+    }
 
     // Fetch recent journal entries (last 3 days) for context
     const threeDaysAgo = new Date();

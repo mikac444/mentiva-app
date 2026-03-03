@@ -89,23 +89,26 @@ export default function TodayPage() {
   const initialize = useCallback(async (userId: string) => {
     const supabase = createClient();
 
-    // 1. Check if user has a vision board
+    // 1. Check if user has vision boards (fetch ALL, not just latest)
     const { data: boards } = await supabase
       .from("vision_boards")
       .select("id, analysis")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1);
+      .order("created_at", { ascending: false });
 
     if (!boards || boards.length === 0) {
       setAppState("no-board");
       return;
     }
 
-    const board = boards[0];
-    const goalsWithSteps: GoalWithSteps[] = board.analysis?.goalsWithSteps ?? [];
-    setBoardGoals(goalsWithSteps);
-    setBoardId(board.id);
+    // Combine goals from ALL vision boards
+    const allGoals: GoalWithSteps[] = [];
+    for (const board of boards) {
+      const goals: GoalWithSteps[] = board.analysis?.goalsWithSteps ?? [];
+      allGoals.push(...goals);
+    }
+    setBoardGoals(allGoals);
+    setBoardId(boards[0].id);
 
     // 2. Check if user has a North Star
     try {
