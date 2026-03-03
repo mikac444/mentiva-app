@@ -207,7 +207,7 @@ export default function WelcomePage() {
             <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
               <p className="font-sans font-medium text-sm text-white">10 {t("referrals", "referidos")}</p>
               <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
-                {t("1-on-1 vision session with founder", "Sesion 1-a-1 con la fundadora")}
+                {t("Exclusive early access to new features", "Acceso exclusivo a nuevas funciones")}
               </p>
             </div>
           </div>
