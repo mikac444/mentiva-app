@@ -204,12 +204,6 @@ export default function WelcomePage() {
                 {t("Gift a free lifetime membership", "Regala una membresia gratis")}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">10 {t("referrals", "referidos")}</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
-                {t("Exclusive early access to new features", "Acceso exclusivo a nuevas funciones")}
-              </p>
-            </div>
           </div>
 
           <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
