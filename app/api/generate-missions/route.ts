@@ -142,6 +142,17 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    // Fetch recent journal entries (last 3 days) for context
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const { data: journalEntries } = await supabase
+      .from("journal_entries")
+      .select("content, date")
+      .eq("user_id", userId)
+      .gte("date", threeDaysAgo.toISOString().split("T")[0])
+      .order("created_at", { ascending: false })
+      .limit(10);
+
     const result = await generateMissionTasks({
       northStar: northStar.goal_text,
       enfoques: enfoques.map((e: { name: string; id: string }) => ({ name: e.name, id: e.id })),
@@ -155,6 +166,10 @@ export async function POST(request: NextRequest) {
       lang: lang || "en",
       currentStreak,
       goalSteps,
+      journalEntries: (journalEntries ?? []).map((e: { content: string; date: string }) => ({
+        content: e.content,
+        date: e.date,
+      })),
     }, sip);
 
     const sortOrderMap: Record<string, number> = { non_negotiable: 0, secondary: 1, micro: 2 };

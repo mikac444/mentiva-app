@@ -8,6 +8,7 @@ export type MissionTaskContext = {
   lang: string;
   currentStreak: number;
   goalSteps?: { goal: string; steps: string[]; emotionalWhy?: string }[];
+  journalEntries?: { content: string; date: string }[];
 };
 
 export type GeneratedMission = {
@@ -63,6 +64,14 @@ export async function generateMissionTasks(
       }).join("\n")
     : "";
 
+  // Build journal context from recent entries
+  const journalBlock = (ctx.journalEntries && ctx.journalEntries.length > 0)
+    ? ctx.journalEntries
+        .slice(0, 10)
+        .map(e => `[${e.date}] ${String(e.content).slice(0, 500)}`)
+        .join("\n")
+    : "";
+
   const prompt = `You are Menti, an AI life mentor. CRITICAL: ALL output must be in ${langName} — every task_text, enfoque_name, and motivational_pulse must be in ${langName}, no exceptions.
 
 NORTH STAR (the user's #1 overarching life goal):
@@ -73,6 +82,11 @@ ${enfoqueList || "Not set yet — use the North Star to guide tasks."}
 ${goalStepsBlock ? `
 VISION BOARD GOALS & NEXT STEPS (from the user's vision board — use these to make missions specific and relevant):
 ${goalStepsBlock}
+` : ""}${journalBlock ? `
+USER'S RECENT JOURNAL ENTRIES (private reflections — use for context about their current state, energy, schedule, and what's on their mind):
+${journalBlock}
+
+Use these journal entries to understand the user's emotional state, energy level, and daily context. Adjust task difficulty and tone accordingly. If they mentioned being stressed or low energy, make tasks lighter. If they're excited about something, lean into that momentum.
 ` : ""}
 TODAY: ${dayOfWeek} ${isWeekend ? "(WEEKEND — lighter, more personal tasks)" : ""}
 CURRENT STREAK: ${ctx.currentStreak} consecutive days${ctx.currentStreak >= 7 ? " — impressive! Acknowledge this." : ""}

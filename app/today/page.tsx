@@ -51,12 +51,18 @@ export default function TodayPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [appState, setAppState] = useState<AppState>("loading");
-  const [tab, setTab] = useState<"today" | "progress">("today");
+  const [tab, setTab] = useState<"today" | "progress" | "journal">("today");
 
   // Mission data
   const [missions, setMissions] = useState<MissionTask[]>([]);
   const [motivationalPulse, setMotivationalPulse] = useState("");
   const [streak, setStreak] = useState(0);
+
+  // Journal data
+  const [journalText, setJournalText] = useState("");
+  const [journalEntries, setJournalEntries] = useState<{ id: string; content: string; date: string; created_at: string }[]>([]);
+  const [savingJournal, setSavingJournal] = useState(false);
+  const [mentiMessage, setMentiMessage] = useState<string | null>(null);
 
   // North Star data
   const [northStarGoal, setNorthStarGoal] = useState("");
@@ -124,6 +130,15 @@ export default function TodayPage() {
 
       // 4. Generate or fetch missions
       await loadMissions(false);
+
+      // 5. Fetch journal entries
+      try {
+        const journalRes = await fetch("/api/journal?days=7");
+        const journalData = await journalRes.json();
+        if (journalData.entries) setJournalEntries(journalData.entries);
+      } catch {
+        // Journal fetch failure is non-critical
+      }
 
     } catch (err) {
       console.error("Init error:", err);
@@ -241,6 +256,63 @@ export default function TodayPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
+
+  // ─── Fetch personalized Menti message ───
+  useEffect(() => {
+    if (appState !== "missions" || !user) return;
+    fetch("/api/menti-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userName: firstName,
+        lang,
+        tasksCompleted: missions.filter(m => m.completed).length,
+        tasksTotal: missions.length,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => { if (data.message) setMentiMessage(data.message); })
+      .catch(() => {}); // Silent fallback — UI has its own default
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appState, user?.id]);
+
+  // ─── Save journal entry ───
+  async function saveJournalEntry() {
+    if (!user || !journalText.trim()) return;
+    setSavingJournal(true);
+    try {
+      const res = await fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: journalText.trim() }),
+      });
+      const data = await res.json();
+      if (data.entry) {
+        setJournalEntries(prev => [data.entry, ...prev]);
+        setJournalText("");
+      }
+    } catch (e) {
+      console.error("Failed to save journal entry:", e);
+    }
+    setSavingJournal(false);
+  }
+
+  // ─── Format journal entry date ───
+  function formatEntryDate(isoDate: string): string {
+    const d = new Date(isoDate);
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    const time = d.toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    if (isToday) return `${lang === "es" ? "Hoy" : "Today"}, ${time}`;
+    return d.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }) + `, ${time}`;
+  }
 
   // ─── Edit task text ───
   async function editTask(taskId: string, newText: string) {
@@ -698,7 +770,7 @@ export default function TodayPage() {
               background: "rgba(255,255,255,0.05)", borderRadius: 12,
               padding: 4, border: "1px solid rgba(255,255,255,0.08)",
             }}>
-              {(["today", "progress"] as const).map((tabName) => (
+              {(["today", "progress", "journal"] as const).map((tabName) => (
                 <button
                   key={tabName}
                   onClick={() => setTab(tabName)}
@@ -714,7 +786,9 @@ export default function TodayPage() {
                 >
                   {tabName === "today"
                     ? t("Today", "Hoy")
-                    : t("Progress", "Progreso")}
+                    : tabName === "progress"
+                      ? t("Progress", "Progreso")
+                      : t("Journal", "Diario")}
                 </button>
               ))}
             </div>
@@ -756,8 +830,8 @@ export default function TodayPage() {
                   </div>
                 )}
 
-                {/* Motivational pulse */}
-                {motivationalPulse && (
+                {/* Menti message — personalized from journal or progress-based */}
+                {(mentiMessage || motivationalPulse) && (
                   <div style={{
                     position: "relative", margin: "1.2rem 0",
                     padding: "1rem 1.2rem",
@@ -783,7 +857,7 @@ export default function TodayPage() {
                       fontWeight: 300, fontSize: "0.95rem",
                       color: "rgba(255,255,255,0.55)", lineHeight: 1.6,
                     }}>
-                      {motivationalPulse}
+                      {mentiMessage || motivationalPulse}
                     </p>
                   </div>
                 )}
@@ -843,6 +917,103 @@ export default function TodayPage() {
                 t={t}
                 currentStreak={streak}
               />
+            )}
+
+            {/* ─── JOURNAL TAB ─── */}
+            {tab === "journal" && (
+              <div style={{ animation: "fadeIn 0.3s ease" }}>
+                {/* Header */}
+                <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
+                  <h2 style={{
+                    fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                    fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)",
+                  }}>
+                    {t("Your Journal", "Tu Diario")}
+                  </h2>
+                  <p style={{
+                    fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: "0.2rem",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
+                    {t("Write about your day", "Escribe sobre tu dia")}
+                  </p>
+                </div>
+
+                {/* Text area */}
+                <div style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 16, padding: "1rem", marginBottom: "1rem",
+                }}>
+                  <textarea
+                    value={journalText}
+                    onChange={(e) => setJournalText(e.target.value)}
+                    placeholder={t("How was your day? What happened?", "Como estuvo tu dia? Que paso?")}
+                    style={{
+                      width: "100%", minHeight: 120,
+                      background: "transparent", border: "none", outline: "none",
+                      color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
+                      lineHeight: 1.6, resize: "vertical",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.5rem" }}>
+                    <button
+                      onClick={saveJournalEntry}
+                      disabled={!journalText.trim() || savingJournal}
+                      style={{
+                        padding: "0.5rem 1.4rem",
+                        background: journalText.trim() ? "#D4BE8C" : "rgba(255,255,255,0.1)",
+                        color: journalText.trim() ? "#1E1C21" : "rgba(255,255,255,0.3)",
+                        border: "none", borderRadius: 20,
+                        fontSize: "0.82rem", fontWeight: 600,
+                        cursor: journalText.trim() ? "pointer" : "default",
+                        transition: "all 0.3s",
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      {savingJournal
+                        ? t("Saving...", "Guardando...")
+                        : t("Save", "Guardar")}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Previous entries */}
+                {journalEntries.length > 0 && (
+                  <div>
+                    <div style={{
+                      fontSize: "0.68rem", color: "rgba(255,255,255,0.25)",
+                      textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                      fontWeight: 700, marginBottom: "0.5rem",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}>
+                      {t("Recent entries", "Entradas recientes")}
+                    </div>
+                    {journalEntries.map((entry) => (
+                      <div key={entry.id} style={{
+                        padding: "0.9rem 1rem",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 14, marginBottom: "0.4rem",
+                      }}>
+                        <div style={{
+                          fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
+                          marginBottom: "0.4rem", fontFamily: "'DM Sans', sans-serif",
+                        }}>
+                          {formatEntryDate(entry.created_at)}
+                        </div>
+                        <div style={{
+                          fontSize: "0.85rem", color: "rgba(255,255,255,0.6)",
+                          lineHeight: 1.6, whiteSpace: "pre-wrap" as const,
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}>
+                          {entry.content}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </>
         )}
