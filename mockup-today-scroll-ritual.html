@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Mentiva – Today (Scroll Ritual Mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(180deg, #A1B392 0%, #6B7F5E 50%, #4A5C3F 100%);
+    min-height: 100vh;
+    color: white;
+    padding-bottom: 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Top Nav */
+  .top-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px; background: rgba(0,0,0,0.1);
+  }
+  .top-nav span { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.1rem; color: rgba(255,255,255,0.7); letter-spacing: 0.1em; }
+
+  .content { max-width: 420px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header / Greeting */
+  .greeting { text-align: center; padding: 24px 0 8px; }
+  .greeting h1 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: 1.6rem; color: rgba(255,255,255,0.7);
+  }
+  .greeting .name {
+    display: block; font-size: 2.4rem; color: rgba(255,255,255,0.95);
+    font-weight: 300; letter-spacing: -0.03em;
+  }
+  .greeting .name em { color: #D4BE8C; font-style: italic; }
+  .date-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
+    font-size: 0.72rem; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.05em; text-transform: uppercase; margin-top: 10px;
+  }
+  .date-pill .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+
+  /* North Star Bar */
+  .north-star-bar {
+    margin-top: 20px; padding: 16px;
+    background: rgba(212,190,140,0.08);
+    border: 1px solid rgba(212,190,140,0.15);
+    border-radius: 16px;
+  }
+  .north-star-label {
+    font-size: 0.65rem; font-weight: 700; color: #D4BE8C;
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+  }
+  .north-star-text {
+    font-family: 'Cormorant Garamond', serif; font-weight: 400;
+    font-size: 1.05rem; color: rgba(255,255,255,0.85); margin-bottom: 10px;
+  }
+  .progress-bar-bg {
+    height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #D4BE8C, #E8D5A8);
+    border-radius: 4px; width: 47%; transition: width 1s ease;
+  }
+  .progress-percent {
+    text-align: right; font-size: 0.65rem; color: rgba(212,190,140,0.5); margin-top: 4px;
+  }
+
+  /* Streak */
+  .streak {
+    display: flex; justify-content: center; margin: 12px 0 6px;
+  }
+  .streak-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+    font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 600;
+  }
+
+  /* Section divider */
+  .section-label {
+    font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.2);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin: 20px 0 12px; text-align: center;
+  }
+
+  /* Mission Card */
+  .mission-card {
+    padding: 16px; margin-bottom: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .mission-card.completed {
+    opacity: 0.5;
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.05);
+  }
+  .mission-card.completed .task-text {
+    text-decoration: line-through;
+    color: rgba(255,255,255,0.3);
+  }
+  .mission-card.non-negotiable {
+    border-left: 3px solid rgba(212,190,140,0.5);
+  }
+  .checkbox {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px; transition: all 0.3s;
+  }
+  .checkbox.checked {
+    background: #D4BE8C; border-color: #D4BE8C;
+  }
+  .checkbox.checked::after {
+    content: '✓'; color: #1E1C21; font-size: 14px; font-weight: 700;
+  }
+  .task-type {
+    font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 4px;
+  }
+  .task-type.nn { color: #D4BE8C; }
+  .task-type.sec { color: rgba(255,255,255,0.3); }
+  .task-type.mic { color: rgba(161,179,146,0.6); }
+  .task-text {
+    font-size: 0.88rem; color: rgba(255,255,255,0.8);
+    line-height: 1.45; margin-bottom: 6px;
+  }
+  .task-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.7rem; color: rgba(255,255,255,0.25);
+  }
+  .task-actions {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    display: flex; gap: 8px;
+  }
+  .task-actions button {
+    background: none; border: none; color: rgba(255,255,255,0.15);
+    font-size: 0.75rem; cursor: pointer; padding: 4px;
+  }
+
+  /* Add task */
+  .add-task {
+    width: 100%; padding: 12px; margin-top: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 12px; color: rgba(255,255,255,0.3);
+    font-size: 0.82rem; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .completion-count {
+    text-align: center; font-size: 0.78rem;
+    color: rgba(255,255,255,0.25); margin-top: 8px;
+  }
+
+  /* Menti Message */
+  .menti-message {
+    margin: 24px 0; padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(212,190,140,0.08), rgba(212,190,140,0.02));
+    border: 1px solid rgba(212,190,140,0.15); border-radius: 16px;
+  }
+  .menti-label {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .menti-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #D4BE8C;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .menti-name {
+    font-size: 0.7rem; font-weight: 700; color: #D4BE8C;
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .menti-text {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-weight: 400; font-size: 0.95rem;
+    color: rgba(255,255,255,0.65); line-height: 1.6;
+  }
+
+  /* Journal / Reflection */
+  .reflection {
+    margin: 16px 0;
+  }
+  .reflection-header {
+    text-align: center; margin-bottom: 14px;
+  }
+  .reflection-title {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: 1.4rem; color: rgba(255,255,255,0.9);
+  }
+  .reflection-subtitle {
+    font-size: 0.78rem; color: rgba(255,255,255,0.35); margin-top: 2px;
+  }
+  .journal-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 16px;
+  }
+  .journal-prompt {
+    font-size: 0.82rem; color: rgba(255,255,255,0.35);
+    margin-bottom: 10px; font-style: italic;
+  }
+  .journal-input {
+    width: 100%; min-height: 60px; background: transparent;
+    border: none; outline: none; color: rgba(255,255,255,0.85);
+    font-size: 0.9rem; line-height: 1.6; resize: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .journal-expand {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .expand-link {
+    font-size: 0.78rem; color: rgba(255,255,255,0.3);
+    cursor: pointer; background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .save-btn {
+    padding: 8px 20px; background: #D4BE8C; color: #1E1C21;
+    border: none; border-radius: 20px; font-size: 0.82rem;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .save-btn.disabled {
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3);
+    cursor: default;
+  }
+
+  /* Previous entries */
+  .prev-entries { margin-top: 12px; }
+  .prev-entry {
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; margin-bottom: 6px;
+  }
+  .prev-entry-date {
+    font-size: 0.65rem; color: rgba(255,255,255,0.25); margin-bottom: 4px;
+  }
+  .prev-entry-text {
+    font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5;
+  }
+
+  /* Weekly progress */
+  .weekly-progress {
+    margin: 24px 0 16px;
+    padding: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+  }
+  .weekly-label {
+    font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.2);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px;
+    text-align: center;
+  }
+  .week-dots {
+    display: flex; justify-content: space-around; align-items: center;
+  }
+  .day-col {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .day-label {
+    font-size: 0.65rem; font-weight: 500; color: rgba(255,255,255,0.2);
+  }
+  .day-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 600;
+  }
+  .day-dot.done { background: rgba(161,179,146,0.3); color: rgba(161,179,146,0.8); }
+  .day-dot.missed { background: rgba(200,100,100,0.15); color: rgba(200,100,100,0.5); }
+  .day-dot.partial { background: rgba(212,190,140,0.15); color: rgba(212,190,140,0.5); }
+  .day-dot.today { background: rgba(212,190,140,0.2); border: 1.5px solid rgba(212,190,140,0.4); color: #D4BE8C; }
+  .day-dot.future { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.1); }
+
+  /* Change focus link */
+  .change-focus {
+    text-align: center; margin: 20px 0 10px;
+  }
+  .change-focus a {
+    font-size: 0.75rem; color: rgba(255,255,255,0.2);
+    text-decoration: underline; text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  /* Animations */
+  @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+
+  /* Mockup badge */
+  .mockup-badge {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #D4BE8C; color: #1E1C21; text-align: center;
+    font-size: 0.7rem; font-weight: 700; padding: 4px;
+    letter-spacing: 0.1em; text-transform: uppercase; z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-badge">MOCKUP — Scroll Ritual (Enfoque A)</div>
+
+<!-- Top Nav -->
+<div class="top-nav" style="margin-top: 24px;">
+  <span>MENTIVA</span>
+  <div style="display: flex; gap: 16px; align-items: center;">
+    <span style="font-size: 0.85rem; color: rgba(255,255,255,0.4);">EN | ES</span>
+    <span style="font-size: 1.2rem; color: rgba(255,255,255,0.4);">☰</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Greeting -->
+  <div class="greeting fade-in">
+    <h1>
+      Buenos días,
+      <span class="name"><em>Mika</em></span>
+    </h1>
+    <div class="date-pill">
+      <span class="dot"></span>
+      miércoles 5 de marzo
+    </div>
+  </div>
+
+  <!-- North Star -->
+  <div class="north-star-bar fade-in" style="animation-delay: 0.1s;">
+    <div class="north-star-label">⭐ North Star</div>
+    <div class="north-star-text">Lanzar Mentiva con 50 founding members</div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill"></div>
+    </div>
+    <div class="progress-percent">47%</div>
+  </div>
+
+  <!-- Streak -->
+  <div class="streak fade-in" style="animation-delay: 0.15s;">
+    <div class="streak-badge">🔥 3 días seguidos</div>
+  </div>
+
+  <!-- Missions Section -->
+  <div class="section-label fade-in" style="animation-delay: 0.2s;">Tus misiones</div>
+
+  <!-- Mission 1: Non-negotiable (completed) -->
+  <div class="mission-card non-negotiable completed fade-in" style="animation-delay: 0.25s;">
+    <div class="checkbox checked"></div>
+    <div style="flex: 1;">
+      <div class="task-type nn">Non-negotiable</div>
+      <p class="task-text">Publicar post de LinkedIn sobre Mentiva</p>
+      <div class="task-meta">
+        <span>Marketing</span>
+        <span>·</span>
+        <span>25 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission 2: Secondary -->
+  <div class="mission-card fade-in" style="animation-delay: 0.3s;">
+    <div class="checkbox"></div>
+    <div style="flex: 1;">
+      <div class="task-type sec">Secondary</div>
+      <p class="task-text">Revisar analytics de la landing page</p>
+      <div class="task-meta">
+        <span>Growth</span>
+        <span>·</span>
+        <span>15 min</span>
+      </div>
+    </div>
+    <div class="task-actions">
+      <button title="Swap">⇄</button>
+      <button title="Delete">✕</button>
+    </div>
+  </div>
+
+  <!-- Mission 3: Micro -->
+  <div class="mission-card fade-in" style="animation-delay: 0.35s;">
+    <div class="checkbox"></div>
+    <div style="flex: 1;">
+      <div class="task-type mic">Micro</div>
+      <p class="task-text">Tomar agua y hacer 5 min de estiramiento</p>
+      <div class="task-meta">
+        <span>Bienestar</span>
+        <span>·</span>
+        <span>5 min</span>
+      </div>
+    </div>
+    <div class="task-actions">
+      <button>⇄</button>
+      <button>✕</button>
+    </div>
+  </div>
+
+  <!-- Add task + count -->
+  <button class="add-task fade-in" style="animation-delay: 0.4s;">+ Agregar tarea</button>
+  <div class="completion-count fade-in" style="animation-delay: 0.4s;">1/3 completadas</div>
+
+  <!-- Menti Message -->
+  <div class="menti-message fade-in" style="animation-delay: 0.45s;">
+    <div class="menti-label">
+      <div class="menti-dot"></div>
+      <div class="menti-name">Menti</div>
+    </div>
+    <p class="menti-text">
+      "Ya publicaste en LinkedIn — eso fue lo más importante hoy. Ahora revisa esos analytics y date un momento para estirarte. Un paso a la vez hacia tu North Star."
+    </p>
+  </div>
+
+  <!-- Reflection / Journal -->
+  <div class="reflection fade-in" style="animation-delay: 0.5s;">
+    <div class="reflection-header">
+      <div class="reflection-title">Reflexión del día</div>
+      <div class="reflection-subtitle">¿Cómo te fue hoy?</div>
+    </div>
+
+    <div class="journal-box">
+      <textarea class="journal-input" placeholder="Estuvo bien, logré publicar el post y me sentí productiva..."></textarea>
+      <div class="journal-expand">
+        <button class="expand-link">▼ Escribir más...</button>
+        <button class="save-btn disabled">Guardar</button>
+      </div>
+    </div>
+
+    <!-- Previous entries -->
+    <div class="prev-entries" style="margin-top: 14px;">
+      <div style="font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">
+        Entradas recientes
+      </div>
+      <div class="prev-entry">
+        <div class="prev-entry-date">Ayer, 2:30 PM</div>
+        <div class="prev-entry-text">Hoy fue un buen día. Logré enviar las conexiones de LinkedIn y ya tengo 90. Me siento motivada.</div>
+      </div>
+      <div class="prev-entry">
+        <div class="prev-entry-date">Mar 3, 11:00 AM</div>
+        <div class="prev-entry-text">Primer día de la semana de launch. Nerviosa pero emocionada.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Progress (compact) -->
+  <div class="weekly-progress fade-in" style="animation-delay: 0.55s;">
+    <div class="weekly-label">Tu semana</div>
+    <div class="week-dots">
+      <div class="day-col">
+        <div class="day-dot done">✓</div>
+        <div class="day-label">Lun</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot done">✓</div>
+        <div class="day-label">Mar</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot missed">✗</div>
+        <div class="day-label">Mié</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot today">⬤</div>
+        <div class="day-label">Jue</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot future">·</div>
+        <div class="day-label">Vie</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot future">·</div>
+        <div class="day-label">Sáb</div>
+      </div>
+      <div class="day-col">
+        <div class="day-dot future">·</div>
+        <div class="day-label">Dom</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change focus -->
+  <div class="change-focus">
+    <a>Cambiar mi enfoque</a>
+  </div>
+
+</div>
+
+</body>
+</html>

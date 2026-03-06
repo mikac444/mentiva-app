@@ -52,7 +52,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
           fontSize: "clamp(1.4rem, 5vw, 1.9rem)", color: "rgba(255,255,255,0.95)",
           lineHeight: 1.2, marginBottom: "0.4rem",
         }}>
-          {t("What's your North Star?", "Cual es tu North Star?")}
+          {t("What's your North Star?", "¿Cuál es tu North Star?")}
         </h2>
         <p style={{
           fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
@@ -60,7 +60,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
         }}>
           {t(
             "Pick the ONE goal that matters most right now. Everything else supports this.",
-            "Elige LA meta que mas importa ahora. Todo lo demas apoya esto."
+            "Elige LA meta que más importa ahora. Todo lo demás apoya esto."
           )}
         </p>
       </div>
@@ -200,7 +200,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                 value={customText}
                 onChange={(e) => setCustomText(e.target.value)}
                 autoFocus
-                placeholder={t("Write your goal here...", "Escribe tu meta aqui...")}
+                placeholder={t("Write your goal here...", "Escribe tu meta aquí...")}
                 style={{
                   width: "100%",
                   background: "transparent",

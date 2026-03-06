@@ -102,7 +102,7 @@ export default function WelcomePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #A1B392 0%, #6B7F5E 100%)" }}>
-        <div className="text-white/80 font-sans">Loading...</div>
+        <div className="text-white/80 font-sans">{t("Loading...", "Cargando...")}</div>
       </div>
     );
   }

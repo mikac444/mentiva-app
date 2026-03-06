@@ -49,7 +49,7 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
     // Build 7-day array
     const dayLabels = ["en", "en"].includes(t("en", "es"))
       ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-      : ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+      : ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     const weekDates: string[] = [];
     for (let i = 0; i < 7; i++) {
@@ -333,14 +333,14 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
           textTransform: "uppercase" as const,
           color: "rgba(255,255,255,0.3)", marginTop: 2,
         }}>
-          {t("day streak", "dias seguidos")}
+          {t("day streak", "días seguidos")}
         </div>
         {longestStreak > currentStreak && (
           <div style={{
             fontSize: "0.68rem", color: "rgba(255,255,255,0.2)",
             marginTop: 6,
           }}>
-            {t("Longest:", "Record:")} {longestStreak} {t("days", "dias")}
+            {t("Longest:", "Récord:")} {longestStreak} {t("days", "días")}
           </div>
         )}
       </div>

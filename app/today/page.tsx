@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { useLanguage } from "@/lib/language";
 import { TopNav } from "@/components/TopNav";
-import NorthStarBar from "@/components/NorthStarBar";
-import StreakCounter from "@/components/StreakCounter";
 import MissionCard from "@/components/MissionCard";
-import ProgressTab from "@/components/ProgressTab";
 import NorthStarPicker from "@/components/NorthStarPicker";
 import EnfoquePicker from "@/components/EnfoquePicker";
 import type { User } from "@supabase/supabase-js";
@@ -23,12 +20,20 @@ type AppState =
   | "generating"
   | "missions";
 
+type WeekDot = {
+  date: string;
+  dayLabel: string;
+  completed: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+};
+
 const MAX_TASKS = 5;
 
 function getGreeting(lang: string) {
   const h = new Date().getHours();
   if (lang === "es") {
-    if (h < 12) return "Buenos dias,";
+    if (h < 12) return "Buenos días,";
     if (h < 18) return "Buenas tardes,";
     return "Buenas noches,";
   }
@@ -51,7 +56,7 @@ export default function TodayPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [appState, setAppState] = useState<AppState>("loading");
-  const [tab, setTab] = useState<"today" | "progress" | "journal">("today");
+  const [currentCard, setCurrentCard] = useState(0);
 
   // Mission data
   const [missions, setMissions] = useState<MissionTask[]>([]);
@@ -72,11 +77,18 @@ export default function TodayPage() {
   const [boardGoals, setBoardGoals] = useState<GoalWithSteps[]>([]);
   const [boardId, setBoardId] = useState<string | null>(null);
 
+  // Progress data (compact card)
+  const [weekDots, setWeekDots] = useState<WeekDot[]>([]);
+  const [longestStreak, setLongestStreak] = useState(0);
+
   // UI state
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Touch/swipe refs
+  const touchStartRef = useRef({ x: 0, y: 0 });
 
   const router = useRouter();
 
@@ -84,6 +96,14 @@ export default function TodayPage() {
     user?.user_metadata?.full_name?.split(/\s+/)[0] ??
     user?.user_metadata?.name?.split(/\s+/)[0] ??
     "friend";
+
+  const cardLabels = lang === "es"
+    ? ["Misiones", "Reflexión", "Progreso"]
+    : ["Missions", "Reflection", "Progress"];
+
+  // ─── Computed ───
+  const completed = missions.filter((m) => m.completed).length;
+  const total = missions.length;
 
   // ─── Initialize ───
   const initialize = useCallback(async (userId: string) => {
@@ -294,6 +314,123 @@ export default function TodayPage() {
       .catch(() => {}); // Silent fallback — UI has its own default
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState, user?.id]);
+
+  // ─── Load progress data (compact card) ───
+  async function loadProgressData() {
+    if (!user?.id) return;
+    const supabase = createClient();
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    // Week dots
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+    const dayLabels = lang === "en"
+      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      : ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    const weekDates: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      weekDates.push(d.toISOString().split("T")[0]);
+    }
+
+    const { data: weekStreaks } = await supabase
+      .from("streaks")
+      .select("date, non_negotiable_completed")
+      .eq("user_id", user.id)
+      .gte("date", weekDates[0])
+      .lte("date", weekDates[6]);
+
+    const streakMap = new Map<string, boolean>();
+    (weekStreaks ?? []).forEach((s: { date: string; non_negotiable_completed: boolean }) => {
+      streakMap.set(s.date, s.non_negotiable_completed);
+    });
+
+    setWeekDots(weekDates.map((date, i) => ({
+      date,
+      dayLabel: dayLabels[i],
+      completed: streakMap.get(date) === true,
+      isToday: date === todayStr,
+      isFuture: date > todayStr,
+    })));
+
+    // Longest streak
+    const { data: allStreaks } = await supabase
+      .from("streaks")
+      .select("date, non_negotiable_completed")
+      .eq("user_id", user.id)
+      .eq("non_negotiable_completed", true)
+      .order("date", { ascending: true });
+
+    let longest = 0;
+    let current = 0;
+    let prevDate: Date | null = null;
+    (allStreaks ?? []).forEach((s: { date: string }) => {
+      const d = new Date(s.date);
+      if (prevDate) {
+        const diff = (d.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (Math.abs(diff - 1) < 0.5) current++;
+        else current = 1;
+      } else {
+        current = 1;
+      }
+      if (current > longest) longest = current;
+      prevDate = d;
+    });
+    setLongestStreak(longest);
+  }
+
+  useEffect(() => {
+    if (appState !== "missions" || !user) return;
+    loadProgressData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appState, user?.id]);
+
+  // ─── Keyboard navigation ───
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (appState !== "missions") return;
+      if (e.key === "ArrowLeft" && currentCard > 0) {
+        setCurrentCard(prev => prev - 1);
+      } else if (e.key === "ArrowRight" && currentCard < 2) {
+        setCurrentCard(prev => prev + 1);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [appState, currentCard]);
+
+  // ─── Touch handlers ───
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      if (deltaX < 0 && currentCard < 2) setCurrentCard(prev => prev + 1);
+      else if (deltaX > 0 && currentCard > 0) setCurrentCard(prev => prev - 1);
+    }
+  }
+
+  // ─── Journal prompt personalization ───
+  function getJournalPrompt(): string {
+    if (completed === total && total > 0) {
+      return t("You did it! How was your day?", "¡Lo lograste! ¿Cómo fue tu día?");
+    }
+    const nn = missions.find(m => m.task_type === "non_negotiable");
+    if (nn?.completed) {
+      return t("You completed your non-negotiable. How did it feel?", "Completaste tu no negociable. ¿Cómo te sentiste?");
+    }
+    if (completed > 0) {
+      return t("How is your day going so far?", "¿Cómo va tu día hasta ahora?");
+    }
+    return t("What plans do you have for today?", "¿Qué planes tienes para hoy?");
+  }
 
   // ─── Save journal entry ───
   async function saveJournalEntry() {
@@ -529,9 +666,9 @@ export default function TodayPage() {
     }
   }
 
-  // ─── Computed ───
-  const completed = missions.filter((m) => m.completed).length;
-  const total = missions.length;
+  // ═══════════════════════════════════════
+  // ─── RENDER ───
+  // ═══════════════════════════════════════
 
   // ─── LOADING ───
   if (appState === "loading") {
@@ -551,7 +688,7 @@ export default function TodayPage() {
       <TopNav />
 
       <div className="px-6 max-w-lg mx-auto">
-        {/* ─── Header ─── */}
+        {/* ═══ FIXED HEADER ═══ */}
         <div className="text-center pt-6 pb-2">
           <h1 style={{
             fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
@@ -577,6 +714,8 @@ export default function TodayPage() {
           </div>
         </div>
 
+        {/* ═══ PRE-MISSION STATES ═══ */}
+
         {/* ─── NO BOARD ─── */}
         {appState === "no-board" && (
           <div style={{
@@ -599,7 +738,7 @@ export default function TodayPage() {
             }}>
               {t(
                 "Upload a vision board and Menti will create your personalized mission plan.",
-                "Sube un tablero de vision y Menti creara tu plan de misiones personalizado."
+                "Sube un tablero de visión y Menti creará tu plan de misiones personalizado."
               )}
             </p>
             <a href="/upload" style={{
@@ -608,7 +747,7 @@ export default function TodayPage() {
               fontWeight: 600, fontSize: "0.9rem", border: "none", borderRadius: 40,
               textDecoration: "none",
             }}>
-              {t("Upload my vision board", "Subir mi tablero de vision")} {String.fromCharCode(8594)}
+              {t("Upload my vision board", "Subir mi tablero de visión")} {String.fromCharCode(8594)}
             </a>
           </div>
         )}
@@ -654,7 +793,7 @@ export default function TodayPage() {
                 fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)",
                 lineHeight: 1.2, marginBottom: "0.4rem",
               }}>
-                {t("How do you want to start today?", "Como quieres empezar hoy?")}
+                {t("How do you want to start today?", "¿Cómo quieres empezar hoy?")}
               </h2>
               <p style={{
                 fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
@@ -662,7 +801,7 @@ export default function TodayPage() {
               }}>
                 {t(
                   "Choose how you'd like to plan your day.",
-                  "Elige como quieres planificar tu dia."
+                  "Elige cómo quieres planificar tu día."
                 )}
               </p>
             </div>
@@ -689,7 +828,7 @@ export default function TodayPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: "0.92rem", fontWeight: 600, color: "rgba(255,255,255,0.9)", marginBottom: 2 }}>
-                    {t("Menti plans my day", "Menti planifica mi dia")}
+                    {t("Menti plans my day", "Menti planifica mi día")}
                   </div>
                   <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
                     {t("Get personalized task suggestions", "Recibe sugerencias personalizadas")}
@@ -721,7 +860,7 @@ export default function TodayPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: "0.92rem", fontWeight: 600, color: "rgba(255,255,255,0.9)", marginBottom: 2 }}>
-                    {t("I'll write my own", "Yo escribo las mias")}
+                    {t("I'll write my own", "Yo escribo las mías")}
                   </div>
                   <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
                     {t("Set your own tasks for today", "Define tus propias tareas de hoy")}
@@ -758,282 +897,583 @@ export default function TodayPage() {
             }}>
               {t(
                 "Menti is creating your personalized daily missions.",
-                "Menti esta creando tus misiones diarias personalizadas."
+                "Menti está creando tus misiones diarias personalizadas."
               )}
             </p>
           </div>
         )}
 
-        {/* ─── MISSIONS VIEW ─── */}
+        {/* ═══════════════════════════════════════ */}
+        {/* ═══ CARD STACK (missions state) ═══ */}
+        {/* ═══════════════════════════════════════ */}
         {appState === "missions" && (
           <>
-            {/* North Star bar */}
+            {/* ─── Compact North Star + Streak Header ─── */}
             {northStarGoal && (
-              <div style={{ marginTop: "1rem" }}>
-                <NorthStarBar
-                  goalText={northStarGoal}
-                  progressPercent={northStarProgress}
-                  t={t}
-                />
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "0.75rem 1rem",
+                background: "rgba(212,190,140,0.06)",
+                border: "1px solid rgba(212,190,140,0.12)",
+                borderRadius: 14,
+                marginTop: "0.8rem", marginBottom: "0.8rem",
+              }}>
+                {/* North Star info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C",
+                      boxShadow: "0 0 6px rgba(212,190,140,0.4)",
+                    }} />
+                    <span style={{
+                      fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.06em",
+                      textTransform: "uppercase" as const, color: "rgba(212,190,140,0.6)",
+                    }}>
+                      North Star
+                    </span>
+                  </div>
+                  <p style={{
+                    fontSize: "0.8rem", fontWeight: 500, color: "rgba(255,255,255,0.8)",
+                    lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis",
+                    whiteSpace: "nowrap" as const, margin: 0,
+                  }}>
+                    {northStarGoal}
+                  </p>
+                  <div style={{
+                    height: 3, borderRadius: 3, background: "rgba(255,255,255,0.06)", marginTop: 5,
+                  }}>
+                    <div style={{
+                      height: "100%", borderRadius: 3,
+                      width: `${northStarProgress}%`,
+                      background: "linear-gradient(90deg, #C4A86B, #D4BE8C)",
+                      transition: "width 0.6s ease",
+                    }} />
+                  </div>
+                </div>
+
+                {/* Streak badge */}
+                {streak > 0 && (
+                  <div style={{
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    padding: "0.35rem 0.7rem",
+                    background: streak >= 7 ? "rgba(212,190,140,0.12)" : "rgba(255,255,255,0.05)",
+                    border: streak >= 7 ? "1px solid rgba(212,190,140,0.25)" : "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 10, flexShrink: 0,
+                  }}>
+                    <span style={{
+                      fontSize: "1.1rem", fontWeight: 600, lineHeight: 1,
+                      color: streak >= 7 ? "#D4BE8C" : "rgba(255,255,255,0.5)",
+                    }}>
+                      {streak}
+                    </span>
+                    <span style={{
+                      fontSize: "0.52rem", fontWeight: 600,
+                      color: streak >= 7 ? "rgba(212,190,140,0.6)" : "rgba(255,255,255,0.3)",
+                      textTransform: "uppercase" as const, letterSpacing: "0.05em",
+                    }}>
+                      {t("days", "días")}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Streak */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.4rem" }}>
-              <StreakCounter streak={streak} t={t} />
-            </div>
-
-            {/* Tab switcher */}
+            {/* ─── Card Navigation Dots + Label ─── */}
             <div style={{
-              display: "flex", gap: 4, margin: "0.6rem 0 1rem",
-              background: "rgba(255,255,255,0.05)", borderRadius: 12,
-              padding: 4, border: "1px solid rgba(255,255,255,0.08)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 12, margin: "0.4rem 0 0.8rem",
             }}>
-              {(["today", "progress", "journal"] as const).map((tabName) => (
+              {cardLabels.map((label, i) => (
                 <button
-                  key={tabName}
-                  onClick={() => setTab(tabName)}
+                  key={i}
+                  onClick={() => setCurrentCard(i)}
                   style={{
-                    flex: 1, padding: "0.55rem 0", textAlign: "center",
-                    borderRadius: 9, fontSize: "0.8rem", fontWeight: 600,
-                    color: tab === tabName ? "#D4BE8C" : "rgba(255,255,255,0.35)",
-                    background: tab === tabName ? "rgba(255,255,255,0.12)" : "none",
-                    border: "none", cursor: "pointer", transition: "all 0.3s",
-                    letterSpacing: "0.03em",
-                    boxShadow: tab === tabName ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+                    display: "flex", alignItems: "center", gap: 5,
+                    background: "none", border: "none", cursor: "pointer",
+                    padding: "4px 0", transition: "all 0.3s",
                   }}
                 >
-                  {tabName === "today"
-                    ? t("Today", "Hoy")
-                    : tabName === "progress"
-                      ? t("Progress", "Progreso")
-                      : t("Journal", "Diario")}
+                  <span style={{
+                    width: currentCard === i ? 18 : 6,
+                    height: 6,
+                    borderRadius: 3,
+                    background: currentCard === i ? "#D4BE8C" : "rgba(255,255,255,0.15)",
+                    transition: "all 0.3s ease",
+                  }} />
+                  <span style={{
+                    fontSize: "0.7rem", fontWeight: 600,
+                    color: currentCard === i ? "#D4BE8C" : "rgba(255,255,255,0.25)",
+                    letterSpacing: "0.03em",
+                    transition: "all 0.3s",
+                  }}>
+                    {label}
+                  </span>
                 </button>
               ))}
             </div>
 
-            {/* ─── TODAY TAB ─── */}
-            {tab === "today" && (
-              <div>
-                {/* Mission cards */}
-                {missions.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {missions.map((m) => (
-                      <MissionCard
-                        key={m.id}
-                        id={m.id}
-                        taskText={m.task_text}
-                        taskType={m.task_type}
-                        enfoqueName={m.enfoque_name}
-                        estimatedMinutes={m.estimated_minutes}
-                        completed={m.completed}
-                        lang={lang}
-                        onToggle={toggleTask}
-                        onEdit={editTask}
-                        onSwap={swapTask}
-                        onDelete={deleteTask}
-                        swapping={swappingId === m.id}
-                        justCompleted={justCompleted === m.id}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{
-                    textAlign: "center", padding: "2rem 1rem",
-                    color: "rgba(255,255,255,0.35)", fontSize: "0.85rem",
-                  }}>
-                    {t(
-                      "No missions for today. Check back soon!",
-                      "No hay misiones hoy. Vuelve pronto!"
-                    )}
-                  </div>
-                )}
+            {/* ─── Card Carousel ─── */}
+            <div
+              style={{ overflow: "hidden", borderRadius: 20 }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div style={{
+                display: "flex",
+                transform: `translateX(-${currentCard * 100}%)`,
+                transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)",
+              }}>
 
-                {/* Menti message — personalized from journal or progress-based */}
-                {(mentiMessage || motivationalPulse) && (
+                {/* ═══ CARD 0: MISIONES ═══ */}
+                <div style={{ minWidth: "100%", padding: "0 2px" }}>
                   <div style={{
-                    position: "relative", margin: "1.2rem 0",
-                    padding: "1rem 1.2rem",
-                    background: "linear-gradient(135deg, rgba(212,190,140,0.08) 0%, rgba(212,190,140,0.02) 100%)",
-                    border: "1px solid rgba(212,190,140,0.15)", borderRadius: 16,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 20, padding: "1.2rem",
                   }}>
+                    {/* Mission cards */}
+                    {missions.length > 0 ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {missions.map((m) => (
+                          <MissionCard
+                            key={m.id}
+                            id={m.id}
+                            taskText={m.task_text}
+                            taskType={m.task_type}
+                            enfoqueName={m.enfoque_name}
+                            estimatedMinutes={m.estimated_minutes}
+                            completed={m.completed}
+                            lang={lang}
+                            onToggle={toggleTask}
+                            onEdit={editTask}
+                            onSwap={swapTask}
+                            onDelete={deleteTask}
+                            swapping={swappingId === m.id}
+                            justCompleted={justCompleted === m.id}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{
+                        textAlign: "center", padding: "2rem 1rem",
+                        color: "rgba(255,255,255,0.35)", fontSize: "0.85rem",
+                      }}>
+                        {t(
+                          "No missions for today. Check back soon!",
+                          "¡No hay misiones hoy! ¡Vuelve pronto!"
+                        )}
+                      </div>
+                    )}
+
+                    {/* Menti message — personalized (Step 7: readability fix) */}
+                    {(mentiMessage || motivationalPulse) && (
+                      <div style={{
+                        position: "relative", margin: "1rem 0 0.5rem",
+                        padding: "0.9rem 1rem",
+                        background: "linear-gradient(135deg, rgba(212,190,140,0.08) 0%, rgba(212,190,140,0.02) 100%)",
+                        border: "1px solid rgba(212,190,140,0.15)", borderRadius: 14,
+                      }}>
+                        <div style={{
+                          display: "flex", alignItems: "center", gap: 7, marginBottom: "0.3rem",
+                        }}>
+                          <div style={{
+                            width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C",
+                            animation: "gentlePulse 3s ease-in-out infinite",
+                          }} />
+                          <div style={{
+                            fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C",
+                            textTransform: "uppercase" as const, letterSpacing: "0.12em",
+                          }}>
+                            Menti
+                          </div>
+                        </div>
+                        <p style={{
+                          fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                          fontWeight: 400, fontSize: "0.95rem",
+                          color: "rgba(255,255,255,0.65)", lineHeight: 1.6,
+                          margin: 0,
+                        }}>
+                          {mentiMessage || motivationalPulse}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Summary */}
+                    {total > 0 && (
+                      <div style={{
+                        textAlign: "center", fontSize: "0.78rem",
+                        color: "rgba(255,255,255,0.25)", marginTop: "0.5rem",
+                      }}>
+                        {completed}/{total} {t("completed", "completadas")}
+                      </div>
+                    )}
+
+                    {/* Add task button */}
+                    {missions.length < MAX_TASKS && (
+                      <button
+                        onClick={addTask}
+                        style={{
+                          width: "100%", padding: "0.7rem",
+                          marginTop: "0.6rem",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px dashed rgba(255,255,255,0.12)",
+                          borderRadius: 12,
+                          color: "rgba(255,255,255,0.3)",
+                          fontSize: "0.82rem", fontWeight: 500,
+                          cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                          transition: "all 0.2s",
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                        }}
+                      >
+                        + {t("Add task", "Agregar tarea")}
+                      </button>
+                    )}
+
+                    {/* Reset / change focus */}
+                    <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                      <button
+                        onClick={resetWeek}
+                        style={{
+                          background: "none", border: "none",
+                          fontSize: "0.75rem", color: "rgba(255,255,255,0.2)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          textDecoration: "underline", textUnderlineOffset: 3,
+                        }}
+                      >
+                        {t("Change my focus", "Cambiar mi enfoque")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ═══ CARD 1: REFLEXIÓN ═══ */}
+                <div style={{ minWidth: "100%", padding: "0 2px" }}>
+                  <div style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 20, padding: "1.2rem",
+                  }}>
+                    {/* Personalized prompt from Menti */}
                     <div style={{
-                      display: "flex", alignItems: "center", gap: 8, marginBottom: "0.4rem",
+                      display: "flex", alignItems: "center", gap: 7, marginBottom: "0.8rem",
                     }}>
                       <div style={{
-                        width: 7, height: 7, borderRadius: "50%", background: "#D4BE8C",
+                        width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C",
                         animation: "gentlePulse 3s ease-in-out infinite",
                       }} />
-                      <div style={{
-                        fontSize: "0.7rem", fontWeight: 700, color: "#D4BE8C",
+                      <span style={{
+                        fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C",
                         textTransform: "uppercase" as const, letterSpacing: "0.12em",
                       }}>
                         Menti
-                      </div>
+                      </span>
                     </div>
                     <p style={{
                       fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
-                      fontWeight: 300, fontSize: "0.95rem",
-                      color: "rgba(255,255,255,0.55)", lineHeight: 1.6,
+                      fontWeight: 400, fontSize: "1.05rem",
+                      color: "rgba(255,255,255,0.65)", lineHeight: 1.5,
+                      marginBottom: "1rem",
                     }}>
-                      {mentiMessage || motivationalPulse}
+                      {getJournalPrompt()}
                     </p>
-                  </div>
-                )}
 
-                {/* Summary */}
-                {total > 0 && (
-                  <div style={{
-                    textAlign: "center", fontSize: "0.78rem",
-                    color: "rgba(255,255,255,0.25)", marginTop: "0.5rem",
-                  }}>
-                    {completed}/{total} {t("completed", "completadas")}
-                  </div>
-                )}
-
-                {/* Add task button — hidden at MAX_TASKS */}
-                {missions.length < MAX_TASKS && <button
-                  onClick={addTask}
-                  style={{
-                    width: "100%", padding: "0.75rem",
-                    marginTop: "0.8rem",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px dashed rgba(255,255,255,0.12)",
-                    borderRadius: 12,
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "0.82rem", fontWeight: 500,
-                    cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif",
-                    transition: "all 0.2s",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  }}
-                >
-                  + {t("Add task", "Agregar tarea")}
-                </button>}
-
-                {/* Reset / change focus */}
-                <div style={{ textAlign: "center", marginTop: "1.5rem", paddingBottom: "1rem" }}>
-                  <button
-                    onClick={resetWeek}
-                    style={{
-                      background: "none", border: "none",
-                      fontSize: "0.75rem", color: "rgba(255,255,255,0.2)",
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                      textDecoration: "underline", textUnderlineOffset: 3,
-                    }}
-                  >
-                    {t("Change my focus", "Cambiar mi enfoque")}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ─── PROGRESS TAB ─── */}
-            {tab === "progress" && user && (
-              <ProgressTab
-                userId={user.id}
-                northStarGoal={northStarGoal}
-                t={t}
-                currentStreak={streak}
-              />
-            )}
-
-            {/* ─── JOURNAL TAB ─── */}
-            {tab === "journal" && (
-              <div style={{ animation: "fadeIn 0.3s ease" }}>
-                {/* Header */}
-                <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
-                  <h2 style={{
-                    fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-                    fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)",
-                  }}>
-                    {t("Your Journal", "Tu Diario")}
-                  </h2>
-                  <p style={{
-                    fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: "0.2rem",
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}>
-                    {t("Write about your day", "Escribe sobre tu dia")}
-                  </p>
-                </div>
-
-                {/* Text area */}
-                <div style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 16, padding: "1rem", marginBottom: "1rem",
-                }}>
-                  <textarea
-                    value={journalText}
-                    onChange={(e) => setJournalText(e.target.value)}
-                    placeholder={t("How was your day? What happened?", "Como estuvo tu dia? Que paso?")}
-                    style={{
-                      width: "100%", minHeight: 120,
-                      background: "transparent", border: "none", outline: "none",
-                      color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
-                      lineHeight: 1.6, resize: "vertical",
-                      fontFamily: "'DM Sans', sans-serif",
-                    }}
-                  />
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.5rem" }}>
-                    <button
-                      onClick={saveJournalEntry}
-                      disabled={!journalText.trim() || savingJournal}
-                      style={{
-                        padding: "0.5rem 1.4rem",
-                        background: journalText.trim() ? "#D4BE8C" : "rgba(255,255,255,0.1)",
-                        color: journalText.trim() ? "#1E1C21" : "rgba(255,255,255,0.3)",
-                        border: "none", borderRadius: 20,
-                        fontSize: "0.82rem", fontWeight: 600,
-                        cursor: journalText.trim() ? "pointer" : "default",
-                        transition: "all 0.3s",
-                        fontFamily: "'DM Sans', sans-serif",
-                      }}
-                    >
-                      {savingJournal
-                        ? t("Saving...", "Guardando...")
-                        : t("Save", "Guardar")}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Previous entries */}
-                {journalEntries.length > 0 && (
-                  <div>
+                    {/* Journal textarea */}
                     <div style={{
-                      fontSize: "0.68rem", color: "rgba(255,255,255,0.25)",
-                      textTransform: "uppercase" as const, letterSpacing: "0.1em",
-                      fontWeight: 700, marginBottom: "0.5rem",
-                      fontFamily: "'DM Sans', sans-serif",
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 14, padding: "0.9rem", marginBottom: "0.8rem",
                     }}>
-                      {t("Recent entries", "Entradas recientes")}
+                      <textarea
+                        value={journalText}
+                        onChange={(e) => setJournalText(e.target.value)}
+                        placeholder={t(
+                          "Write your thoughts here...",
+                          "Escribe tus pensamientos aquí..."
+                        )}
+                        style={{
+                          width: "100%", minHeight: 100,
+                          background: "transparent", border: "none", outline: "none",
+                          color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
+                          lineHeight: 1.6, resize: "vertical",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      />
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.4rem" }}>
+                        <button
+                          onClick={saveJournalEntry}
+                          disabled={!journalText.trim() || savingJournal}
+                          style={{
+                            padding: "0.45rem 1.2rem",
+                            background: journalText.trim() ? "#D4BE8C" : "rgba(255,255,255,0.1)",
+                            color: journalText.trim() ? "#1E1C21" : "rgba(255,255,255,0.3)",
+                            border: "none", borderRadius: 20,
+                            fontSize: "0.82rem", fontWeight: 600,
+                            cursor: journalText.trim() ? "pointer" : "default",
+                            transition: "all 0.3s",
+                            fontFamily: "'DM Sans', sans-serif",
+                          }}
+                        >
+                          {savingJournal
+                            ? t("Saving...", "Guardando...")
+                            : t("Save", "Guardar")}
+                        </button>
+                      </div>
                     </div>
-                    {journalEntries.map((entry) => (
-                      <div key={entry.id} style={{
-                        padding: "0.9rem 1rem",
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderRadius: 14, marginBottom: "0.4rem",
-                      }}>
+
+                    {/* Previous entries */}
+                    {journalEntries.length > 0 ? (
+                      <div>
                         <div style={{
                           fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
-                          marginBottom: "0.4rem", fontFamily: "'DM Sans', sans-serif",
-                        }}>
-                          {formatEntryDate(entry.created_at)}
-                        </div>
-                        <div style={{
-                          fontSize: "0.85rem", color: "rgba(255,255,255,0.6)",
-                          lineHeight: 1.6, whiteSpace: "pre-wrap" as const,
+                          textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                          fontWeight: 700, marginBottom: "0.4rem",
                           fontFamily: "'DM Sans', sans-serif",
                         }}>
-                          {entry.content}
+                          {t("Recent entries", "Entradas recientes")}
+                        </div>
+                        {journalEntries.slice(0, 3).map((entry) => (
+                          <div key={entry.id} style={{
+                            padding: "0.7rem 0.8rem",
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                            borderRadius: 12, marginBottom: "0.3rem",
+                          }}>
+                            <div style={{
+                              fontSize: "0.6rem", color: "rgba(255,255,255,0.2)",
+                              marginBottom: "0.3rem", fontFamily: "'DM Sans', sans-serif",
+                            }}>
+                              {formatEntryDate(entry.created_at)}
+                            </div>
+                            <div style={{
+                              fontSize: "0.82rem", color: "rgba(255,255,255,0.55)",
+                              lineHeight: 1.5,
+                              fontFamily: "'DM Sans', sans-serif",
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical" as const,
+                            }}>
+                              {entry.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Empty state */
+                      <div style={{
+                        textAlign: "center", padding: "1.5rem 1rem",
+                        color: "rgba(255,255,255,0.25)", fontSize: "0.82rem",
+                        fontStyle: "italic",
+                      }}>
+                        {t(
+                          "Your first reflection starts here.",
+                          "Tu primera reflexión empieza aquí."
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ═══ CARD 2: PROGRESO ═══ */}
+                <div style={{ minWidth: "100%", padding: "0 2px" }}>
+                  <div style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 20, padding: "1.2rem",
+                  }}>
+                    {/* 3 Stats Row */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
+                      {/* Streak */}
+                      <div style={{
+                        flex: 1, textAlign: "center",
+                        padding: "0.8rem 0.5rem",
+                        background: streak >= 7 ? "rgba(212,190,140,0.08)" : "rgba(255,255,255,0.03)",
+                        border: streak >= 7 ? "1px solid rgba(212,190,140,0.15)" : "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: 14,
+                      }}>
+                        <div style={{
+                          fontSize: "1.8rem", fontWeight: 300,
+                          fontFamily: "'Cormorant Garamond', serif",
+                          color: streak > 0 ? "#D4BE8C" : "rgba(255,255,255,0.3)",
+                          lineHeight: 1,
+                        }}>
+                          {streak}
+                        </div>
+                        <div style={{
+                          fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
+                          textTransform: "uppercase" as const,
+                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                        }}>
+                          {t("Streak", "Racha")}
                         </div>
                       </div>
-                    ))}
+
+                      {/* Record */}
+                      <div style={{
+                        flex: 1, textAlign: "center",
+                        padding: "0.8rem 0.5rem",
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: 14,
+                      }}>
+                        <div style={{
+                          fontSize: "1.8rem", fontWeight: 300,
+                          fontFamily: "'Cormorant Garamond', serif",
+                          color: longestStreak > 0 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)",
+                          lineHeight: 1,
+                        }}>
+                          {longestStreak}
+                        </div>
+                        <div style={{
+                          fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
+                          textTransform: "uppercase" as const,
+                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                        }}>
+                          {t("Record", "Récord")}
+                        </div>
+                      </div>
+
+                      {/* Month % */}
+                      <div style={{
+                        flex: 1, textAlign: "center",
+                        padding: "0.8rem 0.5rem",
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: 14,
+                      }}>
+                        <div style={{
+                          fontSize: "1.8rem", fontWeight: 300,
+                          fontFamily: "'Cormorant Garamond', serif",
+                          color: northStarProgress > 0 ? "rgba(161,179,146,0.8)" : "rgba(255,255,255,0.3)",
+                          lineHeight: 1,
+                        }}>
+                          {northStarProgress}%
+                        </div>
+                        <div style={{
+                          fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
+                          textTransform: "uppercase" as const,
+                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                        }}>
+                          {t("Month", "Mes")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Weekly Dots */}
+                    <div style={{
+                      padding: "0.8rem",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      borderRadius: 14, marginBottom: "0.8rem",
+                    }}>
+                      <div style={{
+                        fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.06em",
+                        textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)",
+                        marginBottom: 8,
+                      }}>
+                        {t("This week", "Esta semana")}
+                      </div>
+                      <div style={{
+                        display: "flex", justifyContent: "space-between", gap: 4,
+                      }}>
+                        {weekDots.map((dot) => (
+                          <div key={dot.date} style={{
+                            display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flex: 1,
+                          }}>
+                            <div style={{
+                              width: 26, height: 26, borderRadius: "50%",
+                              background: dot.completed
+                                ? "#D4BE8C"
+                                : dot.isFuture
+                                  ? "rgba(255,255,255,0.03)"
+                                  : "rgba(255,255,255,0.06)",
+                              border: dot.isToday
+                                ? "2px solid rgba(212,190,140,0.5)"
+                                : dot.completed
+                                  ? "none"
+                                  : "1px solid rgba(255,255,255,0.08)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              animation: dot.isToday && !dot.completed ? "todayPulse 2s ease-in-out infinite" : undefined,
+                              transition: "all 0.3s",
+                            }}>
+                              {dot.completed && (
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4A5C3F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <span style={{
+                              fontSize: "0.55rem", fontWeight: 500, letterSpacing: "0.03em",
+                              color: dot.isToday
+                                ? "rgba(212,190,140,0.7)"
+                                : "rgba(255,255,255,0.2)",
+                            }}>
+                              {dot.dayLabel}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Monthly Progress Bar */}
+                    <div style={{
+                      padding: "0.8rem",
+                      background: "rgba(212,190,140,0.04)",
+                      border: "1px solid rgba(212,190,140,0.1)",
+                      borderRadius: 14,
+                    }}>
+                      <div style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        marginBottom: 6,
+                      }}>
+                        <span style={{
+                          fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.06em",
+                          textTransform: "uppercase" as const, color: "rgba(212,190,140,0.5)",
+                        }}>
+                          {t("North Star this month", "North Star este mes")}
+                        </span>
+                        <span style={{
+                          fontSize: "0.7rem", fontWeight: 600, color: "#D4BE8C",
+                        }}>
+                          {northStarProgress}%
+                        </span>
+                      </div>
+                      <div style={{
+                        height: 5, borderRadius: 5, background: "rgba(255,255,255,0.06)",
+                      }}>
+                        <div style={{
+                          height: "100%", borderRadius: 5,
+                          width: `${northStarProgress}%`,
+                          background: "linear-gradient(90deg, #C4A86B, #D4BE8C)",
+                          transition: "width 0.8s ease",
+                        }} />
+                      </div>
+                    </div>
+
+                    {/* Streak display */}
+                    {longestStreak > streak && (
+                      <div style={{
+                        textAlign: "center", fontSize: "0.68rem",
+                        color: "rgba(255,255,255,0.2)", marginTop: "0.8rem",
+                      }}>
+                        {t("Longest:", "Récord:")} {longestStreak} {t("days", "días")}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
               </div>
-            )}
+            </div>
+
+            {/* Swipe hint (only on first visit) */}
+            <div style={{
+              textAlign: "center", marginTop: "0.8rem",
+              fontSize: "0.68rem", color: "rgba(255,255,255,0.15)",
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              {t("← Swipe to navigate →", "← Desliza para navegar →")}
+            </div>
           </>
         )}
       </div>
@@ -1074,14 +1514,14 @@ export default function TodayPage() {
               fontSize: "1.15rem", color: "rgba(255,255,255,0.9)",
               margin: "0 0 0.4rem",
             }}>
-              {t("Remove this task?", "Eliminar esta tarea?")}
+              {t("Remove this task?", "¿Eliminar esta tarea?")}
             </h3>
             <p style={{
               fontSize: "0.78rem", color: "rgba(255,255,255,0.35)",
               lineHeight: 1.5, margin: "0 0 1.3rem",
               fontFamily: "'DM Sans', sans-serif",
             }}>
-              {t("This action can't be undone.", "Esta accion no se puede deshacer.")}
+              {t("This action can't be undone.", "Esta acción no se puede deshacer.")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <button
@@ -1095,7 +1535,7 @@ export default function TodayPage() {
                   letterSpacing: "0.02em",
                 }}
               >
-                {t("Yes, remove", "Si, eliminar")}
+                {t("Yes, remove", "Sí, eliminar")}
               </button>
               <button
                 onClick={() => setConfirmDeleteId(null)}
@@ -1113,13 +1553,6 @@ export default function TodayPage() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
 
       {/* ─── Celebration overlay ─── */}
       {showCelebration && (
@@ -1149,7 +1582,7 @@ export default function TodayPage() {
               fontSize: "clamp(1.6rem, 5vw, 2.2rem)", color: "#D4BE8C",
               marginBottom: "0.5rem",
             }}>
-              {t("All missions complete!", "Todas las misiones completadas!")}
+              {t("All missions complete!", "¡Todas las misiones completadas!")}
             </h2>
             <p style={{
               fontSize: "0.85rem", color: "rgba(255,255,255,0.5)",
@@ -1157,7 +1590,7 @@ export default function TodayPage() {
             }}>
               {t(
                 "You did it. Another day closer to your North Star.",
-                "Lo lograste. Un dia mas cerca de tu North Star."
+                "Lo lograste. Un día más cerca de tu North Star."
               )}
             </p>
             <button
@@ -1178,8 +1611,10 @@ export default function TodayPage() {
       <style>{`
         @keyframes gentlePulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes celebPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
         @keyframes celebBounce { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes todayPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(212,190,140,0.3); } 50% { box-shadow: 0 0 0 4px rgba(212,190,140,0.1); } }
       `}</style>
     </div>
   );

@@ -8,8 +8,10 @@ import { useLanguage } from "@/lib/language";
 import { TopNav } from "@/components/TopNav";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
-const WELCOME_MESSAGE =
+const WELCOME_MESSAGE_EN =
   "Hey! I'm Menti, your AI mentor. I'm here to help you turn your vision board dreams into reality. What are you working on today?";
+const WELCOME_MESSAGE_ES =
+  "¡Hola! Soy Menti, tu mentora de IA. Estoy aquí para ayudarte a convertir los sueños de tu vision board en realidad. ¿En qué estás trabajando hoy?";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -66,6 +68,7 @@ function BouncingDots() {
 export default function ChatPage() {
   const router = useRouter();
   const { t, lang } = useLanguage();
+  const welcomeMessage = t(WELCOME_MESSAGE_EN, WELCOME_MESSAGE_ES);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -169,7 +172,7 @@ export default function ChatPage() {
     if (data?.length) {
       setMessages(data as Message[]);
     } else {
-      setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+      setMessages([{ role: "assistant", content: welcomeMessage }]);
     }
   }, []);
 
@@ -178,7 +181,7 @@ export default function ChatPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.id) {
-        setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+        setMessages([{ role: "assistant", content: welcomeMessage }]);
         setLoadingHistory(false);
         return;
       }
@@ -206,7 +209,7 @@ export default function ChatPage() {
           .single();
         if (newConv?.id) {
           setCurrentConversationId(newConv.id);
-          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setMessages([{ role: "assistant", content: welcomeMessage }]);
           setConversations((prev) => [{ id: newConv.id, user_id: user.id!, title: "New chat", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...prev]);
         }
       } else {
@@ -219,7 +222,7 @@ export default function ChatPage() {
         if (msgs?.length) {
           setMessages(msgs as Message[]);
         } else {
-          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setMessages([{ role: "assistant", content: welcomeMessage }]);
         }
       }
       setLoadingHistory(false);
@@ -246,7 +249,7 @@ export default function ChatPage() {
       .single();
     if (data) {
       setCurrentConversationId(data.id);
-      setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+      setMessages([{ role: "assistant", content: welcomeMessage }]);
       setConversations((prev) => [data as Conversation, ...prev]);
       setError(null);
       setSidebarOpen(false);
@@ -288,11 +291,11 @@ export default function ChatPage() {
         if (newConv) {
           const newConversation = newConv as Conversation;
           setCurrentConversationId(newConversation.id);
-          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setMessages([{ role: "assistant", content: welcomeMessage }]);
           setConversations([newConversation]);
         } else {
           setCurrentConversationId(null);
-          setMessages([{ role: "assistant", content: WELCOME_MESSAGE }]);
+          setMessages([{ role: "assistant", content: welcomeMessage }]);
         }
       } else {
         setCurrentConversationId(nextConvs[0].id);

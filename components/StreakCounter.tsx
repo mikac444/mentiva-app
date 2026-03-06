@@ -34,8 +34,8 @@ export default function StreakCounter({ streak, t }: Props) {
         letterSpacing: "0.02em",
       }}>
         {streak} {streak === 1
-          ? t("day", "dia")
-          : t("days", "dias")}
+          ? t("day", "día")
+          : t("days", "días")}
       </span>
     </div>
   );
