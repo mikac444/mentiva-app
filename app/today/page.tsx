@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { useLanguage } from "@/lib/language";
@@ -56,7 +56,7 @@ export default function TodayPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [appState, setAppState] = useState<AppState>("loading");
-  const [currentCard, setCurrentCard] = useState(0);
+  const [activeTab, setActiveTab] = useState<"missions" | "journal" | "progress">("missions");
 
   // Mission data
   const [missions, setMissions] = useState<MissionTask[]>([]);
@@ -87,19 +87,12 @@ export default function TodayPage() {
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  // Touch/swipe refs
-  const touchStartRef = useRef({ x: 0, y: 0 });
-
   const router = useRouter();
 
   const firstName =
     user?.user_metadata?.full_name?.split(/\s+/)[0] ??
     user?.user_metadata?.name?.split(/\s+/)[0] ??
     "friend";
-
-  const cardLabels = lang === "es"
-    ? ["Misiones", "Reflexión", "Progreso"]
-    : ["Missions", "Reflection", "Progress"];
 
   // ─── Computed ───
   const completed = missions.filter((m) => m.completed).length;
@@ -388,34 +381,6 @@ export default function TodayPage() {
     loadProgressData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState, user?.id]);
-
-  // ─── Keyboard navigation ───
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (appState !== "missions") return;
-      if (e.key === "ArrowLeft" && currentCard > 0) {
-        setCurrentCard(prev => prev - 1);
-      } else if (e.key === "ArrowRight" && currentCard < 2) {
-        setCurrentCard(prev => prev + 1);
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [appState, currentCard]);
-
-  // ─── Touch handlers ───
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
-
-  function handleTouchEnd(e: React.TouchEvent) {
-    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
-    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-      if (deltaX < 0 && currentCard < 2) setCurrentCard(prev => prev + 1);
-      else if (deltaX > 0 && currentCard > 0) setCurrentCard(prev => prev - 1);
-    }
-  }
 
   // ─── Journal prompt personalization ───
   function getJournalPrompt(): string {
@@ -978,59 +943,83 @@ export default function TodayPage() {
               </div>
             )}
 
-            {/* ─── Card Navigation Dots + Label ─── */}
+            {/* ─── Tab Bar ─── */}
             <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 12, margin: "0.4rem 0 0.8rem",
+              display: "flex", gap: 4,
+              background: "rgba(0,0,0,0.12)",
+              borderRadius: 14, padding: 4,
+              marginBottom: "1rem",
             }}>
-              {cardLabels.map((label, i) => (
+              {([
+                { key: "missions" as const, label: t("Missions", "Misiones"), icon: "check" },
+                { key: "journal" as const, label: t("Reflection", "Reflexión"), icon: "feather" },
+                { key: "progress" as const, label: t("Progress", "Progreso"), icon: "pulse" },
+              ]).map((tab) => (
                 <button
-                  key={i}
-                  onClick={() => setCurrentCard(i)}
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
                   style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    background: "none", border: "none", cursor: "pointer",
-                    padding: "4px 0", transition: "all 0.3s",
+                    flex: 1,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                    padding: "10px 8px",
+                    background: activeTab === tab.key ? "rgba(255,255,255,0.1)" : "none",
+                    border: "none",
+                    borderRadius: 11,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "0.78rem", fontWeight: 500,
+                    color: activeTab === tab.key ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    boxShadow: activeTab === tab.key ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+                    position: "relative",
                   }}
                 >
-                  <span style={{
-                    width: currentCard === i ? 18 : 6,
-                    height: 6,
-                    borderRadius: 3,
-                    background: currentCard === i ? "#D4BE8C" : "rgba(255,255,255,0.15)",
-                    transition: "all 0.3s ease",
-                  }} />
-                  <span style={{
-                    fontSize: "0.7rem", fontWeight: 600,
-                    color: currentCard === i ? "#D4BE8C" : "rgba(255,255,255,0.25)",
-                    letterSpacing: "0.03em",
-                    transition: "all 0.3s",
-                  }}>
-                    {label}
-                  </span>
+                  {tab.icon === "check" && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: activeTab === tab.key ? 0.8 : 0.5 }}>
+                      <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                    </svg>
+                  )}
+                  {tab.icon === "feather" && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: activeTab === tab.key ? 0.8 : 0.5 }}>
+                      <path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z" />
+                      <line x1="16" y1="8" x2="2" y2="22" />
+                    </svg>
+                  )}
+                  {tab.icon === "pulse" && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: activeTab === tab.key ? 0.8 : 0.5 }}>
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                  )}
+                  {tab.label}
+                  {/* Badge for incomplete missions */}
+                  {tab.key === "missions" && total > 0 && completed < total && (
+                    <span style={{
+                      position: "absolute", top: 4, right: 8,
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: "#D4BE8C",
+                    }} />
+                  )}
                 </button>
               ))}
             </div>
 
-            {/* ─── Card Carousel ─── */}
-            <div
-              style={{ overflow: "hidden", borderRadius: 20 }}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div style={{
-                display: "flex",
-                transform: `translateX(-${currentCard * 100}%)`,
-                transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)",
-              }}>
+            {/* ═══ TAB CONTENT ═══ */}
 
-                {/* ═══ CARD 0: MISIONES ═══ */}
-                <div style={{ minWidth: "100%", padding: "0 2px" }}>
-                  <div style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 20, padding: "1.2rem",
-                  }}>
+            {/* ═══ MISSIONS TAB ═══ */}
+            {activeTab === "missions" && (
+              <div style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 20, padding: "1.5rem",
+                position: "relative", overflow: "hidden",
+                animation: "tabFadeIn 0.35s ease",
+              }}>
+                <style>{`@keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                {/* Gold accent top */}
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                  background: "linear-gradient(90deg, transparent 0%, rgba(212,190,140,0.3) 50%, transparent 100%)",
+                }} />
                     {/* Mission cards */}
                     {missions.length > 0 ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1065,32 +1054,33 @@ export default function TodayPage() {
                       </div>
                     )}
 
-                    {/* Menti message — personalized (Step 7: readability fix) */}
+                    {/* Menti message — warm bubble style */}
                     {(mentiMessage || motivationalPulse) && (
                       <div style={{
                         position: "relative", margin: "1rem 0 0.5rem",
-                        padding: "0.9rem 1rem",
-                        background: "linear-gradient(135deg, rgba(212,190,140,0.08) 0%, rgba(212,190,140,0.02) 100%)",
-                        border: "1px solid rgba(212,190,140,0.15)", borderRadius: 14,
+                        padding: "0.8rem 1rem",
+                        background: "rgba(212,190,140,0.06)",
+                        borderLeft: "3px solid rgba(212,190,140,0.3)",
+                        borderRadius: "0 12px 12px 0",
                       }}>
                         <div style={{
-                          display: "flex", alignItems: "center", gap: 7, marginBottom: "0.3rem",
+                          display: "flex", alignItems: "center", gap: 6, marginBottom: "0.25rem",
                         }}>
                           <div style={{
-                            width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C",
+                            width: 5, height: 5, borderRadius: "50%", background: "#D4BE8C",
                             animation: "gentlePulse 3s ease-in-out infinite",
                           }} />
-                          <div style={{
-                            fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C",
-                            textTransform: "uppercase" as const, letterSpacing: "0.12em",
+                          <span style={{
+                            fontSize: "0.6rem", fontWeight: 700, color: "rgba(212,190,140,0.7)",
+                            textTransform: "uppercase" as const, letterSpacing: "0.1em",
                           }}>
                             Menti
-                          </div>
+                          </span>
                         </div>
                         <p style={{
                           fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
                           fontWeight: 400, fontSize: "0.95rem",
-                          color: "rgba(255,255,255,0.65)", lineHeight: 1.6,
+                          color: "rgba(255,255,255,0.6)", lineHeight: 1.6,
                           margin: 0,
                         }}>
                           {mentiMessage || motivationalPulse}
@@ -1144,45 +1134,95 @@ export default function TodayPage() {
                         {t("Change my focus", "Cambiar mi enfoque")}
                       </button>
                     </div>
-                  </div>
-                </div>
+              </div>
+            )}
 
-                {/* ═══ CARD 1: REFLEXIÓN ═══ */}
-                <div style={{ minWidth: "100%", padding: "0 2px" }}>
-                  <div style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 20, padding: "1.2rem",
-                  }}>
-                    {/* Personalized prompt from Menti */}
+            {/* ═══ JOURNAL TAB ═══ */}
+            {activeTab === "journal" && (
+              <div style={{
+                background: "rgba(212,190,140,0.03)",
+                border: "1px solid rgba(212,190,140,0.1)",
+                borderRadius: 20, padding: "1.5rem",
+                position: "relative", overflow: "hidden",
+                animation: "tabFadeIn 0.35s ease",
+              }}>
+                {/* Gold accent top */}
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                  background: "linear-gradient(90deg, transparent 0%, rgba(212,190,140,0.35) 50%, transparent 100%)",
+                }} />
+                    {/* Card header — feather icon + title */}
                     <div style={{
-                      display: "flex", alignItems: "center", gap: 7, marginBottom: "0.8rem",
+                      display: "flex", alignItems: "center", gap: 10, marginBottom: "1.2rem",
                     }}>
                       <div style={{
-                        width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C",
-                        animation: "gentlePulse 3s ease-in-out infinite",
-                      }} />
-                      <span style={{
-                        fontSize: "0.65rem", fontWeight: 700, color: "#D4BE8C",
-                        textTransform: "uppercase" as const, letterSpacing: "0.12em",
+                        width: 36, height: 36, borderRadius: 10,
+                        background: "rgba(212,190,140,0.1)",
+                        border: "1px solid rgba(212,190,140,0.15)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
                       }}>
-                        Menti
-                      </span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4BE8C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+                          <line x1="16" y1="8" x2="2" y2="22" />
+                          <line x1="17.5" y1="15" x2="9" y2="15" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 style={{
+                          fontFamily: "'Cormorant Garamond', serif", fontWeight: 400,
+                          fontSize: "1.15rem", color: "rgba(255,255,255,0.9)",
+                          margin: 0, lineHeight: 1.2,
+                        }}>
+                          {t("Your Reflection", "Tu Reflexión")}
+                        </h3>
+                        <span style={{
+                          fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}>
+                          {t("A moment of peace", "Un momento de paz")}
+                        </span>
+                      </div>
                     </div>
-                    <p style={{
-                      fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
-                      fontWeight: 400, fontSize: "1.05rem",
-                      color: "rgba(255,255,255,0.65)", lineHeight: 1.5,
+
+                    {/* Menti prompt bubble */}
+                    <div style={{
+                      padding: "0.8rem 1rem",
+                      background: "rgba(212,190,140,0.06)",
+                      borderLeft: "3px solid rgba(212,190,140,0.3)",
+                      borderRadius: "0 12px 12px 0",
                       marginBottom: "1rem",
                     }}>
-                      {getJournalPrompt()}
-                    </p>
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 6, marginBottom: "0.25rem",
+                      }}>
+                        <div style={{
+                          width: 5, height: 5, borderRadius: "50%", background: "#D4BE8C",
+                          animation: "gentlePulse 3s ease-in-out infinite",
+                        }} />
+                        <span style={{
+                          fontSize: "0.6rem", fontWeight: 700, color: "rgba(212,190,140,0.7)",
+                          textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                        }}>
+                          Menti
+                        </span>
+                      </div>
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                        fontWeight: 400, fontSize: "1rem",
+                        color: "rgba(255,255,255,0.6)", lineHeight: 1.5,
+                        margin: 0,
+                      }}>
+                        {getJournalPrompt()}
+                      </p>
+                    </div>
 
-                    {/* Journal textarea */}
+                    {/* Notebook-style textarea */}
                     <div style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: 14, padding: "0.9rem", marginBottom: "0.8rem",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 14, padding: "1rem", marginBottom: "0.8rem",
+                      backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px)",
                     }}>
                       <textarea
                         value={journalText}
@@ -1192,10 +1232,10 @@ export default function TodayPage() {
                           "Escribe tus pensamientos aquí..."
                         )}
                         style={{
-                          width: "100%", minHeight: 100,
+                          width: "100%", minHeight: 140,
                           background: "transparent", border: "none", outline: "none",
                           color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
-                          lineHeight: 1.6, resize: "vertical",
+                          lineHeight: "28px", resize: "vertical",
                           fontFamily: "'DM Sans', sans-serif",
                         }}
                       />
@@ -1204,8 +1244,8 @@ export default function TodayPage() {
                           onClick={saveJournalEntry}
                           disabled={!journalText.trim() || savingJournal}
                           style={{
-                            padding: "0.45rem 1.2rem",
-                            background: journalText.trim() ? "#D4BE8C" : "rgba(255,255,255,0.1)",
+                            padding: "0.5rem 1.4rem",
+                            background: journalText.trim() ? "#D4BE8C" : "rgba(255,255,255,0.08)",
                             color: journalText.trim() ? "#1E1C21" : "rgba(255,255,255,0.3)",
                             border: "none", borderRadius: 20,
                             fontSize: "0.82rem", fontWeight: 600,
@@ -1224,19 +1264,31 @@ export default function TodayPage() {
                     {/* Previous entries */}
                     {journalEntries.length > 0 ? (
                       <div>
+                        {/* Reflection counter */}
                         <div style={{
-                          fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
-                          textTransform: "uppercase" as const, letterSpacing: "0.1em",
-                          fontWeight: 700, marginBottom: "0.4rem",
-                          fontFamily: "'DM Sans', sans-serif",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          marginBottom: "0.5rem",
                         }}>
-                          {t("Recent entries", "Entradas recientes")}
+                          <span style={{
+                            fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
+                            textTransform: "uppercase" as const, letterSpacing: "0.1em",
+                            fontWeight: 700,
+                            fontFamily: "'DM Sans', sans-serif",
+                          }}>
+                            {t("Recent entries", "Entradas recientes")}
+                          </span>
+                          <span style={{
+                            fontSize: "0.62rem", color: "rgba(212,190,140,0.5)",
+                            fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
+                          }}>
+                            {journalEntries.length} {t("this week", "esta semana")}
+                          </span>
                         </div>
                         {journalEntries.slice(0, 3).map((entry) => (
                           <div key={entry.id} style={{
                             padding: "0.7rem 0.8rem",
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.06)",
+                            background: "rgba(255,255,255,0.02)",
+                            border: "1px solid rgba(255,255,255,0.05)",
                             borderRadius: 12, marginBottom: "0.3rem",
                           }}>
                             <div style={{
@@ -1246,7 +1298,7 @@ export default function TodayPage() {
                               {formatEntryDate(entry.created_at)}
                             </div>
                             <div style={{
-                              fontSize: "0.82rem", color: "rgba(255,255,255,0.55)",
+                              fontSize: "0.82rem", color: "rgba(255,255,255,0.5)",
                               lineHeight: 1.5,
                               fontFamily: "'DM Sans', sans-serif",
                               overflow: "hidden",
@@ -1263,25 +1315,40 @@ export default function TodayPage() {
                       /* Empty state */
                       <div style={{
                         textAlign: "center", padding: "1.5rem 1rem",
-                        color: "rgba(255,255,255,0.25)", fontSize: "0.82rem",
-                        fontStyle: "italic",
                       }}>
-                        {t(
-                          "Your first reflection starts here.",
-                          "Tu primera reflexión empieza aquí."
-                        )}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(212,190,140,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8 }}>
+                          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+                          <line x1="16" y1="8" x2="2" y2="22" />
+                        </svg>
+                        <div style={{
+                          color: "rgba(255,255,255,0.25)", fontSize: "0.82rem",
+                          fontStyle: "italic",
+                          fontFamily: "'Cormorant Garamond', serif",
+                        }}>
+                          {t(
+                            "Your first reflection starts here.",
+                            "Tu primera reflexión empieza aquí."
+                          )}
+                        </div>
                       </div>
                     )}
-                  </div>
-                </div>
+              </div>
+            )}
 
-                {/* ═══ CARD 2: PROGRESO ═══ */}
-                <div style={{ minWidth: "100%", padding: "0 2px" }}>
-                  <div style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 20, padding: "1.2rem",
-                  }}>
+            {/* ═══ PROGRESS TAB ═══ */}
+            {activeTab === "progress" && (
+              <div style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 20, padding: "1.5rem",
+                position: "relative", overflow: "hidden",
+                animation: "tabFadeIn 0.35s ease",
+              }}>
+                {/* Gold accent top */}
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                  background: "linear-gradient(90deg, transparent 0%, rgba(161,179,146,0.3) 50%, transparent 100%)",
+                }} />
                     {/* 3 Stats Row */}
                     <div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
                       {/* Streak */}
@@ -1460,20 +1527,20 @@ export default function TodayPage() {
                         {t("Longest:", "Récord:")} {longestStreak} {t("days", "días")}
                       </div>
                     )}
-                  </div>
-                </div>
 
+                    {/* Motivational line */}
+                    <div style={{
+                      textAlign: "center", marginTop: "1rem",
+                      fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                      fontSize: "0.88rem", color: "rgba(212,190,140,0.35)",
+                      lineHeight: 1.5,
+                    }}>
+                      {streak > 0
+                        ? t("Every day counts.", "Cada día cuenta.")
+                        : t("Today is a great day to start.", "Hoy es un gran día para empezar.")}
+                    </div>
               </div>
-            </div>
-
-            {/* Swipe hint (only on first visit) */}
-            <div style={{
-              textAlign: "center", marginTop: "0.8rem",
-              fontSize: "0.68rem", color: "rgba(255,255,255,0.15)",
-              fontFamily: "'DM Sans', sans-serif",
-            }}>
-              {t("← Swipe to navigate →", "← Desliza para navegar →")}
-            </div>
+            )}
           </>
         )}
       </div>
