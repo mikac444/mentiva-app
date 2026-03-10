@@ -15,14 +15,14 @@ export default function Icon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 6,
-          background: "linear-gradient(135deg, #A1B392 0%, #6B7F5E 100%)",
+          background: "linear-gradient(135deg, #B2C4A0 0%, #9DB48C 100%)",
         }}
       >
         <span
           style={{
             fontSize: 20,
             fontWeight: 300,
-            color: "#D4BE8C",
+            color: "#2C3028",
             fontFamily: "serif",
             lineHeight: 1,
           }}

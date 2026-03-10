@@ -34,10 +34,10 @@ export function CollapsibleSection({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left transition-colors cursor-pointer hover:bg-white/5 rounded-t-xl"
-        style={{ color: "rgba(255,255,255,0.9)" }}
+        style={{ color: "#2C3028" }}
       >
-        <h2 className="font-serif text-lg" style={{ color: "#D4BE8C" }}>{title}</h2>
-        <span className="shrink-0 text-sm" style={{ color: "rgba(255,255,255,0.7)" }} aria-hidden>
+        <h2 className="font-serif text-lg" style={{ color: "#9DB48C" }}>{title}</h2>
+        <span className="shrink-0 text-sm" style={{ color: "#7E8C74" }} aria-hidden>
           {isOpen ? "▼" : "▶"}
         </span>
       </button>

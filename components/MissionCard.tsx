@@ -80,8 +80,8 @@ export default function MissionCard({
           ? "rgba(255,255,255,0.03)"
           : "rgba(255,255,255,0.06)",
         border: completed
-          ? "1px solid rgba(255,255,255,0.05)"
-          : "1px solid rgba(255,255,255,0.1)",
+          ? "1px solid rgba(44,48,40,0.05)"
+          : "1px solid rgba(44,48,40,0.1)",
         borderRadius: 16,
         borderLeft: `3.5px solid ${config.color}`,
         padding: "1rem 1rem 0.8rem",
@@ -105,7 +105,7 @@ export default function MissionCard({
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{
-            fontSize: "0.7rem", color: "rgba(255,255,255,0.3)",
+            fontSize: "0.7rem", color: "#9DA894",
             fontWeight: 500,
           }}>
             {estimatedMinutes} min
@@ -116,7 +116,7 @@ export default function MissionCard({
               style={{
                 background: "none", border: "none", padding: "2px",
                 cursor: "pointer", display: "flex", alignItems: "center",
-                color: "rgba(255,255,255,0.2)",
+                color: "#9DA894",
                 transition: "color 0.2s",
               }}
               aria-label={lang === "es" ? "Eliminar tarea" : "Delete task"}
@@ -140,7 +140,7 @@ export default function MissionCard({
             borderRadius: "50%",
             border: completed
               ? `2px solid ${config.color}`
-              : "1.5px solid rgba(255,255,255,0.25)",
+              : "1.5px solid rgba(44,48,40,0.25)",
             background: completed ? config.color : "transparent",
             cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -171,11 +171,11 @@ export default function MissionCard({
             style={{
               flex: 1, margin: 0, padding: "0 0 4px",
               fontSize: "0.88rem", lineHeight: 1.45,
-              color: "rgba(255,255,255,0.95)",
+              color: "#2C3028",
               fontWeight: 400,
               background: "transparent",
               border: "none",
-              borderBottom: "1px solid rgba(212,190,140,0.4)",
+              borderBottom: "1px solid rgba(157,180,140,0.4)",
               outline: "none",
               fontFamily: "inherit",
               resize: "none",
@@ -189,7 +189,7 @@ export default function MissionCard({
             style={{
               flex: 1, margin: 0,
               fontSize: "0.88rem", lineHeight: 1.45,
-              color: completed ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.88)",
+              color: completed ? "#9DA894" : "#2C3028",
               textDecoration: completed ? "line-through" : "none",
               fontWeight: 400,
               cursor: !completed && onEdit ? "text" : "default",
@@ -204,7 +204,7 @@ export default function MissionCard({
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         marginTop: 10, paddingTop: 8,
-        borderTop: "1px solid rgba(255,255,255,0.04)",
+        borderTop: "1px solid rgba(44,48,40,0.06)",
       }}>
         {/* Enfoque */}
         <div style={{
@@ -215,7 +215,7 @@ export default function MissionCard({
             background: config.color, opacity: 0.6,
           }} />
           <span style={{
-            fontSize: "0.7rem", color: "rgba(255,255,255,0.3)",
+            fontSize: "0.7rem", color: "#7E8C74",
             fontWeight: 500,
           }}>
             {enfoqueName}
@@ -229,7 +229,7 @@ export default function MissionCard({
             disabled={swapping}
             style={{
               background: "none", border: "none",
-              fontSize: "0.72rem", color: "rgba(255,255,255,0.25)",
+              fontSize: "0.72rem", color: "#9DA894",
               cursor: swapping ? "wait" : "pointer",
               padding: "2px 6px",
               fontFamily: "'DM Sans', sans-serif",

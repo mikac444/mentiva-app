@@ -190,15 +190,15 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
         <Orbs />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem", textAlign: "center", position: "relative", zIndex: 1 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40, fontSize: "0.75rem", fontWeight: 500, color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "2.5rem", backdropFilter: "blur(8px)" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C", animation: "pulse 2s ease-in-out infinite" }} />
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9DB48C", animation: "pulse 2s ease-in-out infinite" }} />
             Founding Member
           </div>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(2.4rem, 8vw, 3.8rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-            Welcome to<br />Mentiva, <span style={{ color: "#D4BE8C", fontStyle: "italic" }}>{firstName}</span>
+            Welcome to<br />Mentiva, <span style={{ color: "#BBCBA8", fontStyle: "italic" }}>{firstName}</span>
           </h1>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-            fontSize: "clamp(3.5rem, 12vw, 5.5rem)", color: "#D4BE8C", lineHeight: 1,
+            fontSize: "clamp(3.5rem, 12vw, 5.5rem)", color: "#BBCBA8", lineHeight: 1,
             margin: "1.5rem 0 0.5rem",
             opacity: numberRevealed ? 1 : 0,
             transform: numberRevealed ? "scale(1)" : "scale(0.8)",
@@ -214,7 +214,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
           </p>
           <button onClick={() => setPhase("depth-choice")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+            padding: "1rem 2.2rem", background: "#2C3028", color: "#BBCBA8",
             fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
             border: "none", borderRadius: 60, cursor: "pointer", marginTop: "2.5rem",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
@@ -446,7 +446,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             borderRadius: 20, backdropFilter: "blur(10px)",
           }}>
             {/* Identity statement */}
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.25rem", fontWeight: 400, color: "#D4BE8C", lineHeight: 1.4, marginBottom: "1.2rem", textAlign: "center" }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.25rem", fontWeight: 400, color: "#6B7E5C", lineHeight: 1.4, marginBottom: "1.2rem", textAlign: "center" }}>
               {summary.identityStatement}
             </p>
 
@@ -454,7 +454,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.2rem" }}>
               {summary.keyInsights.map((insight, i) => (
                 <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: "0.6rem", fontSize: "0.88rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif" }}>
-                  <span style={{ color: "#D4BE8C", flexShrink: 0, marginTop: 2 }}>&#8226;</span>
+                  <span style={{ color: "#6B7E5C", flexShrink: 0, marginTop: 2 }}>&#8226;</span>
                   {insight}
                 </li>
               ))}
@@ -477,7 +477,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
 
         <button onClick={() => finishOnboarding("upload")} style={{
           display: "inline-flex", alignItems: "center", gap: 8,
-          padding: "1rem 2.2rem", background: "white", color: "#4A5C3F",
+          padding: "1rem 2.2rem", background: "#2C3028", color: "#BBCBA8",
           fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
           border: "none", borderRadius: 60, cursor: "pointer", marginTop: "2rem",
           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
@@ -502,7 +502,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
 function Orbs() {
   return (
     <>
-      <div style={{ position: "absolute", width: 350, height: 350, borderRadius: "50%", filter: "blur(80px)", opacity: 0.12, background: "rgba(196,168,107,0.35)", top: "-5%", left: "-10%", animation: "drift1 20s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", width: 350, height: 350, borderRadius: "50%", filter: "blur(80px)", opacity: 0.12, background: "rgba(157,180,140,0.35)", top: "-5%", left: "-10%", animation: "drift1 20s ease-in-out infinite", pointerEvents: "none" }} />
       <div style={{ position: "absolute", width: 250, height: 250, borderRadius: "50%", filter: "blur(80px)", opacity: 0.12, background: "rgba(255,255,255,0.2)", bottom: "-5%", right: "-5%", animation: "drift2 18s ease-in-out infinite", pointerEvents: "none" }} />
       <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", filter: "blur(80px)", opacity: 0.12, background: "rgba(185,205,170,0.25)", top: "40%", right: "-8%", animation: "drift3 22s ease-in-out infinite", pointerEvents: "none" }} />
     </>

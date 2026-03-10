@@ -11,7 +11,7 @@ type PlannerProps = {
 };
 
 const GOAL_COLORS: Record<string, string> = {
-  business: "#D4BE8C", negocio: "#D4BE8C", career: "#D4BE8C", launch: "#D4BE8C", lanzar: "#D4BE8C",
+  business: "#9DB48C", negocio: "#9DB48C", career: "#9DB48C", launch: "#9DB48C", lanzar: "#9DB48C",
   health: "#8CB39A", salud: "#8CB39A", fitness: "#8CB39A", exercise: "#8CB39A",
   relationship: "#C48B8B", relacion: "#C48B8B", love: "#C48B8B", pareja: "#C48B8B",
   finance: "#B3A18C", finanzas: "#B3A18C", money: "#B3A18C", dinero: "#B3A18C",
@@ -61,7 +61,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
     <div style={{ minHeight: "50vh", display: "flex", flexDirection: "column" }}>
       {/* Progress bar */}
       <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 3, marginBottom: "1.5rem", overflow: "hidden" }}>
-        <div style={{ height: "100%", background: "linear-gradient(90deg, #D4BE8C, #C4A86B)", borderRadius: 3, width: progressWidth, transition: "width 0.5s ease" }} />
+        <div style={{ height: "100%", background: "linear-gradient(90deg, #6B7E5C, #9DB48C)", borderRadius: 3, width: progressWidth, transition: "width 0.5s ease" }} />
       </div>
 
       {/* Step 0: Goal Selection */}
@@ -69,10 +69,10 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
         <div style={{ animation: "fadeUp 0.4s ease" }}>
           <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
             <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
-              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#D4BE8C" }} />
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#9DB48C" }} />
             </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.95)", marginBottom: "0.3rem" }}>
-              {t("Let's plan your week,", "Planifiquemos tu semana,")} <em style={{ color: "#D4BE8C", fontStyle: "italic" }}>{userName}</em>
+              {t("Let's plan your week,", "Planifiquemos tu semana,")} <em style={{ color: "#9DB48C", fontStyle: "italic" }}>{userName}</em>
             </h2>
             <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>
               {t("Pick 2-3 goals to focus on. Menti will create your daily plan.", "Elige 2-3 metas. Menti creará tu plan diario.")}
@@ -82,18 +82,18 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
             {goals.map((g) => {
               const selected = selectedGoals.includes(g.goal);
               return (
-                <div key={g.goal} onClick={() => toggleGoal(g.goal)} style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.9rem 1rem", background: selected ? "linear-gradient(135deg, rgba(212,190,140,0.15) 0%, rgba(212,190,140,0.05) 100%)" : "rgba(255,255,255,0.05)", border: `1.5px solid ${selected ? "rgba(212,190,140,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: 14, cursor: "pointer", transition: "all 0.3s ease" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: selected ? "rgba(212,190,140,0.2)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: getGoalColor(g.goal) }} /></div>
+                <div key={g.goal} onClick={() => toggleGoal(g.goal)} style={{ display: "flex", alignItems: "center", gap: "0.8rem", padding: "0.9rem 1rem", background: selected ? "linear-gradient(135deg, rgba(157,180,140,0.15) 0%, rgba(157,180,140,0.05) 100%)" : "rgba(255,255,255,0.05)", border: `1.5px solid ${selected ? "rgba(157,180,140,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: 14, cursor: "pointer", transition: "all 0.3s ease" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: selected ? "rgba(157,180,140,0.2)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: getGoalColor(g.goal) }} /></div>
                   <div style={{ flex: 1, fontSize: "0.88rem", fontWeight: 500, color: selected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)" }}>{g.goal}</div>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selected ? "#D4BE8C" : "rgba(255,255,255,0.15)"}`, background: selected ? "#D4BE8C" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {selected && <svg viewBox="0 0 14 14" style={{ width: 10, height: 10 }}><path d="M2 7L5.5 10.5L12 3.5" fill="none" stroke="#4A5C3F" strokeWidth="2.5" strokeLinecap="round" /></svg>}
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selected ? "#9DB48C" : "rgba(255,255,255,0.15)"}`, background: selected ? "#9DB48C" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {selected && <svg viewBox="0 0 14 14" style={{ width: 10, height: 10 }}><path d="M2 7L5.5 10.5L12 3.5" fill="none" stroke="#2C3028" strokeWidth="2.5" strokeLinecap="round" /></svg>}
                   </div>
                 </div>
               );
             })}
           </div>
           {selectedGoals.length > 0 && (
-            <button onClick={() => setStep(1)} style={{ width: "100%", padding: "0.9rem", background: "linear-gradient(135deg, #D4BE8C, #C4A86B)", color: "#3A4A2F", fontWeight: 700, fontSize: "0.9rem", border: "none", borderRadius: 14, cursor: "pointer", marginBottom: "0.5rem" }}>
+            <button onClick={() => setStep(1)} style={{ width: "100%", padding: "0.9rem", background: "#2C3028", color: "rgba(255,255,255,0.92)", fontWeight: 700, fontSize: "0.9rem", border: "none", borderRadius: 14, cursor: "pointer", marginBottom: "0.5rem" }}>
               {t("Continue", "Continuar")} →
             </button>
           )}
@@ -113,8 +113,8 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
           </div>
           <div style={{ padding: "1rem 1.2rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, marginBottom: "0.8rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.4rem" }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#D4BE8C" }} />
-              <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#D4BE8C", textTransform: "uppercase" as const, letterSpacing: "0.12em" }}>Menti</div>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#9DB48C" }} />
+              <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#9DB48C", textTransform: "uppercase" as const, letterSpacing: "0.12em" }}>Menti</div>
             </div>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "0.92rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
               {t(`Tell me about "${currentGoalForContext}" — what do you want to accomplish this week?`, `Cuéntame sobre "${currentGoalForContext}" — ¿qué quieres lograr esta semana?`)}
@@ -123,7 +123,7 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
           <textarea value={currentContext} onChange={(e) => setCurrentContext(e.target.value)} placeholder={t("e.g. I need to define pricing and send 10 DMs...", "ej. Necesito definir el pricing y enviar 10 DMs...")} style={{ width: "100%", minHeight: 80, padding: "0.9rem 1rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, color: "rgba(255,255,255,0.9)", fontSize: "0.85rem", fontFamily: "inherit", resize: "vertical", outline: "none", lineHeight: 1.5 }} />
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.8rem" }}>
             <button onClick={() => { setCurrentContext(""); setStep(step - 1); }} style={{ padding: "0.8rem 1.2rem", background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", fontWeight: 600, fontSize: "0.85rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, cursor: "pointer" }}>← {t("Back", "Atrás")}</button>
-            <button onClick={nextFromContext} style={{ flex: 1, padding: "0.8rem", background: "linear-gradient(135deg, #D4BE8C, #C4A86B)", color: "#3A4A2F", fontWeight: 700, fontSize: "0.85rem", border: "none", borderRadius: 12, cursor: "pointer" }}>
+            <button onClick={nextFromContext} style={{ flex: 1, padding: "0.8rem", background: "#2C3028", color: "rgba(255,255,255,0.92)", fontWeight: 700, fontSize: "0.85rem", border: "none", borderRadius: 12, cursor: "pointer" }}>
               {isLastContext ? t("Create my plan", "Crear mi plan") : t("Next", "Siguiente")} {String.fromCharCode(8594)}
             </button>
           </div>
@@ -133,8 +133,8 @@ export default function WeeklyPlanner({ goals, userName, t, onComplete, onSkip }
       {/* Confirmation */}
       {step > selectedGoals.length && (
         <div style={{ animation: "fadeUp 0.4s ease", textAlign: "center", padding: "2rem 0" }}>
-          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,190,140,0.4) 0%, transparent 70%)", border: "1px solid rgba(212,190,140,0.25)", margin: "0 auto 1.5rem", display: "flex", alignItems: "center", justifyContent: "center", animation: "gentlePulse 2s ease-in-out infinite" }}>
-            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#D4BE8C" }} />
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle, rgba(157,180,140,0.4) 0%, transparent 70%)", border: "1px solid rgba(157,180,140,0.25)", margin: "0 auto 1.5rem", display: "flex", alignItems: "center", justifyContent: "center", animation: "gentlePulse 2s ease-in-out infinite" }}>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", background: "#9DB48C" }} />
           </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)", marginBottom: "0.5rem" }}>{t("Creating your plan...", "Creando tu plan...")}</h2>
           <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5, maxWidth: 280, margin: "0 auto" }}>{t("Menti is building your personalized tasks.", "Menti está construyendo tus tareas personalizadas.")}</p>

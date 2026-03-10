@@ -42,20 +42,20 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
       <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
         <div style={{
           width: 48, height: 48, borderRadius: "50%", margin: "0 auto 1rem",
-          background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.3)",
+          background: "rgba(157,180,140,0.15)", border: "1px solid rgba(157,180,140,0.3)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#D4BE8C" }} />
+          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#9DB48C" }} />
         </div>
         <h2 style={{
           fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-          fontSize: "clamp(1.4rem, 5vw, 1.9rem)", color: "rgba(255,255,255,0.95)",
+          fontSize: "clamp(1.4rem, 5vw, 1.9rem)", color: "#2C3028",
           lineHeight: 1.2, marginBottom: "0.4rem",
         }}>
           {t("What's your North Star?", "¿Cuál es tu North Star?")}
         </h2>
         <p style={{
-          fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
+          fontSize: "0.85rem", color: "#7E8C74", lineHeight: 1.5,
           maxWidth: 320, margin: "0 auto",
         }}>
           {t(
@@ -78,11 +78,11 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "1rem 1.2rem", textAlign: "left",
                 background: isSelected
-                  ? "rgba(212,190,140,0.15)"
+                  ? "rgba(157,180,140,0.15)"
                   : "rgba(255,255,255,0.05)",
                 border: isSelected
-                  ? "1.5px solid rgba(212,190,140,0.5)"
-                  : "1px solid rgba(255,255,255,0.1)",
+                  ? "1.5px solid rgba(157,180,140,0.5)"
+                  : "1px solid rgba(44,48,40,0.1)",
                 borderRadius: 14, cursor: "pointer",
                 transition: "all 0.3s ease",
                 position: "relative",
@@ -92,14 +92,14 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
               <div style={{
                 width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
                 border: isSelected
-                  ? "2px solid #D4BE8C"
+                  ? "2px solid #9DB48C"
                   : "1.5px solid rgba(255,255,255,0.2)",
-                background: isSelected ? "#D4BE8C" : "transparent",
+                background: isSelected ? "#9DB48C" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.2s",
               }}>
                 {isSelected && (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5C3F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2C3028" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -129,9 +129,9 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                 <div style={{
                   position: "absolute", top: -8, right: 12,
                   padding: "2px 10px", borderRadius: 20,
-                  background: "rgba(212,190,140,0.2)", border: "1px solid rgba(212,190,140,0.3)",
+                  background: "rgba(157,180,140,0.2)", border: "1px solid rgba(157,180,140,0.3)",
                   fontSize: "0.65rem", fontWeight: 600,
-                  color: "#D4BE8C", letterSpacing: "0.05em",
+                  color: "#9DB48C", letterSpacing: "0.05em",
                   textTransform: "uppercase",
                 }}>
                   {t("Menti suggests", "Menti sugiere")}
@@ -159,9 +159,9 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
         onClick={activateCustom}
         style={{
           padding: "1rem 1.2rem",
-          background: isCustom ? "rgba(212,190,140,0.15)" : "rgba(255,255,255,0.05)",
+          background: isCustom ? "rgba(157,180,140,0.15)" : "rgba(255,255,255,0.05)",
           border: isCustom
-            ? "1.5px solid rgba(212,190,140,0.5)"
+            ? "1.5px solid rgba(157,180,140,0.5)"
             : "1px solid rgba(255,255,255,0.1)",
           borderRadius: 14, cursor: "pointer",
           transition: "all 0.3s ease",
@@ -172,14 +172,14 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
           <div style={{
             width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
             border: isCustom
-              ? "2px solid #D4BE8C"
+              ? "2px solid #9DB48C"
               : "1.5px solid rgba(255,255,255,0.2)",
-            background: isCustom ? "#D4BE8C" : "transparent",
+            background: isCustom ? "#9DB48C" : "transparent",
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s",
           }}>
             {isCustom && (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5C3F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2C3028" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             )}
@@ -228,8 +228,8 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
           style={{
             width: "100%", maxWidth: 320,
             padding: "0.9rem 2rem",
-            background: canConfirm ? "white" : "rgba(255,255,255,0.1)",
-            color: canConfirm ? "#4A5C3F" : "rgba(255,255,255,0.3)",
+            background: canConfirm ? "#2C3028" : "rgba(255,255,255,0.1)",
+            color: canConfirm ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
             fontWeight: 600, fontSize: "0.92rem",
             border: "none", borderRadius: 40, cursor: canConfirm ? "pointer" : "default",
             fontFamily: "'DM Sans', sans-serif",

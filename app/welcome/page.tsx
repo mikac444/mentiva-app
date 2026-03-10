@@ -101,8 +101,8 @@ export default function WelcomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #A1B392 0%, #6B7F5E 100%)" }}>
-        <div className="text-white/80 font-sans">{t("Loading...", "Cargando...")}</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(172deg, #B2C4A0 0%, #C0D4AA 25%, #CCDABC 48%, #D3D0C4 72%, #DAD7CB 100%)" }}>
+        <div className="font-sans" style={{ color: "#5A6352" }}>{t("Loading...", "Cargando...")}</div>
       </div>
     );
   }
@@ -112,44 +112,44 @@ export default function WelcomePage() {
   return (
     <div
       className="min-h-screen flex flex-col overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #A1B392 0%, #6B7F5E 100%)" }}
+      style={{ background: "linear-gradient(172deg, #B2C4A0 0%, #C0D4AA 25%, #CCDABC 48%, #D3D0C4 72%, #DAD7CB 100%)" }}
     >
       {/* Ambient orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute w-96 h-96 rounded-full opacity-30 blur-3xl animate-[drift_20s_ease-in-out_infinite]" style={{ background: "radial-gradient(circle, #D4BE8C 0%, transparent 70%)", top: "10%", left: "10%" }} />
+        <div className="absolute w-96 h-96 rounded-full opacity-30 blur-3xl animate-[drift_20s_ease-in-out_infinite]" style={{ background: "radial-gradient(circle, #BBCBA8 0%, transparent 70%)", top: "10%", left: "10%" }} />
         <div className="absolute w-80 h-80 rounded-full opacity-20 blur-3xl animate-[drift_25s_ease-in-out_infinite_reverse]" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)", top: "60%", right: "15%" }} />
       </div>
       <style>{`@keyframes drift { 0%,100%{transform:translate(0,0)} 25%{transform:translate(20px,-30px)} 50%{transform:translate(-15px,20px)} 75%{transform:translate(30px,10px)} }`}</style>
 
       <header className="relative z-10 pt-8 pb-4">
-        <p className="text-center font-serif font-light tracking-[0.35em] uppercase" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>
+        <p className="text-center font-serif font-light tracking-[0.35em] uppercase" style={{ color: "#9DA894", fontSize: "0.9rem" }}>
           MENTIVA
         </p>
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8">
         <div className="max-w-xl mx-auto text-center space-y-6 animate-[rise_0.8s_ease-out_both]">
-          <h1 className="font-serif font-light text-3xl sm:text-4xl" style={{ color: "rgba(255,255,255,0.95)" }}>
+          <h1 className="font-serif font-light text-3xl sm:text-4xl" style={{ color: "#2C3028" }}>
             {t("Welcome, Founding Member.", "Bienvenido/a, Miembro Fundador.")}
           </h1>
 
-          <div className="animate-[scaleIn_0.6s_ease-out_0.3s_both]" style={{ color: "#D4BE8C" }}>
+          <div className="animate-[scaleIn_0.6s_ease-out_0.3s_both]" style={{ color: "#6B7E5C" }}>
             <span className="font-serif text-6xl sm:text-7xl font-light">#{displayMemberNumber}</span>
           </div>
 
           <div className="space-y-2">
-            <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <p className="font-sans text-sm" style={{ color: "#5A6352" }}>
               {spotsClaimed} {t("of 3,000 spots claimed", "de 3,000 lugares ocupados")}
             </p>
-            <div className="h-1 rounded-full bg-white/20 max-w-xs mx-auto overflow-hidden">
+            <div className="h-1 rounded-full max-w-xs mx-auto overflow-hidden" style={{ background: "rgba(44,48,40,0.1)" }}>
               <div
-                className="h-full rounded-full bg-[#D4BE8C] transition-all duration-500"
-                style={{ width: `${Math.min(100, (spotsClaimed / 3000) * 100)}%` }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{ background: "linear-gradient(90deg, #BBCBA8, #6B7E5C)", width: `${Math.min(100, (spotsClaimed / 3000) * 100)}%` }}
               />
             </div>
           </div>
 
-          <p className="font-serif italic font-light" style={{ color: "rgba(255,255,255,0.8)" }}>
+          <p className="font-serif italic font-light" style={{ color: "#5A6352" }}>
             {t(
               "You\u2019re one of the first. Now help us spread the vision.",
               "Eres de los primeros. Ahora ayudanos a compartir la vision."
@@ -158,17 +158,18 @@ export default function WelcomePage() {
 
           {/* Referral link */}
           <div className="space-y-3">
-            <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
+            <p className="font-sans text-sm" style={{ color: "#7E8C74" }}>
               {t("Your referral link:", "Tu link de referidos:")}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
-              <div className="flex-1 px-4 py-3 rounded-full bg-white/15 backdrop-blur-md border border-white/40 font-sans text-sm text-white truncate">
+              <div className="flex-1 px-4 py-3 rounded-full backdrop-blur-md font-sans text-sm truncate" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)", color: "#2C3028" }}>
                 {referralLink}
               </div>
               <button
                 type="button"
                 onClick={copyLink}
-                className="shrink-0 px-5 py-3 rounded-full bg-white/20 backdrop-blur-md border border-white/40 text-white font-sans text-sm hover:bg-white/30 transition-colors"
+                className="shrink-0 px-5 py-3 rounded-full backdrop-blur-md font-sans text-sm transition-colors"
+                style={{ background: "#2C3028", color: "rgba(255,255,255,0.92)", border: "none" }}
               >
                 {copied ? t("Copied!", "Copiado!") : t("Copy Link", "Copiar Link")}
               </button>
@@ -183,7 +184,8 @@ export default function WelcomePage() {
                 href={b.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/40 text-white font-sans text-xs hover:bg-white/25 transition-colors"
+                className="px-4 py-2 rounded-full backdrop-blur-md font-sans text-xs transition-colors"
+                style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)", color: "#2C3028" }}
               >
                 {b.label}
               </a>
@@ -192,21 +194,21 @@ export default function WelcomePage() {
 
           {/* Referral tiers */}
           <div className="pt-4 space-y-3 text-left max-w-sm mx-auto">
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">3 {t("referrals", "referidos")}</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="font-sans font-medium text-sm" style={{ color: "#2C3028" }}>3 {t("referrals", "referidos")}</p>
+              <p className="font-sans text-xs mt-1" style={{ color: "#5A6352" }}>
                 {t("Get your $10 back", "Recupera tus $10")}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/20">
-              <p className="font-sans font-medium text-sm text-white">5 {t("referrals", "referidos")}</p>
-              <p className="font-sans text-xs mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="font-sans font-medium text-sm" style={{ color: "#2C3028" }}>5 {t("referrals", "referidos")}</p>
+              <p className="font-sans text-xs mt-1" style={{ color: "#5A6352" }}>
                 {t("Gift a free lifetime membership", "Regala una membresia gratis")}
               </p>
             </div>
           </div>
 
-          <p className="font-sans text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <p className="font-sans text-sm" style={{ color: "#7E8C74" }}>
             {referralCount > 0
               ? `${referralCount} ${t("referrals so far", "referidos hasta ahora")}`
               : t("Share to start earning rewards", "Comparte para empezar a ganar")}
@@ -216,7 +218,8 @@ export default function WelcomePage() {
           <div className="pt-4">
             <a
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-[#4A5C3F] font-sans font-semibold text-sm hover:bg-white/90 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-sans font-semibold text-sm transition-colors"
+              style={{ background: "#2C3028", color: "rgba(255,255,255,0.92)" }}
             >
               {t("Continue to Mentiva", "Continuar a Mentiva")} {String.fromCharCode(8594)}
             </a>
@@ -224,7 +227,7 @@ export default function WelcomePage() {
         </div>
       </main>
 
-      <footer className="relative z-10 py-6 text-center font-sans text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+      <footer className="relative z-10 py-6 text-center font-sans text-sm" style={{ color: "#9DA894" }}>
         {String.fromCharCode(169)} 2026 Mentiva
       </footer>
 
