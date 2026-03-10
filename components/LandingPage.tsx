@@ -221,7 +221,7 @@ export default function LandingPage() {
         <div
           className="absolute w-96 h-96 rounded-full opacity-30 blur-3xl animate-[drift_20s_ease-in-out_infinite]"
           style={{
-            background: "radial-gradient(circle, #D4BE8C 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(187,203,168,0.3) 0%, transparent 70%)",
             top: "10%",
             left: "10%",
           }}
@@ -237,7 +237,7 @@ export default function LandingPage() {
         <div
           className="absolute w-64 h-64 rounded-full opacity-25 blur-2xl animate-[drift_18s_ease-in-out_infinite]"
           style={{
-            background: "radial-gradient(circle, #D4BE8C 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(187,203,168,0.3) 0%, transparent 70%)",
             bottom: "20%",
             left: "30%",
           }}

@@ -338,7 +338,7 @@ export default function DashboardPage() {
                     <ul className="space-y-2">
                       {selectedBoard.analysis.themes?.map((t, i) => (
                         <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
-                          <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
+                          <span className="mt-0.5" style={{ color: "#6B7E5C" }}>-</span>
                           <span>{t}</span>
                         </li>
                       ))}
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                         : selectedBoard.analysis.goalsWithSteps?.map((g) => g.goal) ?? []
                       ).map((g, i) => (
                         <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
-                          <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
+                          <span className="mt-0.5" style={{ color: "#6B7E5C" }}>-</span>
                           <span>{g}</span>
                         </li>
                       ))}
@@ -362,7 +362,7 @@ export default function DashboardPage() {
                       <ul className="space-y-2">
                         {selectedBoard.analysis.patterns.map((p, i) => (
                           <li key={i} className="flex items-start gap-2" style={{ color: "rgba(255,255,255,0.9)" }}>
-                            <span className="mt-0.5" style={{ color: "#D4BE8C" }}>-</span>
+                            <span className="mt-0.5" style={{ color: "#6B7E5C" }}>-</span>
                             <span>{p}</span>
                           </li>
                         ))}
@@ -385,7 +385,7 @@ export default function DashboardPage() {
                             <li key={step} className="flex gap-4">
                               <span
                                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif font-medium text-sm"
-                                style={{ background: "rgba(212,190,140,0.3)", color: "#D4BE8C" }}
+                                style={{ background: "rgba(157,180,140,0.3)", color: "#6B7E5C" }}
                               >
                                 {step}
                               </span>

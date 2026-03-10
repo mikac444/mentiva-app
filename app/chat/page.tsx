@@ -51,15 +51,15 @@ function BouncingDots() {
     <div className="flex items-center gap-1.5 py-1" aria-hidden>
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "0ms", background: "#D4BE8C" }}
+        style={{ animationDelay: "0ms", background: "#9DB48C" }}
       />
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "150ms", background: "#D4BE8C" }}
+        style={{ animationDelay: "150ms", background: "#9DB48C" }}
       />
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "300ms", background: "#D4BE8C" }}
+        style={{ animationDelay: "300ms", background: "#9DB48C" }}
       />
     </div>
   );
@@ -428,7 +428,7 @@ export default function ChatPage() {
               type="button"
               onClick={handleNewChat}
               className="w-full rounded-lg font-medium py-2.5 px-3 text-sm transition-colors"
-              style={{ background: "#FFFFFF", color: "#4A5C3F" }}
+              style={{ background: "#2C3028", color: "rgba(255,255,255,0.92)" }}
             >
               {t("+ New chat", "+ Nuevo chat")}
             </button>
@@ -598,7 +598,7 @@ export default function ChatPage() {
               type="submit"
               disabled={!input.trim() || isLoading}
               className="shrink-0 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold px-4 sm:px-5 py-3 h-[44px] transition-colors"
-              style={{ background: "#FFFFFF", color: "#4A5C3F" }}
+              style={{ background: "#2C3028", color: "rgba(255,255,255,0.92)" }}
             >
               {t("Send", "Enviar")}
             </button>

@@ -104,13 +104,13 @@ function LoginContent() {
     return (
       <div style={{
         position: "fixed", inset: 0, zIndex: 9999,
-        background: "linear-gradient(175deg, #A1B392 0%, #93A684 20%, #869978 40%, #7A8E6C 70%, #6B7F5E 100%)",
+        background: "linear-gradient(172deg, #B2C4A0 0%, #C0D4AA 25%, #CCDABC 48%, #D3D0C4 72%, #DAD7CB 100%)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <div style={{ textAlign: "center" }}>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-            fontSize: "2rem", color: "rgba(255,255,255,0.9)", letterSpacing: "-0.02em",
+            fontSize: "2rem", color: "#2C3028", letterSpacing: "-0.02em",
           }}>
             mentiva
           </div>
@@ -118,7 +118,7 @@ function LoginContent() {
             {[0, 1, 2].map((d) => (
               <span key={d} style={{
                 width: 6, height: 6, borderRadius: "50%",
-                background: "rgba(255,255,255,0.4)",
+                background: "#9DB48C",
                 animation: `pulse 1.2s ease-in-out ${d * 0.15}s infinite`,
               }} />
             ))}
@@ -137,15 +137,15 @@ function LoginContent() {
         style={{
           position: "fixed", top: 24, right: 28, zIndex: 60,
           padding: "7px 16px", borderRadius: 22,
-          background: "rgba(255,255,255,0.08)",
-          backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          color: "rgba(255,255,255,0.5)", fontSize: "0.72rem", fontWeight: 600,
+          background: "rgba(255,255,255,0.14)",
+          backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#7E8C74", fontSize: "0.72rem", fontWeight: 600,
           letterSpacing: "0.12em", cursor: "pointer", transition: "all 0.3s",
           display: "flex", alignItems: "center", gap: 6,
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.color = "rgba(255,255,255,0.8)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.color = "#5A6352"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.color = "#7E8C74"; }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -162,7 +162,7 @@ function LoginContent() {
       }}>
         <p style={{
           fontFamily: "'Playfair Display', serif", fontWeight: 300,
-          fontSize: "0.7rem", color: "rgba(255,255,255,0.3)",
+          fontSize: "0.7rem", color: "#9DA894",
           letterSpacing: "0.5em", textTransform: "uppercase",
           marginBottom: 40,
           opacity: phase >= 1 ? 1 : 0, transition: "opacity 1s ease",
@@ -170,12 +170,12 @@ function LoginContent() {
 
         <p style={{
           fontSize: "0.78rem", letterSpacing: "0.15em", textTransform: "uppercase",
-          color: "rgba(255,255,255,0.3)", marginBottom: 12, height: 20,
+          color: "#9DA894", marginBottom: 12, height: 20,
           opacity: phase >= 2 ? 1 : 0, transition: "opacity 0.8s ease",
         }}>
           {lang === "en" ? "Beyond just " : "M\u00e1s que solo "}
           <span style={{
-            display: "inline-block", color: "rgba(212,190,140,0.7)", fontWeight: 600,
+            display: "inline-block", color: "#6B7E5C", fontWeight: 600,
             opacity: showWord ? 1 : 0, transform: showWord ? "translateY(0)" : "translateY(8px)",
             transition: "all 0.4s ease", minWidth: 70,
           }}>{words[wordIdx]}</span>
@@ -184,7 +184,7 @@ function LoginContent() {
         <h1 style={{
           fontFamily: "'Playfair Display', serif", fontWeight: 500,
           fontSize: "clamp(2rem, 5.5vw, 3.2rem)",
-          color: "rgba(255,255,255,0.93)", textAlign: "center", marginBottom: 12,
+          color: "#2C3028", textAlign: "center", marginBottom: 12,
           opacity: phase >= 2 ? 1 : 0,
           transform: phase >= 2 ? "translateY(0)" : "translateY(20px)",
           transition: "all 1s cubic-bezier(0.16,1,0.3,1)",
@@ -194,7 +194,7 @@ function LoginContent() {
 
         <p style={{
           fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 400,
-          fontSize: "0.92rem", color: "rgba(255,255,255,0.4)",
+          fontSize: "0.92rem", color: "#7E8C74",
           marginBottom: 48, textAlign: "center",
           opacity: phase >= 3 ? 1 : 0,
           transform: phase >= 3 ? "translateY(0)" : "translateY(10px)",
@@ -206,10 +206,9 @@ function LoginContent() {
           style={{
             width: "100%", maxWidth: 340,
             display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-            padding: "16px 28px", borderRadius: 16,
-            background: "rgba(255,255,255,0.12)",
-            backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(255,255,255,0.18)",
+            padding: "16px 28px", borderRadius: 60,
+            background: "#2C3028",
+            border: "none",
             color: "rgba(255,255,255,0.92)", fontSize: "0.9rem", fontWeight: 500,
             fontFamily: "'DM Sans', sans-serif", cursor: "pointer",
             boxShadow: "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.12)",
@@ -217,8 +216,8 @@ function LoginContent() {
             transform: phase >= 4 ? "translateY(0)" : "translateY(20px)",
             transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.12)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.12)"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#3a3f35"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.15)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "#2C3028"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.06)"; }}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" style={{ opacity: 0.85 }}>
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -237,22 +236,22 @@ function LoginContent() {
           <Link href="/" style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "7px 18px", borderRadius: 24,
-            background: "rgba(255,255,255,0.06)",
-            backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.14)",
+            backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+            border: "1px solid rgba(255,255,255,0.08)",
             textDecoration: "none", cursor: "pointer", transition: "all 0.3s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
           >
             <div style={{
               width: 5, height: 5, borderRadius: "50%",
-              background: "rgba(212,190,140,0.6)",
-              boxShadow: "0 0 10px rgba(212,190,140,0.3)",
+              background: "#9DB48C",
+              boxShadow: "0 0 10px rgba(157,180,140,0.3)",
             }} />
             <span style={{
               fontSize: "0.72rem", fontWeight: 500,
-              color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em",
+              color: "#7E8C74", letterSpacing: "0.05em",
             }}>{t.founding}</span>
           </Link>
         </div>
@@ -271,7 +270,7 @@ export default function LoginPage() {
       position: "fixed", inset: 0,
       fontFamily: "'DM Sans', system-ui, sans-serif",
       overflow: "hidden",
-      background: "linear-gradient(165deg, #B8C9A8 0%, #9BAE8B 25%, #8DA07D 45%, #7A8E6C 65%, #6B7F5E 85%, #5C7050 100%)",
+      background: "linear-gradient(172deg, #B2C4A0 0%, #C0D4AA 25%, #CCDABC 48%, #D3D0C4 72%, #DAD7CB 100%)",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
@@ -301,12 +300,12 @@ export default function LoginPage() {
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
         <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%)", top: "-8%", right: "-5%", filter: "blur(40px)", animation: "breatheA 12s ease-in-out infinite" }} />
         <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(200,220,180,0.18) 0%, transparent 60%)", bottom: "-10%", left: "-5%", filter: "blur(45px)", animation: "breatheB 16s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,190,140,0.1) 0%, transparent 55%)", top: "35%", left: "18%", filter: "blur(40px)", animation: "breatheA 18s ease-in-out infinite 4s" }} />
+        <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(187,203,168,0.15) 0%, transparent 55%)", top: "35%", left: "18%", filter: "blur(40px)", animation: "breatheA 18s ease-in-out infinite 4s" }} />
       </div>
 
       {/* Rings */}
-      <div style={{ position: "absolute", top: "50%", left: "50%", width: 600, height: 600, border: "1px solid rgba(255,255,255,0.05)", borderRadius: "50%", animation: "pulseRing 10s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", top: "50%", left: "50%", width: 400, height: 400, border: "1px solid rgba(255,255,255,0.04)", borderRadius: "50%", animation: "pulseRing 10s ease-in-out infinite 3s" }} />
+      <div style={{ position: "absolute", top: "50%", left: "50%", width: 600, height: 600, border: "1px solid rgba(44,48,40,0.04)", borderRadius: "50%", animation: "pulseRing 10s ease-in-out infinite" }} />
+      <div style={{ position: "absolute", top: "50%", left: "50%", width: 400, height: 400, border: "1px solid rgba(44,48,40,0.03)", borderRadius: "50%", animation: "pulseRing 10s ease-in-out infinite 3s" }} />
 
       <Suspense fallback={<LoginFallback />}>
         <LoginContent />

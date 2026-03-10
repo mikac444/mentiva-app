@@ -62,20 +62,20 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
       <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
         <div style={{
           width: 48, height: 48, borderRadius: "50%", margin: "0 auto 1rem",
-          background: "rgba(212,190,140,0.15)", border: "1px solid rgba(212,190,140,0.3)",
+          background: "rgba(157,180,140,0.15)", border: "1px solid rgba(157,180,140,0.3)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#D4BE8C" }} />
+          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "#9DB48C" }} />
         </div>
         <h2 style={{
           fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-          fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "rgba(255,255,255,0.95)",
+          fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: "#2C3028",
           lineHeight: 1.2, marginBottom: "0.4rem",
         }}>
           {t("Choose up to 3 focus areas", "Elige hasta 3 areas de enfoque")}
         </h2>
         <p style={{
-          fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
+          fontSize: "0.85rem", color: "#7E8C74", lineHeight: 1.5,
           maxWidth: 320, margin: "0 auto",
         }}>
           {t(
@@ -89,14 +89,14 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
       <div style={{
         display: "flex", alignItems: "center", gap: 8,
         padding: "0.6rem 1rem", marginBottom: "1rem",
-        background: "rgba(212,190,140,0.08)",
-        border: "1px solid rgba(212,190,140,0.15)",
+        background: "rgba(157,180,140,0.08)",
+        border: "1px solid rgba(157,180,140,0.15)",
         borderRadius: 10,
       }}>
         <span style={{
-          width: 6, height: 6, borderRadius: "50%", background: "#D4BE8C", flexShrink: 0,
+          width: 6, height: 6, borderRadius: "50%", background: "#9DB48C", flexShrink: 0,
         }} />
-        <span style={{ fontSize: "0.78rem", color: "rgba(212,190,140,0.7)", fontStyle: "italic" }}>
+        <span style={{ fontSize: "0.78rem", color: "#7E8C74", fontStyle: "italic" }}>
           North Star: {northStarGoal}
         </span>
       </div>
@@ -115,10 +115,10 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "0.7rem 1rem",
                 background: isSelected ? `${color}22` : "rgba(255,255,255,0.05)",
-                border: isSelected ? `1.5px solid ${color}` : "1px solid rgba(255,255,255,0.12)",
+                border: isSelected ? `1.5px solid ${color}` : "1px solid rgba(44,48,40,0.12)",
                 borderRadius: 12, cursor: isSelected || canAdd ? "pointer" : "default",
                 fontSize: "0.82rem", fontWeight: 500,
-                color: isSelected ? color : "rgba(255,255,255,0.6)",
+                color: isSelected ? color : "#5A6352",
                 transition: "all 0.2s",
                 opacity: !isSelected && !canAdd ? 0.4 : 1,
                 textAlign: "left",
@@ -177,8 +177,8 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
             style={{
               flex: 1, padding: "0.65rem 1rem",
               background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 10, color: "white",
+              border: "1px solid rgba(44,48,40,0.12)",
+              borderRadius: 10, color: "#2C3028",
               fontSize: "0.85rem", outline: "none",
               fontFamily: "'DM Sans', sans-serif",
             }}
@@ -188,10 +188,10 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
             disabled={!customInput.trim()}
             style={{
               padding: "0.65rem 1rem",
-              background: customInput.trim() ? "rgba(212,190,140,0.2)" : "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(212,190,140,0.3)",
+              background: customInput.trim() ? "rgba(157,180,140,0.2)" : "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(157,180,140,0.3)",
               borderRadius: 10, cursor: customInput.trim() ? "pointer" : "default",
-              color: "#D4BE8C", fontWeight: 600, fontSize: "0.85rem",
+              color: "#6B7E5C", fontWeight: 600, fontSize: "0.85rem",
               transition: "all 0.2s",
             }}
           >
@@ -203,7 +203,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
       {/* Counter */}
       <div style={{
         textAlign: "center", fontSize: "0.75rem",
-        color: "rgba(255,255,255,0.3)", marginBottom: "1rem",
+        color: "#9DA894", marginBottom: "1rem",
       }}>
         {totalSelected}/3 {t("selected", "seleccionados")}
       </div>
@@ -216,8 +216,8 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
           style={{
             width: "100%", maxWidth: 320,
             padding: "0.9rem 2rem",
-            background: totalSelected > 0 ? "white" : "rgba(255,255,255,0.1)",
-            color: totalSelected > 0 ? "#4A5C3F" : "rgba(255,255,255,0.3)",
+            background: totalSelected > 0 ? "#2C3028" : "rgba(255,255,255,0.1)",
+            color: totalSelected > 0 ? "white" : "#9DA894",
             fontWeight: 600, fontSize: "0.92rem",
             border: "none", borderRadius: 40,
             cursor: totalSelected > 0 ? "pointer" : "default",
@@ -233,7 +233,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
             onClick={onBack}
             style={{
               background: "none", border: "none",
-              fontSize: "0.8rem", color: "rgba(255,255,255,0.3)",
+              fontSize: "0.8rem", color: "#9DA894",
               cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
               fontFamily: "'DM Sans', sans-serif",
             }}

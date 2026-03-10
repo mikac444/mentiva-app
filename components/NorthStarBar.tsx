@@ -12,8 +12,8 @@ export default function NorthStarBar({ goalText, progressPercent, t }: Props) {
   return (
     <div style={{
       padding: "0.8rem 1rem",
-      background: "rgba(212,190,140,0.06)",
-      border: "1px solid rgba(212,190,140,0.15)",
+      background: "rgba(157,180,140,0.08)",
+      border: "1px solid rgba(157,180,140,0.15)",
       borderRadius: 14,
       marginBottom: "0.8rem",
     }}>
@@ -26,19 +26,19 @@ export default function NorthStarBar({ goalText, progressPercent, t }: Props) {
           display: "flex", alignItems: "center", gap: 6,
         }}>
           <span style={{
-            width: 8, height: 8, borderRadius: "50%", background: "#D4BE8C",
-            boxShadow: "0 0 8px rgba(212,190,140,0.4)",
+            width: 8, height: 8, borderRadius: "50%", background: "#6B7E5C",
+            boxShadow: "0 0 8px rgba(107,126,92,0.4)",
           }} />
           <span style={{
             fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.06em",
             textTransform: "uppercase" as const,
-            color: "rgba(212,190,140,0.7)",
+            color: "#6B7E5C",
           }}>
             North Star
           </span>
         </div>
         <span style={{
-          fontSize: "0.72rem", fontWeight: 600, color: "#D4BE8C",
+          fontSize: "0.72rem", fontWeight: 600, color: "#6B7E5C",
         }}>
           {clamped}%
         </span>
@@ -47,7 +47,7 @@ export default function NorthStarBar({ goalText, progressPercent, t }: Props) {
       {/* Goal text */}
       <p style={{
         fontSize: "0.88rem", fontWeight: 500,
-        color: "rgba(255,255,255,0.85)", lineHeight: 1.4,
+        color: "#2C3028", lineHeight: 1.4,
         marginBottom: 10,
       }}>
         {goalText}
@@ -56,13 +56,13 @@ export default function NorthStarBar({ goalText, progressPercent, t }: Props) {
       {/* Progress bar */}
       <div style={{
         height: 4, borderRadius: 4,
-        background: "rgba(255,255,255,0.06)",
+        background: "rgba(107,126,92,0.15)",
         overflow: "hidden",
       }}>
         <div style={{
           height: "100%", borderRadius: 4,
           width: `${clamped}%`,
-          background: "linear-gradient(90deg, #C4A86B, #D4BE8C)",
+          background: "linear-gradient(90deg, #6B7E5C, #9DB48C)",
           transition: "width 0.6s ease",
         }} />
       </div>
