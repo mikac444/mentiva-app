@@ -11,9 +11,9 @@ type NavProps = {
 };
 
 const linkBase = "text-sm transition-colors";
-const linkActive = "font-medium text-white";
-const linkInactive = "hover:text-white";
-const linkInactiveColor = { color: "rgba(255,255,255,0.6)" };
+const linkActive = "font-medium text-[#2C3028]";
+const linkInactive = "hover:text-[#2C3028]";
+const linkInactiveColor = { color: "#7E8C74" };
 
 export function Nav({ active, hideHamburger }: NavProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -76,7 +76,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
 
   const glassStyle = {
     background: "rgba(100,120,90,0.95)",
-    border: "1px solid rgba(255,255,255,0.15)",
+    border: "1px solid rgba(100,120,90,0.3)",
     backdropFilter: "blur(10px)",
   };
 
@@ -85,7 +85,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
       <Link
         href={user ? "/dashboard" : "/"}
         className="font-serif font-light text-2xl uppercase shrink-0 transition-opacity hover:opacity-80"
-        style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.35em" }}
+        style={{ color: "#9DA894", letterSpacing: "0.35em" }}
       >
         Mentiva
       </Link>
@@ -113,7 +113,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
           Chat with Menti
         </Link>
         {user && (
-          <div className="relative border-l pl-3" style={{ borderColor: "rgba(255,255,255,0.15)" }} ref={dropdownRef}>
+          <div className="relative border-l pl-3" style={{ borderColor: "rgba(44,48,40,0.1)" }} ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
@@ -121,11 +121,11 @@ export function Nav({ active, hideHamburger }: NavProps) {
               style={linkInactiveColor}
             >
               <span>{firstName}</span>
-              <span className="text-xs" aria-hidden style={{ color: "rgba(255,255,255,0.35)" }}>▼</span>
+              <span className="text-xs" aria-hidden style={{ color: "#9DA894" }}>▼</span>
             </button>
             {dropdownOpen && (
               <div className="absolute right-0 top-full mt-1 min-w-[220px] rounded-lg shadow-xl py-2 z-50" style={glassStyle}>
-                <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.15)" }}>
+                <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
                   {fullName && (
                     <p className="text-sm font-medium truncate" style={{ color: "rgba(255,255,255,0.9)" }} title={fullName}>
                       {fullName}
@@ -165,7 +165,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
             type="button"
             onClick={() => setMobileMenuOpen((o) => !o)}
             className="md:hidden p-2 -mr-2 transition-colors"
-            style={{ color: "rgba(255,255,255,0.6)" }}
+            style={{ color: "#7E8C74" }}
             aria-label="Open menu"
             aria-expanded={mobileMenuOpen}
           >
@@ -179,7 +179,7 @@ export function Nav({ active, hideHamburger }: NavProps) {
               mobileMenuOpen ? "max-h-[80vh]" : "max-h-0"
             }`}
           >
-            <div className="shadow-xl border-t" style={{ ...glassStyle, borderColor: "rgba(255,255,255,0.15)" }}>
+            <div className="shadow-xl border-t" style={{ ...glassStyle, borderColor: "rgba(100,120,90,0.3)" }}>
               <div className="px-4 py-3 flex flex-col gap-0">
                 <Link
                   href="/dashboard"

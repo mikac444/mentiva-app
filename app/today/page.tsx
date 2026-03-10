@@ -669,8 +669,8 @@ export default function TodayPage() {
           </h1>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "5px 14px", background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)", borderRadius: 30,
+            padding: "5px 14px", background: "rgba(44,48,40,0.04)",
+            border: "1px solid rgba(44,48,40,0.08)", borderRadius: 30,
             fontSize: "0.72rem", color: "#9DA894",
             letterSpacing: "0.05em", textTransform: "uppercase" as const, marginTop: "0.6rem",
           }}>
@@ -685,8 +685,8 @@ export default function TodayPage() {
         {appState === "no-board" && (
           <div style={{
             textAlign: "center", padding: "3rem 1rem",
-            background: "rgba(255,255,255,0.05)", borderRadius: 16,
-            border: "1px solid rgba(255,255,255,0.08)", marginTop: "1.5rem",
+            background: "rgba(44,48,40,0.03)", borderRadius: 16,
+            border: "1px solid rgba(44,48,40,0.05)", marginTop: "1.5rem",
           }}>
             <div style={{ marginBottom: "0.8rem", display: "flex", justifyContent: "center" }}>
               <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#BBCBA8" }} />
@@ -807,15 +807,15 @@ export default function TodayPage() {
                 style={{
                   display: "flex", alignItems: "center", gap: 14,
                   padding: "1.1rem 1.2rem", textAlign: "left",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(44,48,40,0.03)",
+                  border: "1px solid rgba(44,48,40,0.06)",
                   borderRadius: 14, cursor: "pointer",
                   transition: "all 0.3s ease",
                 }}
               >
                 <div style={{
                   width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                  background: "rgba(255,255,255,0.06)",
+                  background: "rgba(44,48,40,0.04)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E8C74" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -905,7 +905,7 @@ export default function TodayPage() {
                     {northStarGoal}
                   </p>
                   <div style={{
-                    height: 3, borderRadius: 3, background: "rgba(255,255,255,0.06)", marginTop: 5,
+                    height: 3, borderRadius: 3, background: "rgba(44,48,40,0.06)", marginTop: 5,
                   }}>
                     <div style={{
                       height: "100%", borderRadius: 3,
@@ -921,8 +921,8 @@ export default function TodayPage() {
                   <div style={{
                     display: "flex", flexDirection: "column", alignItems: "center",
                     padding: "0.35rem 0.7rem",
-                    background: streak >= 7 ? "rgba(187,203,168,0.12)" : "rgba(255,255,255,0.05)",
-                    border: streak >= 7 ? "1px solid rgba(187,203,168,0.25)" : "1px solid rgba(255,255,255,0.08)",
+                    background: streak >= 7 ? "rgba(187,203,168,0.12)" : "rgba(44,48,40,0.03)",
+                    border: streak >= 7 ? "1px solid rgba(187,203,168,0.25)" : "1px solid rgba(44,48,40,0.05)",
                     borderRadius: 10, flexShrink: 0,
                   }}>
                     <span style={{
@@ -962,12 +962,12 @@ export default function TodayPage() {
                     flex: 1,
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                     padding: "10px 8px",
-                    background: activeTab === tab.key ? "rgba(255,255,255,0.1)" : "none",
+                    background: activeTab === tab.key ? "rgba(255,255,255,0.85)" : "none",
                     border: "none",
                     borderRadius: 11,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: "0.78rem", fontWeight: 500,
-                    color: activeTab === tab.key ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)",
+                    color: activeTab === tab.key ? "#2C3028" : "#9DA894",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
                     boxShadow: activeTab === tab.key ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
@@ -1008,8 +1008,8 @@ export default function TodayPage() {
             {/* ═══ MISSIONS TAB ═══ */}
             {activeTab === "missions" && (
               <div style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(44,48,40,0.03)",
+                border: "1px solid rgba(44,48,40,0.05)",
                 borderRadius: 20, padding: "1.5rem",
                 position: "relative", overflow: "hidden",
                 animation: "tabFadeIn 0.35s ease",
@@ -1045,7 +1045,7 @@ export default function TodayPage() {
                     ) : (
                       <div style={{
                         textAlign: "center", padding: "2rem 1rem",
-                        color: "rgba(255,255,255,0.35)", fontSize: "0.85rem",
+                        color: "#9DA894", fontSize: "0.85rem",
                       }}>
                         {t(
                           "No missions for today. Check back soon!",
@@ -1080,7 +1080,7 @@ export default function TodayPage() {
                         <p style={{
                           fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
                           fontWeight: 400, fontSize: "0.95rem",
-                          color: "rgba(255,255,255,0.6)", lineHeight: 1.6,
+                          color: "#5A6352", lineHeight: 1.6,
                           margin: 0,
                         }}>
                           {mentiMessage || motivationalPulse}
@@ -1092,7 +1092,7 @@ export default function TodayPage() {
                     {total > 0 && (
                       <div style={{
                         textAlign: "center", fontSize: "0.78rem",
-                        color: "rgba(255,255,255,0.25)", marginTop: "0.5rem",
+                        color: "#9DA894", marginTop: "0.5rem",
                       }}>
                         {completed}/{total} {t("completed", "completadas")}
                       </div>
@@ -1105,10 +1105,10 @@ export default function TodayPage() {
                         style={{
                           width: "100%", padding: "0.7rem",
                           marginTop: "0.6rem",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px dashed rgba(255,255,255,0.12)",
+                          background: "rgba(44,48,40,0.03)",
+                          border: "1px dashed rgba(44,48,40,0.1)",
                           borderRadius: 12,
-                          color: "rgba(255,255,255,0.3)",
+                          color: "#9DA894",
                           fontSize: "0.82rem", fontWeight: 500,
                           cursor: "pointer",
                           fontFamily: "'DM Sans', sans-serif",
@@ -1126,7 +1126,7 @@ export default function TodayPage() {
                         onClick={resetWeek}
                         style={{
                           background: "none", border: "none",
-                          fontSize: "0.75rem", color: "rgba(255,255,255,0.2)",
+                          fontSize: "0.75rem", color: "#B5BFAD",
                           cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                           textDecoration: "underline", textUnderlineOffset: 3,
                         }}
@@ -1171,13 +1171,13 @@ export default function TodayPage() {
                       <div>
                         <h3 style={{
                           fontFamily: "'Cormorant Garamond', serif", fontWeight: 400,
-                          fontSize: "1.15rem", color: "rgba(255,255,255,0.9)",
+                          fontSize: "1.15rem", color: "#2C3028",
                           margin: 0, lineHeight: 1.2,
                         }}>
                           {t("Your Reflection", "Tu Reflexión")}
                         </h3>
                         <span style={{
-                          fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
+                          fontSize: "0.65rem", color: "#9DA894",
                           fontFamily: "'DM Sans', sans-serif",
                         }}>
                           {t("A moment of peace", "Un momento de paz")}
@@ -1210,7 +1210,7 @@ export default function TodayPage() {
                       <p style={{
                         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
                         fontWeight: 400, fontSize: "1rem",
-                        color: "rgba(255,255,255,0.6)", lineHeight: 1.5,
+                        color: "#5A6352", lineHeight: 1.5,
                         margin: 0,
                       }}>
                         {getJournalPrompt()}
@@ -1219,10 +1219,10 @@ export default function TodayPage() {
 
                     {/* Notebook-style textarea */}
                     <div style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: "rgba(44,48,40,0.02)",
+                      border: "1px solid rgba(44,48,40,0.06)",
                       borderRadius: 14, padding: "1rem", marginBottom: "0.8rem",
-                      backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px)",
+                      backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(44,48,40,0.04) 27px, rgba(44,48,40,0.04) 28px)",
                     }}>
                       <textarea
                         value={journalText}
@@ -1234,7 +1234,7 @@ export default function TodayPage() {
                         style={{
                           width: "100%", minHeight: 140,
                           background: "transparent", border: "none", outline: "none",
-                          color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
+                          color: "#2C3028", fontSize: "0.9rem",
                           lineHeight: "28px", resize: "vertical",
                           fontFamily: "'DM Sans', sans-serif",
                         }}
@@ -1245,8 +1245,8 @@ export default function TodayPage() {
                           disabled={!journalText.trim() || savingJournal}
                           style={{
                             padding: "0.5rem 1.4rem",
-                            background: journalText.trim() ? "#2C3028" : "rgba(255,255,255,0.08)",
-                            color: journalText.trim() ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
+                            background: journalText.trim() ? "#2C3028" : "rgba(44,48,40,0.05)",
+                            color: journalText.trim() ? "rgba(255,255,255,0.92)" : "#9DA894",
                             border: "none", borderRadius: 20,
                             fontSize: "0.82rem", fontWeight: 600,
                             cursor: journalText.trim() ? "pointer" : "default",
@@ -1270,7 +1270,7 @@ export default function TodayPage() {
                           marginBottom: "0.5rem",
                         }}>
                           <span style={{
-                            fontSize: "0.65rem", color: "rgba(255,255,255,0.25)",
+                            fontSize: "0.65rem", color: "#9DA894",
                             textTransform: "uppercase" as const, letterSpacing: "0.1em",
                             fontWeight: 700,
                             fontFamily: "'DM Sans', sans-serif",
@@ -1287,18 +1287,18 @@ export default function TodayPage() {
                         {journalEntries.slice(0, 3).map((entry) => (
                           <div key={entry.id} style={{
                             padding: "0.7rem 0.8rem",
-                            background: "rgba(255,255,255,0.02)",
-                            border: "1px solid rgba(255,255,255,0.05)",
+                            background: "rgba(44,48,40,0.02)",
+                            border: "1px solid rgba(44,48,40,0.04)",
                             borderRadius: 12, marginBottom: "0.3rem",
                           }}>
                             <div style={{
-                              fontSize: "0.6rem", color: "rgba(255,255,255,0.2)",
+                              fontSize: "0.6rem", color: "#B5BFAD",
                               marginBottom: "0.3rem", fontFamily: "'DM Sans', sans-serif",
                             }}>
                               {formatEntryDate(entry.created_at)}
                             </div>
                             <div style={{
-                              fontSize: "0.82rem", color: "rgba(255,255,255,0.5)",
+                              fontSize: "0.82rem", color: "#7E8C74",
                               lineHeight: 1.5,
                               fontFamily: "'DM Sans', sans-serif",
                               overflow: "hidden",
@@ -1321,7 +1321,7 @@ export default function TodayPage() {
                           <line x1="16" y1="8" x2="2" y2="22" />
                         </svg>
                         <div style={{
-                          color: "rgba(255,255,255,0.25)", fontSize: "0.82rem",
+                          color: "#9DA894", fontSize: "0.82rem",
                           fontStyle: "italic",
                           fontFamily: "'Cormorant Garamond', serif",
                         }}>
@@ -1338,8 +1338,8 @@ export default function TodayPage() {
             {/* ═══ PROGRESS TAB ═══ */}
             {activeTab === "progress" && (
               <div style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(44,48,40,0.03)",
+                border: "1px solid rgba(44,48,40,0.05)",
                 borderRadius: 20, padding: "1.5rem",
                 position: "relative", overflow: "hidden",
                 animation: "tabFadeIn 0.35s ease",
@@ -1355,14 +1355,14 @@ export default function TodayPage() {
                       <div style={{
                         flex: 1, textAlign: "center",
                         padding: "0.8rem 0.5rem",
-                        background: streak >= 7 ? "rgba(157,180,140,0.08)" : "rgba(255,255,255,0.03)",
-                        border: streak >= 7 ? "1px solid rgba(157,180,140,0.15)" : "1px solid rgba(255,255,255,0.06)",
+                        background: streak >= 7 ? "rgba(157,180,140,0.08)" : "rgba(44,48,40,0.02)",
+                        border: streak >= 7 ? "1px solid rgba(157,180,140,0.15)" : "1px solid rgba(44,48,40,0.04)",
                         borderRadius: 14,
                       }}>
                         <div style={{
                           fontSize: "1.8rem", fontWeight: 300,
                           fontFamily: "'Cormorant Garamond', serif",
-                          color: streak > 0 ? "#6B7E5C" : "rgba(255,255,255,0.3)",
+                          color: streak > 0 ? "#6B7E5C" : "#9DA894",
                           lineHeight: 1,
                         }}>
                           {streak}
@@ -1370,7 +1370,7 @@ export default function TodayPage() {
                         <div style={{
                           fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
                           textTransform: "uppercase" as const,
-                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                          color: "#9DA894", marginTop: 3,
                         }}>
                           {t("Streak", "Racha")}
                         </div>
@@ -1380,14 +1380,14 @@ export default function TodayPage() {
                       <div style={{
                         flex: 1, textAlign: "center",
                         padding: "0.8rem 0.5rem",
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        background: "rgba(44,48,40,0.02)",
+                        border: "1px solid rgba(44,48,40,0.04)",
                         borderRadius: 14,
                       }}>
                         <div style={{
                           fontSize: "1.8rem", fontWeight: 300,
                           fontFamily: "'Cormorant Garamond', serif",
-                          color: longestStreak > 0 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)",
+                          color: longestStreak > 0 ? "#5A6352" : "#9DA894",
                           lineHeight: 1,
                         }}>
                           {longestStreak}
@@ -1395,7 +1395,7 @@ export default function TodayPage() {
                         <div style={{
                           fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
                           textTransform: "uppercase" as const,
-                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                          color: "#9DA894", marginTop: 3,
                         }}>
                           {t("Record", "Récord")}
                         </div>
@@ -1405,14 +1405,14 @@ export default function TodayPage() {
                       <div style={{
                         flex: 1, textAlign: "center",
                         padding: "0.8rem 0.5rem",
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        background: "rgba(44,48,40,0.02)",
+                        border: "1px solid rgba(44,48,40,0.04)",
                         borderRadius: 14,
                       }}>
                         <div style={{
                           fontSize: "1.8rem", fontWeight: 300,
                           fontFamily: "'Cormorant Garamond', serif",
-                          color: northStarProgress > 0 ? "rgba(161,179,146,0.8)" : "rgba(255,255,255,0.3)",
+                          color: northStarProgress > 0 ? "rgba(161,179,146,0.8)" : "#9DA894",
                           lineHeight: 1,
                         }}>
                           {northStarProgress}%
@@ -1420,7 +1420,7 @@ export default function TodayPage() {
                         <div style={{
                           fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em",
                           textTransform: "uppercase" as const,
-                          color: "rgba(255,255,255,0.3)", marginTop: 3,
+                          color: "#9DA894", marginTop: 3,
                         }}>
                           {t("Month", "Mes")}
                         </div>
@@ -1430,13 +1430,13 @@ export default function TodayPage() {
                     {/* Weekly Dots */}
                     <div style={{
                       padding: "0.8rem",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: "rgba(44,48,40,0.02)",
+                      border: "1px solid rgba(44,48,40,0.04)",
                       borderRadius: 14, marginBottom: "0.8rem",
                     }}>
                       <div style={{
                         fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.06em",
-                        textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)",
+                        textTransform: "uppercase" as const, color: "#9DA894",
                         marginBottom: 8,
                       }}>
                         {t("This week", "Esta semana")}
@@ -1453,13 +1453,13 @@ export default function TodayPage() {
                               background: dot.completed
                                 ? "#9DB48C"
                                 : dot.isFuture
-                                  ? "rgba(255,255,255,0.03)"
-                                  : "rgba(255,255,255,0.06)",
+                                  ? "rgba(44,48,40,0.02)"
+                                  : "rgba(44,48,40,0.04)",
                               border: dot.isToday
                                 ? "2px solid rgba(157,180,140,0.5)"
                                 : dot.completed
                                   ? "none"
-                                  : "1px solid rgba(255,255,255,0.08)",
+                                  : "1px solid rgba(44,48,40,0.06)",
                               display: "flex", alignItems: "center", justifyContent: "center",
                               animation: dot.isToday && !dot.completed ? "todayPulse 2s ease-in-out infinite" : undefined,
                               transition: "all 0.3s",
@@ -1474,7 +1474,7 @@ export default function TodayPage() {
                               fontSize: "0.55rem", fontWeight: 500, letterSpacing: "0.03em",
                               color: dot.isToday
                                 ? "rgba(157,180,140,0.7)"
-                                : "rgba(255,255,255,0.2)",
+                                : "#B5BFAD",
                             }}>
                               {dot.dayLabel}
                             </span>
@@ -1507,7 +1507,7 @@ export default function TodayPage() {
                         </span>
                       </div>
                       <div style={{
-                        height: 5, borderRadius: 5, background: "rgba(255,255,255,0.06)",
+                        height: 5, borderRadius: 5, background: "rgba(44,48,40,0.06)",
                       }}>
                         <div style={{
                           height: "100%", borderRadius: 5,
@@ -1522,7 +1522,7 @@ export default function TodayPage() {
                     {longestStreak > streak && (
                       <div style={{
                         textAlign: "center", fontSize: "0.68rem",
-                        color: "rgba(255,255,255,0.2)", marginTop: "0.8rem",
+                        color: "#B5BFAD", marginTop: "0.8rem",
                       }}>
                         {t("Longest:", "Récord:")} {longestStreak} {t("days", "días")}
                       </div>

@@ -51,15 +51,15 @@ function BouncingDots() {
     <div className="flex items-center gap-1.5 py-1" aria-hidden>
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "0ms", background: "#9DB48C" }}
+        style={{ animationDelay: "0ms", background: "#6B7E5C" }}
       />
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "150ms", background: "#9DB48C" }}
+        style={{ animationDelay: "150ms", background: "#6B7E5C" }}
       />
       <span
         className="w-2 h-2 rounded-full animate-bounce"
-        style={{ animationDelay: "300ms", background: "#9DB48C" }}
+        style={{ animationDelay: "300ms", background: "#6B7E5C" }}
       />
     </div>
   );
@@ -402,18 +402,18 @@ export default function ChatPage() {
     }
   }
 
-  const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
-  const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
-  const sidebarStyle = { background: "rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+  const headerStyle = { background: "rgba(44,48,40,0.03)", borderBottom: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+  const glassStyle = { background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+  const sidebarStyle = { background: "rgba(44,48,40,0.03)", borderRight: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
 
   return (
     <div className="fixed inset-0 flex flex-col bg-mentiva-gradient">
       <TopNav />
-      <div className="shrink-0 flex items-center justify-between px-4 py-2 lg:hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <button type="button" onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Conversations">
+      <div className="shrink-0 flex items-center justify-between px-4 py-2 lg:hidden" style={{ borderBottom: "1px solid rgba(44,48,40,0.03)" }}>
+        <button type="button" onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg" style={{ color: "#7E8C74" }} aria-label="Conversations">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
         </button>
-        <button type="button" onClick={handleNewChat} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)" }}>{t("+ New chat", "+ Nuevo chat")}</button>
+        <button type="button" onClick={handleNewChat} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: "rgba(44,48,40,0.05)", color: "#5A6352" }}>{t("+ New chat", "+ Nuevo chat")}</button>
       </div>
 
       <div className="flex-1 flex min-h-0">
@@ -438,16 +438,16 @@ export default function ChatPage() {
               <div
                 key={conv.id}
                 className="group flex items-center gap-1 rounded-lg mb-1 transition-colors"
-                style={{ background: currentConversationId === conv.id ? "rgba(255,255,255,0.15)" : "transparent" }}
+                style={{ background: currentConversationId === conv.id ? "rgba(44,48,40,0.06)" : "transparent" }}
               >
                 <button
                   type="button"
                   onClick={() => handleSelectConversation(conv)}
                   className="flex-1 min-w-0 text-left px-3 py-2.5 text-sm transition-colors"
-                  style={{ color: currentConversationId === conv.id ? "white" : "rgba(255,255,255,0.7)" }}
+                  style={{ color: currentConversationId === conv.id ? "#2C3028" : "#5A6352" }}
                 >
                   <p className="truncate font-medium">{conv.title || t("New chat", "Nuevo chat")}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{formatConversationDate(conv.updated_at, lang)}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#7E8C74" }}>{formatConversationDate(conv.updated_at, lang)}</p>
                 </button>
                 <button
                   type="button"
@@ -464,7 +464,7 @@ export default function ChatPage() {
               </div>
             ))}
           </div>
-          <div className="mt-auto px-3 pt-3 pb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+          <div className="mt-auto px-3 pt-3 pb-4" style={{ borderTop: "1px solid rgba(44,48,40,0.06)" }}>
             <button
               type="button"
               onClick={async () => {
@@ -473,8 +473,8 @@ export default function ChatPage() {
                 await supabase.auth.signOut({ scope: "global" });
                 window.location.href = "/login";
               }}
-              className="block w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-white/10 hover:text-white"
-              style={{ color: "rgba(255,255,255,0.6)" }}
+              className="block w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-[rgba(44,48,40,0.04)] hover:text-[#2C3028]"
+              style={{ color: "#5A6352" }}
             >
               {t("Sign out", "Cerrar sesión")}
             </button>
@@ -484,14 +484,14 @@ export default function ChatPage() {
         {conversationToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.3)" }}>
             <div className="rounded-xl p-5 shadow-xl max-w-sm w-full" style={glassStyle}>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>{t("Delete this conversation?", "\u00bfEliminar esta conversaci\u00f3n?")}</p>
+              <p className="text-sm" style={{ color: "#2C3028" }}>{t("Delete this conversation?", "\u00bfEliminar esta conversaci\u00f3n?")}</p>
               <div className="mt-4 flex gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => setConversationToDelete(null)}
                   disabled={deletingConversation}
                   className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                  style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
+                  style={{ background: "rgba(44,48,40,0.06)", color: "#2C3028", border: "1px solid rgba(44,48,40,0.08)" }}
                 >
                   {t("Cancel", "Cancelar")}
                 </button>
@@ -520,7 +520,7 @@ export default function ChatPage() {
         <main className="flex-1 flex flex-col min-h-0 min-w-0 max-w-3xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-5 pb-4 min-h-0">
             {loadingHistory ? (
-              <div className="flex items-center justify-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <div className="flex items-center justify-center py-12 text-sm" style={{ color: "#7E8C74" }}>
                 {t("Loading...", "Cargando...")}
               </div>
             ) : (
@@ -537,12 +537,12 @@ export default function ChatPage() {
                           : "rounded-bl-md"
                       }`}
                       style={{
-                        background: msg.role === "user" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        color: "rgba(255,255,255,0.9)",
+                        background: msg.role === "user" ? "rgba(44,48,40,0.06)" : "rgba(44,48,40,0.03)",
+                        border: "1px solid rgba(44,48,40,0.05)",
+                        color: "#2C3028",
                       }}
                     >
-                      <p className="text-sm font-medium mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      <p className="text-sm font-medium mb-1" style={{ color: "#7E8C74" }}>
                         {msg.role === "user" ? t("You", "T\u00fa") : "Menti"}
                       </p>
                       <p className="text-sm sm:text-base whitespace-pre-wrap break-words">
@@ -555,9 +555,9 @@ export default function ChatPage() {
                   <div className="flex justify-start">
                     <div
                       className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm"
-                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.9)" }}
+                      style={{ background: "rgba(44,48,40,0.03)", border: "1px solid rgba(44,48,40,0.05)", color: "#2C3028" }}
                     >
-                      <p className="text-sm font-medium mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Menti</p>
+                      <p className="text-sm font-medium mb-2" style={{ color: "#7E8C74" }}>Menti</p>
                       <BouncingDots />
                     </div>
                   </div>
@@ -568,7 +568,7 @@ export default function ChatPage() {
           </div>
 
           {error && (
-            <div className="shrink-0 rounded-lg px-4 py-2 text-sm mb-3" style={{ background: "rgba(229,115,115,0.2)", border: "1px solid rgba(229,115,115,0.5)", color: "#ffcdd2" }}>
+            <div className="shrink-0 rounded-lg px-4 py-2 text-sm mb-3" style={{ background: "rgba(229,115,115,0.12)", border: "1px solid rgba(229,115,115,0.3)", color: "#b71c1c" }}>
               {error}
             </div>
           )}
@@ -576,7 +576,7 @@ export default function ChatPage() {
           <form
             onSubmit={handleSubmit}
             className="shrink-0 flex gap-2 sm:gap-3 items-end pt-4 pb-[env(safe-area-inset-bottom)]"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}
+            style={{ borderTop: "1px solid rgba(44,48,40,0.06)" }}
           >
             <textarea
               ref={inputRef}
@@ -591,8 +591,8 @@ export default function ChatPage() {
               placeholder={t("Message Menti…", "Escribe a Menti…")}
               rows={1}
               disabled={isLoading}
-              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-opacity-60"
-              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" }}
+              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-[#9DA894]"
+              style={{ background: "rgba(44,48,40,0.06)", border: "1px solid rgba(44,48,40,0.08)", color: "#2C3028", backdropFilter: "blur(10px)" }}
             />
             <button
               type="submit"

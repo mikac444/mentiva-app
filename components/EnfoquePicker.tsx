@@ -114,7 +114,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "0.7rem 1rem",
-                background: isSelected ? `${color}22` : "rgba(255,255,255,0.05)",
+                background: isSelected ? `${color}22` : "rgba(44,48,40,0.03)",
                 border: isSelected ? `1.5px solid ${color}` : "1px solid rgba(44,48,40,0.12)",
                 borderRadius: 12, cursor: isSelected || canAdd ? "pointer" : "default",
                 fontSize: "0.82rem", fontWeight: 500,
@@ -176,7 +176,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
             placeholder={t("Add custom focus area...", "Agregar area personalizada...")}
             style={{
               flex: 1, padding: "0.65rem 1rem",
-              background: "rgba(255,255,255,0.08)",
+              background: "rgba(44,48,40,0.04)",
               border: "1px solid rgba(44,48,40,0.12)",
               borderRadius: 10, color: "#2C3028",
               fontSize: "0.85rem", outline: "none",
@@ -188,7 +188,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
             disabled={!customInput.trim()}
             style={{
               padding: "0.65rem 1rem",
-              background: customInput.trim() ? "rgba(157,180,140,0.2)" : "rgba(255,255,255,0.05)",
+              background: customInput.trim() ? "rgba(157,180,140,0.2)" : "rgba(44,48,40,0.03)",
               border: "1px solid rgba(157,180,140,0.3)",
               borderRadius: 10, cursor: customInput.trim() ? "pointer" : "default",
               color: "#6B7E5C", fontWeight: 600, fontSize: "0.85rem",
@@ -216,7 +216,7 @@ export default function EnfoquePicker({ goals, northStarGoal, t, onSelect, onBac
           style={{
             width: "100%", maxWidth: 320,
             padding: "0.9rem 2rem",
-            background: totalSelected > 0 ? "#2C3028" : "rgba(255,255,255,0.1)",
+            background: totalSelected > 0 ? "#2C3028" : "rgba(44,48,40,0.06)",
             color: totalSelected > 0 ? "white" : "#9DA894",
             fontWeight: 600, fontSize: "0.92rem",
             border: "none", borderRadius: 40,

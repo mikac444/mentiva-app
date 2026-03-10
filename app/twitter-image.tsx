@@ -77,8 +77,8 @@ export default async function Image() {
             marginTop: 40,
             padding: "12px 28px",
             borderRadius: 50,
-            background: "rgba(255,255,255,0.14)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.35)",
+            border: "1px solid rgba(44,48,40,0.06)",
           }}
         >
           <div style={{ fontSize: 18, color: "#7E8C74", textDecoration: "line-through" }}>

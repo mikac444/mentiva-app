@@ -79,7 +79,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                 padding: "1rem 1.2rem", textAlign: "left",
                 background: isSelected
                   ? "rgba(157,180,140,0.15)"
-                  : "rgba(255,255,255,0.05)",
+                  : "rgba(44,48,40,0.03)",
                 border: isSelected
                   ? "1.5px solid rgba(157,180,140,0.5)"
                   : "1px solid rgba(44,48,40,0.1)",
@@ -93,7 +93,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                 width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
                 border: isSelected
                   ? "2px solid #9DB48C"
-                  : "1.5px solid rgba(255,255,255,0.2)",
+                  : "1.5px solid rgba(44,48,40,0.15)",
                 background: isSelected ? "#9DB48C" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.2s",
@@ -109,14 +109,14 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontSize: "0.92rem", fontWeight: 500,
-                  color: isSelected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)",
+                  color: isSelected ? "#2C3028" : "#5A6352",
                   lineHeight: 1.4,
                 }}>
                   {g.goal}
                 </div>
                 {g.area && (
                   <div style={{
-                    fontSize: "0.72rem", color: "rgba(255,255,255,0.3)",
+                    fontSize: "0.72rem", color: "#9DA894",
                     marginTop: 3, textTransform: "uppercase", letterSpacing: "0.05em",
                   }}>
                     {g.area}
@@ -147,11 +147,11 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
         display: "flex", alignItems: "center", gap: 12,
         margin: "1.2rem 0",
       }}>
-        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-        <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", fontWeight: 500 }}>
+        <div style={{ flex: 1, height: 1, background: "rgba(44,48,40,0.08)" }} />
+        <span style={{ fontSize: "0.75rem", color: "#9DA894", fontWeight: 500 }}>
           {t("or", "o")}
         </span>
-        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ flex: 1, height: 1, background: "rgba(44,48,40,0.08)" }} />
       </div>
 
       {/* Custom North Star input */}
@@ -159,10 +159,10 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
         onClick={activateCustom}
         style={{
           padding: "1rem 1.2rem",
-          background: isCustom ? "rgba(157,180,140,0.15)" : "rgba(255,255,255,0.05)",
+          background: isCustom ? "rgba(157,180,140,0.15)" : "rgba(44,48,40,0.03)",
           border: isCustom
             ? "1.5px solid rgba(157,180,140,0.5)"
-            : "1px solid rgba(255,255,255,0.1)",
+            : "1px solid rgba(44,48,40,0.1)",
           borderRadius: 14, cursor: "pointer",
           transition: "all 0.3s ease",
         }}
@@ -173,7 +173,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
             width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
             border: isCustom
               ? "2px solid #9DB48C"
-              : "1.5px solid rgba(255,255,255,0.2)",
+              : "1.5px solid rgba(44,48,40,0.15)",
             background: isCustom ? "#9DB48C" : "transparent",
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s",
@@ -189,7 +189,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
             {!isCustom ? (
               <div style={{
                 fontSize: "0.92rem", fontWeight: 500,
-                color: "rgba(255,255,255,0.4)",
+                color: "#9DA894",
                 lineHeight: 1.4,
               }}>
                 {t("I have a different goal in mind...", "Tengo otra meta en mente...")}
@@ -206,7 +206,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
                   background: "transparent",
                   border: "none",
                   outline: "none",
-                  color: "rgba(255,255,255,0.95)",
+                  color: "#2C3028",
                   fontSize: "0.92rem",
                   fontWeight: 500,
                   fontFamily: "'DM Sans', sans-serif",
@@ -228,8 +228,8 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
           style={{
             width: "100%", maxWidth: 320,
             padding: "0.9rem 2rem",
-            background: canConfirm ? "#2C3028" : "rgba(255,255,255,0.1)",
-            color: canConfirm ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
+            background: canConfirm ? "#2C3028" : "rgba(44,48,40,0.06)",
+            color: canConfirm ? "rgba(255,255,255,0.92)" : "#9DA894",
             fontWeight: 600, fontSize: "0.92rem",
             border: "none", borderRadius: 40, cursor: canConfirm ? "pointer" : "default",
             fontFamily: "'DM Sans', sans-serif",
@@ -244,7 +244,7 @@ export default function NorthStarPicker({ goals, suggestedIndex = 0, t, onSelect
             onClick={onSkip}
             style={{
               background: "none", border: "none",
-              fontSize: "0.8rem", color: "rgba(255,255,255,0.3)",
+              fontSize: "0.8rem", color: "#9DA894",
               cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
               fontFamily: "'DM Sans', sans-serif",
             }}

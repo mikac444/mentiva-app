@@ -46,15 +46,15 @@ export function TopNav() {
     <nav style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
       padding: "0.75rem 1.5rem",
-      background: "rgba(255,255,255,0.06)",
-      borderBottom: "1px solid rgba(255,255,255,0.1)",
+      background: "rgba(255,255,255,0.35)",
+      borderBottom: "1px solid rgba(44,48,40,0.06)",
       backdropFilter: "blur(10px)",
       position: "relative",
       zIndex: 50,
     }}>
       <Link href="/dashboard" style={{
         fontFamily: "serif", fontWeight: 300, fontSize: "1.1rem",
-        color: "rgba(255,255,255,0.4)", letterSpacing: "0.25em",
+        color: "#9DA894", letterSpacing: "0.25em",
         textTransform: "uppercase", textDecoration: "none",
       }}>
         Mentiva
@@ -67,8 +67,8 @@ export function TopNav() {
             <Link key={tab.href} href={tab.href} style={{
               padding: "0.5rem 0.9rem", borderRadius: 10,
               fontSize: "0.85rem", fontWeight: active ? 600 : 500,
-              color: active ? "white" : "rgba(255,255,255,0.5)",
-              background: active ? "rgba(255,255,255,0.12)" : "transparent",
+              color: active ? "#2C3028" : "#7E8C74",
+              background: active ? "rgba(44,48,40,0.08)" : "transparent",
               textDecoration: "none", transition: "all 0.3s",
             }}>
               {tab.label}
@@ -81,9 +81,9 @@ export function TopNav() {
             <button onClick={() => setDropOpen((o) => !o)} style={{
               display: "flex", alignItems: "center", gap: "5px",
               padding: "0.45rem 0.7rem", borderRadius: 10,
-              background: dropOpen ? "rgba(255,255,255,0.12)" : "transparent",
+              background: dropOpen ? "rgba(44,48,40,0.08)" : "transparent",
               border: "none", cursor: "pointer", transition: "all 0.3s",
-              color: "rgba(255,255,255,0.55)",
+              color: "#5A6352",
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
