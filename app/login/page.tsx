@@ -137,15 +137,15 @@ function LoginContent() {
         style={{
           position: "fixed", top: 24, right: 28, zIndex: 60,
           padding: "7px 16px", borderRadius: 22,
-          background: "rgba(255,255,255,0.14)",
+          background: "rgba(255,255,255,0.28)",
           backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          border: "1px solid rgba(44,48,40,0.06)",
           color: "#7E8C74", fontSize: "0.72rem", fontWeight: 600,
           letterSpacing: "0.12em", cursor: "pointer", transition: "all 0.3s",
           display: "flex", alignItems: "center", gap: 6,
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.color = "#5A6352"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.color = "#7E8C74"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.4)"; e.currentTarget.style.color = "#5A6352"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.28)"; e.currentTarget.style.color = "#7E8C74"; }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -236,13 +236,13 @@ function LoginContent() {
           <Link href="/" style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "7px 18px", borderRadius: 24,
-            background: "rgba(255,255,255,0.14)",
+            background: "rgba(255,255,255,0.28)",
             backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            border: "1px solid rgba(44,48,40,0.06)",
             textDecoration: "none", cursor: "pointer", transition: "all 0.3s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.4)"; e.currentTarget.style.borderColor = "rgba(44,48,40,0.1)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.28)"; e.currentTarget.style.borderColor = "rgba(44,48,40,0.06)"; }}
           >
             <div style={{
               width: 5, height: 5, borderRadius: "50%",

@@ -51,7 +51,7 @@ export default function UnauthorizedPage() {
             </a>
             <a
               href="mailto:mika@mentiva.app"
-              className="text-sm transition-colors hover:text-white"
+              className="text-sm transition-colors hover:text-[#2C3028]"
               style={{ color: "#7E8C74" }}
             >
               {t("Already a member? Contact us", "\u00bfYa eres miembro? Cont\u00e1ctanos")}
@@ -64,7 +64,7 @@ export default function UnauthorizedPage() {
         <button
           type="button"
           onClick={handleSignOut}
-          className="text-sm transition-colors hover:text-white"
+          className="text-sm transition-colors hover:text-[#2C3028]"
           style={{ color: "#7E8C74" }}
         >
           {t("Sign out", "Cerrar sesi\u00f3n")}

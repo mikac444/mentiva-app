@@ -15,8 +15,8 @@
   --text-3: #7E8C74;
   --text-4: #9DA894;
   --text-5: #B5BFAD;
-  --glass: rgba(255,255,255,0.13);
-  --glass-border: rgba(255,255,255,0.08);
+  --glass: rgba(255,255,255,0.35);
+  --glass-border: rgba(44,48,40,0.06);
   --r: 22px;
   --mentiva-gradient: linear-gradient(172deg, #B2C4A0 0%, #C0D4AA 25%, #CCDABC 48%, #D3D0C4 72%, #DAD7CB 100%);
   --mentiva-accent: #9DB48C;
@@ -34,10 +34,11 @@ body {
 }
 
 .glass {
-  background: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.35);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(44,48,40,0.06);
+  box-shadow: 0 2px 12px rgba(44,48,40,0.04);
 }
 
 .dark-pill {

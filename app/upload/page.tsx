@@ -34,8 +34,8 @@ function compressImage(file: File): Promise<string> {
   });
 }
 
-const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
-const inputStyle = { background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.22)", color: "white", backdropFilter: "blur(10px)" };
+const headerStyle = { background: "rgba(44,48,40,0.04)", borderBottom: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+const inputStyle = { background: "rgba(44,48,40,0.06)", border: "1px solid rgba(44,48,40,0.08)", color: "#2C3028", backdropFilter: "blur(10px)" };
 
 type GoalWithArea = {
   goal: string;
@@ -95,13 +95,13 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
           </div>
           <div style={{
             position: "absolute", inset: 15, borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.08)",
+            border: "1px solid rgba(44,48,40,0.04)",
             animation: "haloSpin 6s linear infinite reverse",
           }}>
             <div style={{
               position: "absolute", top: -2, left: "50%", width: 4, height: 4,
-              borderRadius: "50%", background: "rgba(255,255,255,0.5)", transform: "translateX(-50%)",
-              boxShadow: "0 0 8px rgba(255,255,255,0.3)",
+              borderRadius: "50%", background: "rgba(44,48,40,0.15)", transform: "translateX(-50%)",
+              boxShadow: "0 0 8px rgba(44,48,40,0.1)",
             }} />
           </div>
           <div style={{
@@ -118,12 +118,12 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
 
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-          fontSize: "clamp(1.6rem, 5vw, 2.2rem)", color: "rgba(255,255,255,0.95)",
+          fontSize: "clamp(1.6rem, 5vw, 2.2rem)", color: "#2C3028",
           lineHeight: 1.25, letterSpacing: "-0.02em", marginBottom: "1rem",
         }}>
           {t("Menti is reading", "Menti est\u00e1 leyendo")}<br />{t("your dreams...", "tus sue\u00f1os...")}
         </h1>
-        <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.5, maxWidth: 280 }}>
+        <p style={{ fontSize: "0.9rem", color: "#9DA894", lineHeight: 1.5, maxWidth: 280 }}>
           {t("Analyzing your vision board to create your personalized roadmap", "Analizando tu tablero de visi\u00f3n para crear tu hoja de ruta personalizada")}
         </p>
 
@@ -141,7 +141,7 @@ function AnalyzingScreen({ t }: { t: (en: string, es: string) => string }) {
           ))}
         </div>
 
-        <div style={{ width: 200, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
+        <div style={{ width: 200, height: 2, background: "rgba(44,48,40,0.04)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
           <div style={{
             height: "100%", borderRadius: 2,
             background: "linear-gradient(90deg, rgba(157,180,140,0.3), rgba(157,180,140,0.8))",
@@ -170,15 +170,15 @@ function EnhancingScreen({ t }: { t: (en: string, es: string) => string }) {
         <div style={{ marginBottom: "1.5rem", animation: "glowPulse 2s ease-in-out infinite", display: "flex", justifyContent: "center" }}><span style={{ display: "inline-block", width: 16, height: 16, borderRadius: "50%", background: "#9DB48C" }} /></div>
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
-          fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "rgba(255,255,255,0.95)",
+          fontSize: "clamp(1.4rem, 5vw, 1.8rem)", color: "#2C3028",
           lineHeight: 1.3, marginBottom: "0.8rem",
         }}>
           {t("Updating your roadmap...", "Actualizando tu hoja de ruta...")}
         </h1>
-        <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)" }}>
+        <p style={{ fontSize: "0.85rem", color: "#9DA894" }}>
           {t("Menti is combining your board with your new goals", "Menti está combinando tu board con tus nuevas metas")}
         </p>
-        <div style={{ width: 160, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
+        <div style={{ width: 160, height: 2, background: "rgba(44,48,40,0.04)", borderRadius: 2, marginTop: "2rem", overflow: "hidden" }}>
           <div style={{
             height: "100%", borderRadius: 2,
             background: "linear-gradient(90deg, rgba(157,180,140,0.3), rgba(157,180,140,0.8))",
@@ -500,13 +500,13 @@ export default function UploadPage() {
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
                 fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
-                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                color: "#2C3028", letterSpacing: "-0.02em",
                 marginBottom: "0.6rem",
               }}>
                 {t("Show me your vision", "Muéstrame tu visión")}
               </h1>
               <p style={{
-                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                fontSize: "0.95rem", color: "#7E8C74", lineHeight: 1.6,
                 marginBottom: "2rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
               }}>
                 {t("Upload your board and Menti will turn it into a real plan.", "Sube tu board y Menti lo convertirá en un plan real.")}
@@ -550,13 +550,13 @@ export default function UploadPage() {
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
                 fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
-                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                color: "#2C3028", letterSpacing: "-0.02em",
                 marginBottom: "0.6rem",
               }}>
                 {t("Let's discover your vision together", "Descubramos tu visión juntos")}
               </h1>
               <p style={{
-                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                fontSize: "0.95rem", color: "#7E8C74", lineHeight: 1.6,
                 marginBottom: "2.5rem", maxWidth: 360, marginLeft: "auto", marginRight: "auto",
               }}>
                 {t(
@@ -582,7 +582,7 @@ export default function UploadPage() {
                   onClick={goToUpload}
                   style={{
                     background: "none", border: "none", fontSize: "0.85rem",
-                    color: "rgba(255,255,255,0.35)", cursor: "pointer",
+                    color: "#9DA894", cursor: "pointer",
                     textDecoration: "underline", textUnderlineOffset: 3,
                     fontFamily: "'DM Sans', sans-serif",
                   }}
@@ -616,13 +616,13 @@ export default function UploadPage() {
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
                 fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
-                color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+                color: "#2C3028", letterSpacing: "-0.02em",
                 marginBottom: "0.6rem",
               }}>
                 {t("Let's sharpen your vision", "Afinemos tu visión")}
               </h1>
               <p style={{
-                fontSize: "0.95rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
+                fontSize: "0.95rem", color: "#7E8C74", lineHeight: 1.6,
                 marginBottom: "2.5rem", maxWidth: 360, marginLeft: "auto", marginRight: "auto",
               }}>
                 {t(
@@ -649,9 +649,9 @@ export default function UploadPage() {
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 8,
                     padding: "0.9rem 2rem",
-                    background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)",
+                    background: "rgba(44,48,40,0.05)", color: "#2C3028",
                     fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: "0.9rem",
-                    border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
+                    border: "1px solid rgba(44,48,40,0.08)", borderRadius: 60,
                     cursor: "pointer", transition: "all 0.3s",
                   }}
                 >
@@ -700,9 +700,9 @@ export default function UploadPage() {
             {/* Progress */}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
-              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              padding: "8px 18px", background: "rgba(44,48,40,0.04)",
+              border: "1px solid rgba(44,48,40,0.06)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "#5A6352",
               letterSpacing: "0.08em", textTransform: "uppercase" as const,
               marginBottom: "1.5rem", backdropFilter: "blur(8px)",
             }}>
@@ -730,7 +730,7 @@ export default function UploadPage() {
               </div>
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
-                fontSize: "1.15rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.5,
+                fontSize: "1.15rem", color: "#2C3028", lineHeight: 1.5,
               }}>
                 {currentQuestion}
               </p>
@@ -756,8 +756,8 @@ export default function UploadPage() {
               disabled={!currentDiscoveryAnswer.trim()}
               style={{
                 width: "100%", marginTop: "1rem", padding: "0.95rem 1.5rem",
-                background: currentDiscoveryAnswer.trim() ? "#2C3028" : "rgba(255,255,255,0.1)",
-                color: currentDiscoveryAnswer.trim() ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
+                background: currentDiscoveryAnswer.trim() ? "#2C3028" : "rgba(44,48,40,0.04)",
+                color: currentDiscoveryAnswer.trim() ? "rgba(255,255,255,0.92)" : "#9DA894",
                 fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
                 border: "none", borderRadius: 60, cursor: currentDiscoveryAnswer.trim() ? "pointer" : "default",
                 transition: "all 0.3s",
@@ -772,7 +772,7 @@ export default function UploadPage() {
               style={{
                 width: "100%", marginTop: "0.8rem", padding: "0.6rem",
                 background: "none", border: "none",
-                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                fontSize: "0.82rem", color: "#9DA894",
                 cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -801,12 +801,12 @@ export default function UploadPage() {
             <h1 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
               fontSize: "clamp(1.6rem, 5vw, 2.2rem)", lineHeight: 1.2,
-              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              color: "#2C3028", letterSpacing: "-0.02em",
               marginBottom: "0.5rem", textAlign: "center",
             }}>
               {t("Here's what lights you up", "Esto es lo que te inspira")}
             </h1>
-            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.4)", textAlign: "center", marginBottom: "2rem" }}>
+            <p style={{ fontSize: "0.9rem", color: "#9DA894", textAlign: "center", marginBottom: "2rem" }}>
               {t("Themes Menti found in your answers", "Temas que Menti encontró en tus respuestas")}
             </p>
 
@@ -829,7 +829,7 @@ export default function UploadPage() {
 
             {/* Answers recap */}
             <div style={{
-              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(44,48,40,0.03)", border: "1px solid rgba(44,48,40,0.06)",
               borderRadius: 18, padding: "1.3rem", marginBottom: "2rem",
               backdropFilter: "blur(8px)",
             }}>
@@ -838,7 +838,7 @@ export default function UploadPage() {
               </div>
               {discoveryAnswers.map((answer, i) => (
                 <div key={i} style={{
-                  fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5,
+                  fontSize: "0.85rem", color: "#5A6352", lineHeight: 1.5,
                   paddingLeft: "0.8rem", borderLeft: "2px solid rgba(157,180,140,0.2)",
                   marginBottom: i < discoveryAnswers.length - 1 ? "0.8rem" : 0,
                 }}>
@@ -857,7 +857,7 @@ export default function UploadPage() {
             {/* Next steps */}
             <p style={{
               fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300,
-              fontSize: "1.05rem", color: "rgba(255,255,255,0.5)", textAlign: "center",
+              fontSize: "1.05rem", color: "#7E8C74", textAlign: "center",
               marginBottom: "1.5rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
             }}>
               {t(
@@ -885,9 +885,9 @@ export default function UploadPage() {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
                   padding: "0.9rem 2rem",
-                  background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)",
+                  background: "rgba(44,48,40,0.05)", color: "#2C3028",
                   fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: "0.9rem",
-                  border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
+                  border: "1px solid rgba(44,48,40,0.08)", borderRadius: 60,
                   cursor: "pointer", transition: "all 0.3s",
                 }}
               >
@@ -933,9 +933,9 @@ export default function UploadPage() {
             {/* Progress */}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
-              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              padding: "8px 18px", background: "rgba(44,48,40,0.04)",
+              border: "1px solid rgba(44,48,40,0.06)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "#5A6352",
               letterSpacing: "0.08em", textTransform: "uppercase" as const,
               marginBottom: "1.5rem", backdropFilter: "blur(8px)",
             }}>
@@ -963,7 +963,7 @@ export default function UploadPage() {
               </div>
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
-                fontSize: "1.15rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.5,
+                fontSize: "1.15rem", color: "#2C3028", lineHeight: 1.5,
               }}>
                 {currentQuestion}
               </p>
@@ -989,8 +989,8 @@ export default function UploadPage() {
               disabled={!currentCrystallizeAnswer.trim()}
               style={{
                 width: "100%", marginTop: "1rem", padding: "0.95rem 1.5rem",
-                background: currentCrystallizeAnswer.trim() ? "#2C3028" : "rgba(255,255,255,0.1)",
-                color: currentCrystallizeAnswer.trim() ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
+                background: currentCrystallizeAnswer.trim() ? "#2C3028" : "rgba(44,48,40,0.04)",
+                color: currentCrystallizeAnswer.trim() ? "rgba(255,255,255,0.92)" : "#9DA894",
                 fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
                 border: "none", borderRadius: 60, cursor: currentCrystallizeAnswer.trim() ? "pointer" : "default",
                 transition: "all 0.3s",
@@ -1005,7 +1005,7 @@ export default function UploadPage() {
               style={{
                 width: "100%", marginTop: "0.8rem", padding: "0.6rem",
                 background: "none", border: "none",
-                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                fontSize: "0.82rem", color: "#9DA894",
                 cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -1035,7 +1035,7 @@ export default function UploadPage() {
             {preview && (
               <div style={{
                 width: 80, height: 80, borderRadius: 16, overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.15)", margin: "0 auto 1.5rem",
+                border: "1px solid rgba(44,48,40,0.06)", margin: "0 auto 1.5rem",
               }}>
                 <img src={preview} alt="Board" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
@@ -1044,13 +1044,13 @@ export default function UploadPage() {
             <h1 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
               fontSize: "clamp(1.6rem, 5vw, 2.2rem)", lineHeight: 1.2,
-              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              color: "#2C3028", letterSpacing: "-0.02em",
               textAlign: "center", marginBottom: "0.5rem",
             }}>
               {t("How should Menti read this?", "¿Cómo quieres que Menti lo lea?")}
             </h1>
             <p style={{
-              fontSize: "0.88rem", color: "rgba(255,255,255,0.4)", textAlign: "center",
+              fontSize: "0.88rem", color: "#9DA894", textAlign: "center",
               marginBottom: "2rem", maxWidth: 340, marginLeft: "auto", marginRight: "auto",
             }}>
               {t("Choose the depth of your analysis", "Elige la profundidad de tu análisis")}
@@ -1062,7 +1062,7 @@ export default function UploadPage() {
                 onClick={() => handleAnalyze("quick")}
                 style={{
                   width: "100%", textAlign: "left", padding: "1.3rem 1.5rem",
-                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)",
                   borderRadius: 18, cursor: "pointer", transition: "all 0.3s",
                   backdropFilter: "blur(10px)",
                 }}
@@ -1070,18 +1070,18 @@ export default function UploadPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
                   <span style={{
                     fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1rem",
-                    color: "rgba(255,255,255,0.9)",
+                    color: "#2C3028",
                   }}>
                     {t("Quick look", "Vista rápida")}
                   </span>
                   <span style={{
-                    fontSize: "0.72rem", fontWeight: 500, color: "rgba(255,255,255,0.4)",
-                    padding: "3px 10px", background: "rgba(255,255,255,0.08)", borderRadius: 12,
+                    fontSize: "0.72rem", fontWeight: 500, color: "#9DA894",
+                    padding: "3px 10px", background: "rgba(44,48,40,0.04)", borderRadius: 12,
                   }}>
                     ~10s
                   </span>
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.4, margin: 0 }}>
+                <p style={{ fontSize: "0.85rem", color: "#7E8C74", lineHeight: 1.4, margin: 0 }}>
                   {t(
                     "Your main themes and top goals in seconds",
                     "Tus temas principales y metas top en segundos"
@@ -1113,7 +1113,7 @@ export default function UploadPage() {
                     ~30s
                   </span>
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.4, margin: 0 }}>
+                <p style={{ fontSize: "0.85rem", color: "#7E8C74", lineHeight: 1.4, margin: 0 }}>
                   {t(
                     "Deep dive with patterns, action steps, and blind spots",
                     "Análisis profundo con patrones, pasos de acción, y más"
@@ -1128,7 +1128,7 @@ export default function UploadPage() {
               style={{
                 display: "block", width: "100%", marginTop: "1.2rem", padding: "0.6rem",
                 background: "none", border: "none",
-                fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+                fontSize: "0.82rem", color: "#9DA894",
                 cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3,
                 fontFamily: "'DM Sans', sans-serif", textAlign: "center",
               }}
@@ -1177,9 +1177,9 @@ export default function UploadPage() {
           <div style={{ animation: "riseIn 0.6s ease both" }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
-              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              padding: "8px 18px", background: "rgba(44,48,40,0.04)",
+              border: "1px solid rgba(44,48,40,0.06)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "#5A6352",
               letterSpacing: "0.08em", textTransform: "uppercase" as const,
               marginBottom: "1rem", backdropFilter: "blur(8px)",
             }}>
@@ -1190,12 +1190,12 @@ export default function UploadPage() {
             <h1 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
               fontSize: "clamp(1.5rem, 5vw, 2rem)", lineHeight: 1.2,
-              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              color: "#2C3028", letterSpacing: "-0.02em",
               marginBottom: "0.5rem",
             }}>
               {t("Here's what Menti sees", "Esto es lo que Menti ve")}
             </h1>
-            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.5, marginBottom: "1.5rem" }}>
+            <p style={{ fontSize: "0.88rem", color: "#7E8C74", lineHeight: 1.5, marginBottom: "1.5rem" }}>
               {analysis.summary}
             </p>
           </div>
@@ -1208,7 +1208,7 @@ export default function UploadPage() {
             {preview && (
               <div style={{
                 width: 100, height: 100, borderRadius: 14, overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0,
+                border: "1px solid rgba(44,48,40,0.06)", flexShrink: 0,
               }}>
                 <img src={preview} alt="Board" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
@@ -1222,7 +1222,7 @@ export default function UploadPage() {
                   <span key={i} style={{
                     padding: "4px 12px", borderRadius: 20,
                     background: "rgba(157,180,140,0.12)", border: "1px solid rgba(157,180,140,0.2)",
-                    fontSize: "0.8rem", color: "rgba(255,255,255,0.7)",
+                    fontSize: "0.8rem", color: "#5A6352",
                   }}>
                     {theme}
                   </span>
@@ -1231,7 +1231,7 @@ export default function UploadPage() {
               <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "rgba(157,180,140,0.7)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginTop: "0.8rem", marginBottom: "0.4rem" }}>
                 {t("Goals from board", "Metas del board")}
               </div>
-              <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+              <div style={{ fontSize: "0.85rem", color: "#5A6352", lineHeight: 1.5 }}>
                 {goalsWithSteps.map((g, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                     <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: getAreaColor(g.area), flexShrink: 0 }} />
@@ -1270,7 +1270,7 @@ export default function UploadPage() {
               </div>
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400,
-                fontSize: "1.1rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.5,
+                fontSize: "1.1rem", color: "#2C3028", lineHeight: 1.5,
               }}>
                 {t(
                   "Your board shows beautiful goals! But I want to know the full picture. What else are you working on that isn't on this board?",
@@ -1282,7 +1282,7 @@ export default function UploadPage() {
             {/* Suggestion chips for missing areas */}
             {missingAreas.length > 0 && (
               <div style={{ marginBottom: "1rem" }}>
-                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                <div style={{ fontSize: "0.75rem", color: "#9DA894", marginBottom: "0.5rem" }}>
                   {t("Tap to add, or type your own below:", "Toca para agregar, o escribe abajo:")}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
@@ -1302,10 +1302,10 @@ export default function UploadPage() {
                         }}
                         style={{
                           padding: "6px 14px", borderRadius: 20,
-                          background: isSelected ? "rgba(157,180,140,0.2)" : "rgba(255,255,255,0.06)",
-                          border: `1px solid ${isSelected ? "rgba(157,180,140,0.4)" : "rgba(255,255,255,0.12)"}`,
+                          background: isSelected ? "rgba(157,180,140,0.2)" : "rgba(44,48,40,0.03)",
+                          border: `1px solid ${isSelected ? "rgba(157,180,140,0.4)" : "rgba(44,48,40,0.06)"}`,
                           fontSize: "0.82rem",
-                          color: isSelected ? "#6B7E5C" : "rgba(255,255,255,0.55)",
+                          color: isSelected ? "#6B7E5C" : "#5A6352",
                           cursor: isSelected ? "default" : "pointer",
                           transition: "all 0.2s",
                           display: "inline-flex", alignItems: "center", gap: 6,
@@ -1342,10 +1342,10 @@ export default function UploadPage() {
                 onClick={handleSkipClarify}
                 style={{
                   padding: "0.9rem 1.5rem",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.6)",
+                  background: "rgba(44,48,40,0.04)",
+                  color: "#5A6352",
                   fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: "0.88rem",
-                  border: "1px solid rgba(255,255,255,0.15)", borderRadius: 60,
+                  border: "1px solid rgba(44,48,40,0.06)", borderRadius: 60,
                   cursor: "pointer",
                   transition: "all 0.3s",
                   whiteSpace: "nowrap" as const,
@@ -1358,8 +1358,8 @@ export default function UploadPage() {
                 disabled={!additionalGoals.trim()}
                 style={{
                   flex: 1, padding: "0.9rem 1.5rem",
-                  background: additionalGoals.trim() ? "#2C3028" : "rgba(255,255,255,0.1)",
-                  color: additionalGoals.trim() ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.3)",
+                  background: additionalGoals.trim() ? "#2C3028" : "rgba(44,48,40,0.04)",
+                  color: additionalGoals.trim() ? "rgba(255,255,255,0.92)" : "#9DA894",
                   fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "0.9rem",
                   border: "none", borderRadius: 60, cursor: additionalGoals.trim() ? "pointer" : "default",
                   transition: "all 0.3s",
@@ -1398,9 +1398,9 @@ export default function UploadPage() {
           <div className="text-center mb-6" style={{ animation: "riseIn 0.8s ease 0.2s both" }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "8px 18px", background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40,
-              fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              padding: "8px 18px", background: "rgba(44,48,40,0.04)",
+              border: "1px solid rgba(44,48,40,0.06)", borderRadius: 40,
+              fontSize: "0.78rem", fontWeight: 600, color: "#5A6352",
               letterSpacing: "0.08em", textTransform: "uppercase" as const,
               marginBottom: "1.5rem", backdropFilter: "blur(8px)",
             }}>
@@ -1413,14 +1413,14 @@ export default function UploadPage() {
             <h1 style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
               fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.2,
-              color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
+              color: "#2C3028", letterSpacing: "-0.02em",
             }}>
               {skippedClarify
                 ? <>{t("Menti found", "Menti encontró")} <em style={{ color: "#6B7E5C", fontStyle: "italic" }}>{goalsWithSteps.length} {t("goals", "metas")}</em><br />{t("in your vision board", "en tu vision board")}</>
                 : <>{t("Your", "Tu")} <em style={{ color: "#6B7E5C", fontStyle: "italic" }}>{goalsWithSteps.length} {t("goals", "metas")}</em> {t("are ready", "están listas")}</>
               }
             </h1>
-            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.45)", marginTop: "0.5rem" }}>
+            <p style={{ fontSize: "0.9rem", color: "#7E8C74", marginTop: "0.5rem" }}>
               {skippedClarify
                 ? t("Here's your personalized roadmap", "Aquí está tu hoja de ruta personalizada")
                 : t("Board + your personal goals combined", "Board + tus metas personales combinadas")
@@ -1432,7 +1432,7 @@ export default function UploadPage() {
           {preview && (
             <div style={{
               borderRadius: 16, overflow: "hidden", position: "relative",
-              border: "1px solid rgba(255,255,255,0.15)", marginBottom: "1.5rem",
+              border: "1px solid rgba(44,48,40,0.06)", marginBottom: "1.5rem",
               animation: "riseIn 0.8s ease 0.4s both",
             }}>
               <img src={preview} alt="Your vision board" style={{ width: "100%", height: 200, objectFit: "cover", display: "block" }} />
@@ -1442,15 +1442,15 @@ export default function UploadPage() {
 
           {/* Summary card */}
           <div style={{
-            background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+            background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)",
             borderRadius: 20, padding: "1.8rem", marginBottom: "1.5rem",
             backdropFilter: "blur(10px)", animation: "riseIn 0.8s ease 0.5s both",
           }}>
             <p style={{
               fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300,
-              fontSize: "1.15rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6,
+              fontSize: "1.15rem", color: "#5A6352", lineHeight: 1.6,
               marginBottom: "1.5rem", paddingBottom: "1.5rem",
-              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              borderBottom: "1px solid rgba(44,48,40,0.05)",
             }}>
               &ldquo;{analysis.summary}&rdquo;
             </p>
@@ -1461,8 +1461,8 @@ export default function UploadPage() {
               }}>
                 {goalsWithSteps.length}
               </div>
-              <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
-                <strong style={{ color: "rgba(255,255,255,0.8)", display: "block", fontSize: "1rem" }}>{t("Goals identified", "Metas identificadas")}</strong>
+              <div style={{ fontSize: "0.85rem", color: "#7E8C74", lineHeight: 1.4 }}>
+                <strong style={{ color: "#2C3028", display: "block", fontSize: "1rem" }}>{t("Goals identified", "Metas identificadas")}</strong>
                 {t("with action steps for each", "con pasos de acción para cada una")}
               </div>
             </div>
@@ -1471,7 +1471,7 @@ export default function UploadPage() {
           {/* Goals with steps */}
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif", fontWeight: 400,
-            fontSize: "1.4rem", color: "rgba(255,255,255,0.9)",
+            fontSize: "1.4rem", color: "#2C3028",
             marginBottom: "1rem", marginTop: "0.5rem",
           }}>
             {t("Your goals & action steps", "Tus metas y pasos de acción")}
@@ -1479,7 +1479,7 @@ export default function UploadPage() {
 
           {goalsWithSteps.map((g, i) => (
             <div key={i} style={{
-              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(44,48,40,0.03)", border: "1px solid rgba(44,48,40,0.05)",
               borderRadius: 16, padding: "1.3rem", marginBottom: "0.8rem",
               backdropFilter: "blur(6px)",
               opacity: revealedGoals.includes(i) ? 1 : 0,
@@ -1496,7 +1496,7 @@ export default function UploadPage() {
                   <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: getAreaColor(g.area) }} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: "1rem", color: "rgba(255,255,255,0.9)" }}>
+                  <div style={{ fontWeight: 600, fontSize: "1rem", color: "#2C3028" }}>
                     {g.goal}
                   </div>
                   {g.area && (
@@ -1509,7 +1509,7 @@ export default function UploadPage() {
               {g.steps.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingLeft: "0.5rem" }}>
                   {g.steps.map((step, j) => (
-                    <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", fontSize: "0.88rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.4 }}>
+                    <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", fontSize: "0.88rem", color: "#5A6352", lineHeight: 1.4 }}>
                       <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#9DB48C", opacity: 0.5, marginTop: "0.45rem", flexShrink: 0 }} />
                       <span>{step}</span>
                     </div>
@@ -1529,7 +1529,7 @@ export default function UploadPage() {
               <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#6B7E5C", marginBottom: "0.6rem" }}>
                 {t("Menti's Insight", "Insight de Menti")}
               </div>
-              <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
+              <p style={{ fontSize: "0.9rem", color: "#5A6352", lineHeight: 1.6 }}>
                 {analysis.insight}
               </p>
             </div>
@@ -1542,8 +1542,8 @@ export default function UploadPage() {
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
                 gap: 6, width: "100%", padding: "0.7rem",
-                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 14, fontSize: "0.82rem", color: "rgba(255,255,255,0.4)",
+                background: "rgba(44,48,40,0.03)", border: "1px solid rgba(44,48,40,0.05)",
+                borderRadius: 14, fontSize: "0.82rem", color: "#9DA894",
                 cursor: "pointer", marginBottom: "1rem",
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -1569,7 +1569,7 @@ export default function UploadPage() {
 
           {/* Name input */}
           <div style={{ marginTop: "1rem" }}>
-            <div style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+            <div style={{ fontSize: "0.85rem", color: "#7E8C74", marginBottom: "0.5rem" }}>
               {t("Give this board a name", "Dale un nombre a este board")}
             </div>
             <input
@@ -1578,16 +1578,16 @@ export default function UploadPage() {
               onChange={(e) => setBoardTitle(e.target.value)}
               placeholder={t("e.g. My 2026 Vision", "ej. Mi Visión 2026")}
               className="w-full rounded-xl px-4 py-3 outline-none"
-              style={{ ...inputStyle, color: "white" }}
+              style={{ ...inputStyle, color: "#2C3028" }}
             />
           </div>
 
           {/* CTAs */}
           <div className="text-center" style={{ marginTop: "2rem", paddingBottom: "3rem" }}>
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.15)", margin: "0 auto 1.5rem" }} />
+            <div style={{ width: 40, height: 1, background: "rgba(44,48,40,0.06)", margin: "0 auto 1.5rem" }} />
             <p style={{
               fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300,
-              fontSize: "1.1rem", color: "rgba(255,255,255,0.5)", marginBottom: "1.5rem",
+              fontSize: "1.1rem", color: "#7E8C74", marginBottom: "1.5rem",
               maxWidth: 320, marginLeft: "auto", marginRight: "auto",
             }}>
               {t("Your roadmap is ready. Set your North Star and start your missions.", "Tu hoja de ruta esta lista. Establece tu North Star y comienza tus misiones.")}
@@ -1613,10 +1613,10 @@ export default function UploadPage() {
               disabled={saving || saveSuccess}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "0.85rem 1.6rem", background: "rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.8)", fontFamily: "'DM Sans', sans-serif",
+                padding: "0.85rem 1.6rem", background: "rgba(44,48,40,0.06)",
+                color: "#2C3028", fontFamily: "'DM Sans', sans-serif",
                 fontWeight: 500, fontSize: "0.9rem",
-                border: "1px solid rgba(255,255,255,0.2)", borderRadius: 60,
+                border: "1px solid rgba(44,48,40,0.08)", borderRadius: 60,
                 cursor: "pointer", marginTop: "0.8rem",
                 transition: "all 0.3s",
                 opacity: (saving || saveSuccess) ? 0.5 : 1,
@@ -1631,7 +1631,7 @@ export default function UploadPage() {
             )}
             <br />
             <button onClick={handleReset} style={{
-              marginTop: "0.8rem", fontSize: "0.82rem", color: "rgba(255,255,255,0.3)",
+              marginTop: "0.8rem", fontSize: "0.82rem", color: "#9DA894",
               background: "none", border: "none", cursor: "pointer",
               textDecoration: "underline", textUnderlineOffset: 3,
             }}>
@@ -1661,10 +1661,10 @@ export default function UploadPage() {
         <TopNav />
       </header>
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto w-full">
-        <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
+        <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "#2C3028" }}>
           {t("Upload vision board", "Sube tu vision board")}
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+        <p className="mt-1 text-sm" style={{ color: "#5A6352" }}>
           {t(
             "Add an image and Menti will analyze your dreams, goals, and create your action plan",
             "Agrega una imagen y Menti analizará tus sueños, metas, y creará tu plan de acción"
@@ -1674,13 +1674,13 @@ export default function UploadPage() {
         <div className="mt-8">
           <label
             className="flex flex-col items-center justify-center min-h-[240px] rounded-xl border-2 border-dashed cursor-pointer transition-colors"
-            style={{ borderColor: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)" }}
+            style={{ borderColor: "rgba(44,48,40,0.12)", background: "rgba(44,48,40,0.02)" }}
           >
-            <span className="text-4xl mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>&#8593;</span>
-            <span className="font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <span className="text-4xl mb-3" style={{ color: "#7E8C74" }}>&#8593;</span>
+            <span className="font-medium" style={{ color: "#2C3028" }}>
               {t("Drop an image here or click to upload", "Arrastra una imagen aquí o haz click para subir")}
             </span>
-            <span className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <span className="mt-1 text-sm" style={{ color: "#7E8C74" }}>
               JPEG, PNG, GIF, or WebP
             </span>
             <input
@@ -1695,7 +1695,7 @@ export default function UploadPage() {
 
         {preview && (
           <div className="mt-6 flex flex-col sm:flex-row sm:items-start gap-4">
-            <div className="rounded-xl overflow-hidden shrink-0 max-w-xs" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}>
+            <div className="rounded-xl overflow-hidden shrink-0 max-w-xs" style={{ background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" }}>
               <img src={preview} alt="Vision board preview" className="w-full h-auto object-cover" />
             </div>
             <div className="flex flex-col gap-3">
@@ -1711,7 +1711,7 @@ export default function UploadPage() {
                 type="button"
                 onClick={handleReset}
                 className="rounded-lg px-5 py-3 transition-colors"
-                style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.22)" }}
+                style={{ background: "rgba(44,48,40,0.06)", color: "#2C3028", border: "1px solid rgba(44,48,40,0.08)" }}
               >
                 {t("Choose different image", "Elegir otra imagen")}
               </button>

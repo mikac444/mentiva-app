@@ -208,8 +208,8 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
       {/* Weekly Dots */}
       <div style={{
         padding: "1rem",
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.45)",
+        border: "1px solid rgba(44,48,40,0.06)",
         borderRadius: 14,
         marginBottom: "1rem",
         backdropFilter: "blur(24px)",
@@ -267,8 +267,8 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
       {enfoqueProgress.length > 0 && (
         <div style={{
           padding: "1rem",
-          background: "rgba(255,255,255,0.14)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.45)",
+          border: "1px solid rgba(44,48,40,0.06)",
           borderRadius: 14,
           marginBottom: "1rem",
           backdropFilter: "blur(24px)",
@@ -317,8 +317,8 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
       {/* Streak display */}
       <div style={{
         padding: "1rem",
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.45)",
+        border: "1px solid rgba(44,48,40,0.06)",
         borderRadius: 14,
         textAlign: "center",
         backdropFilter: "blur(24px)",

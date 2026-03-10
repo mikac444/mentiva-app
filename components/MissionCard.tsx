@@ -77,8 +77,8 @@ export default function MissionCard({
       style={{
         position: "relative",
         background: completed
-          ? "rgba(255,255,255,0.03)"
-          : "rgba(255,255,255,0.06)",
+          ? "rgba(44,48,40,0.02)"
+          : "rgba(44,48,40,0.04)",
         border: completed
           ? "1px solid rgba(44,48,40,0.05)"
           : "1px solid rgba(44,48,40,0.1)",

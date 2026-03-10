@@ -26,8 +26,9 @@ function TrashIcon({ className }: { className?: string }) {
   );
 }
 
-const glassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
-const headerStyle = { background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
+const glassStyle = { background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+const headerStyle = { background: "rgba(44,48,40,0.04)", borderBottom: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+const modalGlassStyle = { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" };
 
 export default function DashboardPage() {
   const { t, lang } = useLanguage();
@@ -177,10 +178,10 @@ export default function DashboardPage() {
       <TopNav />
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "rgba(255,255,255,0.9)" }}>
+        <h1 className="font-serif font-light text-2xl sm:text-3xl" style={{ color: "#2C3028" }}>
           {t("Your boards", "Tus tableros")}
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+        <p className="mt-1 text-sm" style={{ color: "#5A6352" }}>
           {t("Create and manage your vision boards", "Crea y administra tus tableros de visión")}
         </p>
 
@@ -188,7 +189,7 @@ export default function DashboardPage() {
           <Link
             href="/upload"
             className="flex flex-col rounded-xl border-2 border-dashed overflow-hidden transition-colors"
-            style={{ borderColor: "rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.6)" }}
+            style={{ borderColor: "rgba(44,48,40,0.1)", color: "#5A6352" }}
           >
             <div className="w-full aspect-square max-h-[150px] flex flex-col items-center justify-center shrink-0">
               <span className="text-2xl mb-1">+</span>
@@ -196,15 +197,15 @@ export default function DashboardPage() {
             </div>
           </Link>
           {loading ? (
-            <div className="col-span-full flex items-center justify-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <div className="col-span-full flex items-center justify-center py-12 text-sm" style={{ color: "#5A6352" }}>
               {t("Loading...", "Cargando...")}
             </div>
           ) : boards.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-12 text-center space-y-3">
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+              <p className="text-sm" style={{ color: "#5A6352" }}>
                 {t("No vision boards yet.", "A\u00fan no tienes tableros.")}
               </p>
-              <p className="text-xs max-w-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <p className="text-xs max-w-xs" style={{ color: "#9DA894" }}>
                 {t("Upload your first vision board to get started with Mentiva.", "Sube tu primer tablero de visi\u00f3n para comenzar con Mentiva.")}
               </p>
             </div>
@@ -217,7 +218,7 @@ export default function DashboardPage() {
                 className="flex flex-col rounded-xl overflow-hidden text-left transition-colors"
                 style={glassStyle}
               >
-                <div className="w-full aspect-square max-h-[150px] relative shrink-0" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <div className="w-full aspect-square max-h-[150px] relative shrink-0" style={{ background: "rgba(44,48,40,0.03)" }}>
                   {board.image_url ? (
                     <img
                       src={board.image_url}
@@ -225,16 +226,16 @@ export default function DashboardPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    <div className="w-full h-full flex items-center justify-center text-2xl" style={{ color: "#9DA894" }}>
                       +
                     </div>
                   )}
                 </div>
                 <div className="p-2 min-h-0 flex flex-col justify-center">
-                  <p className="text-sm font-medium truncate" style={{ color: "rgba(255,255,255,0.9)" }} title={board.title || "Untitled"}>
+                  <p className="text-sm font-medium truncate" style={{ color: "#2C3028" }} title={board.title || "Untitled"}>
                     {board.title || t("Untitled board", "Tablero sin t\u00edtulo")}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "#5A6352" }}>
                     {formatDate(board.created_at)}
                   </p>
                 </div>
@@ -252,7 +253,7 @@ export default function DashboardPage() {
         >
           <div
             className="relative rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
-            style={glassStyle}
+            style={modalGlassStyle}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 flex items-center justify-between gap-4 p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
@@ -286,7 +287,7 @@ export default function DashboardPage() {
             </div>
             {showDeleteConfirm && (
               <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
-                <div className="rounded-xl p-5 max-w-sm w-full shadow-xl" style={glassStyle}>
+                <div className="rounded-xl p-5 max-w-sm w-full shadow-xl" style={modalGlassStyle}>
                   <p className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>
                     {t("Are you sure you want to delete this board?", "\u00bfSeguro que quieres eliminar este tablero?")}
                   </p>
@@ -317,7 +318,7 @@ export default function DashboardPage() {
             )}
             <div className="p-4 sm:p-6 space-y-6">
               {selectedBoard.image_url && (
-                <div className="rounded-xl overflow-hidden max-w-sm" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                <div className="rounded-xl overflow-hidden max-w-sm" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
                   <img
                     src={selectedBoard.image_url}
                     alt="Vision board"

@@ -162,7 +162,7 @@ export default function WelcomePage() {
               {t("Your referral link:", "Tu link de referidos:")}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
-              <div className="flex-1 px-4 py-3 rounded-full backdrop-blur-md font-sans text-sm truncate" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)", color: "#2C3028" }}>
+              <div className="flex-1 px-4 py-3 rounded-full backdrop-blur-md font-sans text-sm truncate" style={{ background: "rgba(255,255,255,0.35)", border: "1px solid rgba(44,48,40,0.06)", color: "#2C3028" }}>
                 {referralLink}
               </div>
               <button
@@ -185,7 +185,7 @@ export default function WelcomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 rounded-full backdrop-blur-md font-sans text-xs transition-colors"
-                style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)", color: "#2C3028" }}
+                style={{ background: "rgba(255,255,255,0.35)", border: "1px solid rgba(44,48,40,0.06)", color: "#2C3028" }}
               >
                 {b.label}
               </a>
@@ -194,13 +194,13 @@ export default function WelcomePage() {
 
           {/* Referral tiers */}
           <div className="pt-4 space-y-3 text-left max-w-sm mx-auto">
-            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.35)", border: "1px solid rgba(44,48,40,0.06)" }}>
               <p className="font-sans font-medium text-sm" style={{ color: "#2C3028" }}>3 {t("referrals", "referidos")}</p>
               <p className="font-sans text-xs mt-1" style={{ color: "#5A6352" }}>
                 {t("Get your $10 back", "Recupera tus $10")}
               </p>
             </div>
-            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="p-4 rounded-xl backdrop-blur" style={{ background: "rgba(255,255,255,0.35)", border: "1px solid rgba(44,48,40,0.06)" }}>
               <p className="font-sans font-medium text-sm" style={{ color: "#2C3028" }}>5 {t("referrals", "referidos")}</p>
               <p className="font-sans text-xs mt-1" style={{ color: "#5A6352" }}>
                 {t("Gift a free lifetime membership", "Regala una membresia gratis")}
