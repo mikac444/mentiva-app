@@ -33,18 +33,25 @@ export default async function Image() {
           }}
         />
 
-        {/* Brand name */}
-        <div
-          style={{
-            display: "flex",
-            fontSize: 28,
-            letterSpacing: "0.35em",
-            color: "#9DA894",
-            marginBottom: 32,
-            fontWeight: 300,
-          }}
-        >
-          MENTIVA
+        {/* Star + Brand name */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+          <svg width="36" height="36" viewBox="0 0 32 32">
+            <path
+              d="M16 3 C16.8 10, 22 15.2, 29 16 C22 16.8, 16.8 22, 16 29 C15.2 22, 10 16.8, 3 16 C10 15.2, 15.2 10, 16 3Z"
+              fill="#6B7E5C"
+            />
+          </svg>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 28,
+              letterSpacing: "0.35em",
+              color: "#9DA894",
+              fontWeight: 300,
+            }}
+          >
+            MENTIVA
+          </div>
         </div>
 
         {/* Headline */}
