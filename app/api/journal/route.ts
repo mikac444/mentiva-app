@@ -11,7 +11,7 @@ function getAdminSupabase() {
   );
 }
 
-// GET /api/journal?days=7
+// GET /api/journal?days=7  (days=0 or days=all → return all entries)
 export async function GET(request: NextRequest) {
   try {
     const serverSupabase = await createServerClient();
@@ -19,18 +19,25 @@ export async function GET(request: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(request.url);
-    const days = parseInt(searchParams.get("days") || "7");
+    const daysParam = searchParams.get("days") || "all";
+    const days = daysParam === "all" ? 0 : parseInt(daysParam);
 
     const supabase = getAdminSupabase();
-    const since = new Date();
-    since.setDate(since.getDate() - days);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("journal_entries")
       .select("id, content, date, created_at")
       .eq("user_id", user.id)
-      .gte("date", since.toISOString().split("T")[0])
       .order("created_at", { ascending: false });
+
+    // Only apply date filter if days > 0
+    if (days > 0) {
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+      query = query.gte("date", since.toISOString().split("T")[0]);
+    }
+
+    const { data, error } = await query;
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ entries: data ?? [] });
