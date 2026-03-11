@@ -165,7 +165,7 @@ export default function TodayPage() {
 
       // 5. Fetch journal entries
       try {
-        const journalRes = await fetch("/api/journal?days=7");
+        const journalRes = await fetch("/api/journal?days=all");
         const journalData = await journalRes.json();
         if (journalData.entries) setJournalEntries(journalData.entries);
       } catch {
@@ -1281,10 +1281,10 @@ export default function TodayPage() {
                             fontSize: "0.62rem", color: "rgba(157,180,140,0.5)",
                             fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
                           }}>
-                            {journalEntries.length} {t("this week", "esta semana")}
+                            {journalEntries.length} {t("total", "total")}
                           </span>
                         </div>
-                        {journalEntries.slice(0, 3).map((entry) => (
+                        {journalEntries.slice(0, 10).map((entry) => (
                           <div key={entry.id} style={{
                             padding: "0.7rem 0.8rem",
                             background: "rgba(44,48,40,0.02)",
