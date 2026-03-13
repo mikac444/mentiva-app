@@ -20,47 +20,65 @@ async function getUserId(): Promise<string | null> {
 }
 
 export async function GET() {
-  const userId = await getUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const userId = await getUserId();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const supabase = getAdminSupabase();
-  const { data, error } = await supabase
-    .from("north_stars")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("is_active", true)
-    .maybeSingle();
+    const supabase = getAdminSupabase();
+    const { data, error } = await supabase
+      .from("north_stars")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ northStar: data });
+    if (error) {
+      console.error("North Star GET DB error:", error.message);
+      return NextResponse.json({ error: "Failed to fetch North Star" }, { status: 500 });
+    }
+    return NextResponse.json({ northStar: data });
+  } catch (err) {
+    console.error("North Star GET error:", err);
+    return NextResponse.json({ error: "Failed to fetch North Star" }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const userId = await getUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const userId = await getUserId();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { goalText, sourceBoardId } = await request.json();
-  if (!goalText) return NextResponse.json({ error: "goalText required" }, { status: 400 });
+    const { goalText, sourceBoardId } = await request.json();
+    if (!goalText || typeof goalText !== "string" || !goalText.trim()) {
+      return NextResponse.json({ error: "goalText is required and must be a non-empty string" }, { status: 400 });
+    }
 
-  const supabase = getAdminSupabase();
+    const supabase = getAdminSupabase();
 
-  await supabase
-    .from("north_stars")
-    .update({ is_active: false })
-    .eq("user_id", userId)
-    .eq("is_active", true);
+    await supabase
+      .from("north_stars")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("is_active", true);
 
-  const { data, error } = await supabase
-    .from("north_stars")
-    .insert({
-      user_id: userId,
-      goal_text: goalText,
-      source_board_id: sourceBoardId || null,
-      is_active: true,
-    })
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from("north_stars")
+      .insert({
+        user_id: userId,
+        goal_text: goalText.trim(),
+        source_board_id: sourceBoardId || null,
+        is_active: true,
+      })
+      .select()
+      .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ northStar: data });
+    if (error) {
+      console.error("North Star POST DB error:", error.message);
+      return NextResponse.json({ error: "Failed to save North Star" }, { status: 500 });
+    }
+    return NextResponse.json({ northStar: data });
+  } catch (err) {
+    console.error("North Star POST error:", err);
+    return NextResponse.json({ error: "Failed to save North Star" }, { status: 500 });
+  }
 }

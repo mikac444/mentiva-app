@@ -11,12 +11,14 @@ const translations = {
     cta: "Continue with Google",
     founding: "Not a member yet? \u00b7 $10 before it\u2019s gone",
     lang: "ES",
+    sessionExpired: "Your session expired. Please sign in again.",
   },
   es: {
     tagline: "Tu tablero de visi\u00f3n, con cerebro.",
     cta: "Continuar con Google",
     founding: "\u00bfA\u00fan no eres miembro? \u00b7 $10 antes de que se acabe",
     lang: "EN",
+    sessionExpired: "Tu sesi\u00f3n expir\u00f3. Inicia sesi\u00f3n de nuevo.",
   },
 };
 
@@ -33,6 +35,7 @@ function LoginContent() {
   const [showWord, setShowWord] = useState(true);
   const t = translations[lang];
   const words = lang === "en" ? WORDS_EN : WORDS_ES;
+  const isExpired = searchParams.get("expired") === "true";
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -200,6 +203,17 @@ function LoginContent() {
           transform: phase >= 3 ? "translateY(0)" : "translateY(10px)",
           transition: "all 0.8s ease",
         }}>{t.tagline}</p>
+
+        {isExpired && (
+          <p style={{
+            fontSize: "0.78rem", color: "#6B7E5C", textAlign: "center",
+            marginBottom: 16, padding: "8px 16px", borderRadius: 8,
+            background: "rgba(107,126,92,0.08)",
+            opacity: phase >= 3 ? 1 : 0, transition: "opacity 0.8s ease",
+          }}>
+            {t.sessionExpired}
+          </p>
+        )}
 
         <button
           onClick={handleGoogleSignIn}

@@ -525,6 +525,49 @@ export default function ChatPage() {
               </div>
             ) : (
               <>
+                {/* Welcome empty state for new conversations */}
+                {messages.length <= 1 && messages[0]?.role === "assistant" && (
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column" as const,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "2.5rem 1.5rem 1rem",
+                  }}>
+                    {/* Chat bubble icon */}
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ marginBottom: "0.8rem" }}>
+                      <circle cx="22" cy="22" r="21" stroke="rgba(107,126,92,0.15)" strokeWidth="1" fill="none" />
+                      <rect x="11" y="13" width="22" height="16" rx="4" stroke="#6B7E5C" strokeWidth="1.3" fill="none" />
+                      <path d="M16 29l-2 4 5-2" stroke="#6B7E5C" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <circle cx="18" cy="21" r="1.2" fill="rgba(107,126,92,0.4)" />
+                      <circle cx="22" cy="21" r="1.2" fill="rgba(107,126,92,0.4)" />
+                      <circle cx="26" cy="21" r="1.2" fill="rgba(107,126,92,0.4)" />
+                    </svg>
+                    <h3 style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontWeight: 400,
+                      fontSize: "1.25rem",
+                      color: "#2C3028",
+                      margin: "0 0 0.4rem",
+                      lineHeight: 1.3,
+                    }}>
+                      {t("Meet Menti, your AI mentor", "Conoce a Menti, tu mentor de AI")}
+                    </h3>
+                    <p style={{
+                      fontSize: "0.85rem",
+                      color: "#7E8C74",
+                      lineHeight: 1.5,
+                      margin: 0,
+                      maxWidth: 280,
+                    }}>
+                      {t(
+                        "Ask anything about your goals, habits, or mindset",
+                        "Pregunta lo que sea sobre tus metas, hábitos o mentalidad"
+                      )}
+                    </p>
+                  </div>
+                )}
                 {messages.map((msg, i) => (
                   <div
                     key={i}
