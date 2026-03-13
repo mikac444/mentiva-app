@@ -87,12 +87,12 @@ function LoginContent() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "https://mentiva.app/auth/callback?redirectTo=%2Fdashboard",
+        redirectTo: `${window.location.origin}/auth/callback?redirectTo=%2Fdashboard`,
         queryParams: { prompt: "select_account" },
       },
     });
     if (error) {
-      console.error("Google sign in error:", error);
+      if (process.env.NODE_ENV !== "production") console.error("Google sign in error:", error);
       return;
     }
     if (data?.url) {

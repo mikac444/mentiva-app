@@ -77,8 +77,8 @@ export default function MissionCard({
       style={{
         position: "relative",
         background: completed
-          ? "rgba(44,48,40,0.02)"
-          : "rgba(44,48,40,0.04)",
+          ? "rgba(255,255,255,0.35)"
+          : "rgba(255,255,255,0.45)",
         border: completed
           ? "1px solid rgba(44,48,40,0.05)"
           : "1px solid rgba(44,48,40,0.1)",
@@ -105,7 +105,7 @@ export default function MissionCard({
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{
-            fontSize: "0.7rem", color: "#9DA894",
+            fontSize: "0.7rem", color: "#7E8C74",
             fontWeight: 500,
           }}>
             {estimatedMinutes} min
@@ -116,7 +116,7 @@ export default function MissionCard({
               style={{
                 background: "none", border: "none", padding: "2px",
                 cursor: "pointer", display: "flex", alignItems: "center",
-                color: "#9DA894",
+                color: "#7E8C74",
                 transition: "color 0.2s",
               }}
               aria-label={lang === "es" ? "Eliminar tarea" : "Delete task"}
@@ -189,7 +189,7 @@ export default function MissionCard({
             style={{
               flex: 1, margin: 0,
               fontSize: "0.88rem", lineHeight: 1.45,
-              color: completed ? "#9DA894" : "#2C3028",
+              color: completed ? "#7E8C74" : "#2C3028",
               textDecoration: completed ? "line-through" : "none",
               fontWeight: 400,
               cursor: !completed && onEdit ? "text" : "default",
@@ -229,7 +229,7 @@ export default function MissionCard({
             disabled={swapping}
             style={{
               background: "none", border: "none",
-              fontSize: "0.72rem", color: "#9DA894",
+              fontSize: "0.72rem", color: "#7E8C74",
               cursor: swapping ? "wait" : "pointer",
               padding: "2px 6px",
               fontFamily: "'DM Sans', sans-serif",
