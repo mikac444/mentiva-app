@@ -3,6 +3,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import { getActiveSIP } from "@/lib/sip";
 import Anthropic from "@anthropic-ai/sdk";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,11 @@ export async function POST(request: NextRequest) {
     const serverSupabase = await createServerClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { success: rateLimitOk } = rateLimit(user.id, { maxRequests: 15, windowMs: 600000 });
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: "Too many requests. Please wait a few minutes." }, { status: 429 });
+    }
 
     const { userName, lang, tasksCompleted, tasksTotal } = await request.json();
     const name = userName || "friend";

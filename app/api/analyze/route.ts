@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { getActiveSIP } from "@/lib/sip";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 const ANALYSIS_PROMPT = `You are Menti, Mentiva's AI mentor. You are analyzing a vision board image. Look at the images, words, colors, and layout. Do not identify yourself as Claude or any other name—only as Menti.
 
@@ -132,6 +133,11 @@ export async function POST(request: Request) {
     const serverSupabase = await createServerClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { success: rateLimitOk } = rateLimit(user.id, { maxRequests: 5, windowMs: 600000 });
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: "Too many requests. Please wait a few minutes." }, { status: 429 });
+    }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
