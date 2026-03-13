@@ -208,9 +208,13 @@ Respond with ONLY the JSON array, nothing else.`
             // The weekly planner is the authoritative source for full replacement.
             // Chat detection should only ADD areas, never remove existing ones.
             const { createClient } = await import("@supabase/supabase-js");
+            const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            if (!serviceRoleKey) {
+              throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+            }
             const supabase = createClient(
               process.env.NEXT_PUBLIC_SUPABASE_URL!,
-              process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+              serviceRoleKey
             );
             const { data: existingAreas } = await supabase
               .from("user_focus_areas")

@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/TopNav";
 import { createClient } from "@/lib/supabase";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/lib/language";
 import type { AnalysisResult } from "@/lib/analyze-types";
 
@@ -265,9 +266,9 @@ export default function UploadPage() {
     async function fetchProfile() {
       try {
         const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id) {
-          const res = await fetch(`/api/profile`);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          const res = await fetchWithAuth(`/api/profile`);
           const data = await res.json();
           if (data.profile?.journey_stage) {
             setJourneyStage(data.profile.journey_stage);
@@ -341,7 +342,7 @@ export default function UploadPage() {
     setError(null);
     try {
       const base64 = await compressImage(file);
-      const res = await fetch("/api/analyze", {
+      const res = await fetchWithAuth("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64, mediaType: "image/jpeg", lang, mode }),
@@ -372,7 +373,7 @@ export default function UploadPage() {
         .map((g: GoalWithArea) => `- ${g.goal}: ${g.steps.join(", ")}`)
         .join("\n");
 
-      const res = await fetch("/api/analyze", {
+      const res = await fetchWithAuth("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -418,10 +419,10 @@ export default function UploadPage() {
     setError(null);
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) { setError(t("Sign in to save your board.", "Inicia sesión para guardar tu board.")); setSaving(false); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) { setError(t("Sign in to save your board.", "Inicia sesión para guardar tu board.")); setSaving(false); return; }
       await supabase.from("vision_boards").insert({
-        user_id: session.user.id,
+        user_id: user.id,
         image_url: savedBase64,
         analysis: { ...analysis, _lang: lang },
         title: boardTitle.trim() || t("Untitled board", "Board sin título"),

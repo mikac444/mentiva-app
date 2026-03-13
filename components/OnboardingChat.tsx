@@ -50,7 +50,7 @@ async function fetchWithRetry(
 
 export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingChatProps) {
   const router = useRouter();
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const [phase, setPhase] = useState<"welcome" | "depth-choice" | "chat" | "summary">("welcome");
   const [numberRevealed, setNumberRevealed] = useState(false);
   const [depth, setDepth] = useState<"deep" | "quick">("deep");
@@ -83,8 +83,8 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
   // Fade-in messages one at a time
   useEffect(() => {
     if (visibleCount < messages.length) {
-      const t = setTimeout(() => setVisibleCount(messages.length), 80);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setVisibleCount(messages.length), 80);
+      return () => clearTimeout(timer);
     }
   }, [messages.length, visibleCount]);
 
@@ -142,13 +142,13 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
           }
         } catch {
           // If completion fails, just continue the chat — don't crash
-          console.error("Completion failed, continuing chat");
+          if (process.env.NODE_ENV !== "production") console.error("Completion failed, continuing chat");
         }
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "I lost my train of thought \u2014 could you repeat that last bit?" },
+        { role: "assistant", content: t("I lost my train of thought \u2014 could you repeat that last bit?", "Perd\u00ed el hilo \u2014 \u00bfpodr\u00edas repetir eso \u00faltimo?") },
       ]);
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
         setCollectedData(data.collectedData || {});
       })
       .catch(() => {
-        setMessages([{ role: "assistant", content: `Hey ${firstName}! I'm Menti. I'd love to get to know you a bit. What's on your mind these days?` }]);
+        setMessages([{ role: "assistant", content: t(`Hey ${firstName}! I'm Menti. I'd love to get to know you a bit. What's on your mind these days?`, `\u00a1Hola ${firstName}! Soy Menti. Me encantar\u00eda conocerte un poco. \u00bfQu\u00e9 tienes en mente estos d\u00edas?`) }]);
       })
       .finally(() => setLoading(false));
   }
@@ -191,10 +191,10 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem", textAlign: "center", position: "relative", zIndex: 1 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 16px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 40, fontSize: "0.75rem", fontWeight: 500, color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "2.5rem", backdropFilter: "blur(8px)" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9DB48C", animation: "pulse 2s ease-in-out infinite" }} />
-            Founding Member
+            {t("Founding Member", "Miembro Fundador")}
           </div>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(2.4rem, 8vw, 3.8rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-            Welcome to<br />Mentiva, <span style={{ color: "#BBCBA8", fontStyle: "italic" }}>{firstName}</span>
+            {t("Welcome to", "Bienvenido a")}<br />Mentiva, <span style={{ color: "#BBCBA8", fontStyle: "italic" }}>{firstName}</span>
           </h1>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
@@ -207,10 +207,10 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             #{memberNumber ?? "--"}
           </div>
           <div style={{ fontSize: "0.8rem", textTransform: "uppercase" as const, letterSpacing: "0.2em", color: "rgba(255,255,255,0.3)", fontWeight: 500 }}>
-            of <strong style={{ color: "rgba(255,255,255,0.5)" }}>3,000</strong> founding members
+            {t("of", "de")} <strong style={{ color: "rgba(255,255,255,0.5)" }}>3,000</strong> {t("founding members", "miembros fundadores")}
           </div>
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 300, fontSize: "1.15rem", color: "rgba(255,255,255,0.45)", marginTop: "2rem", maxWidth: 320 }}>
-            Let&apos;s turn your dreams into a plan.
+            {t("Let\u2019s turn your dreams into a plan.", "Convirtamos tus sue\u00f1os en un plan.")}
           </p>
           <button onClick={() => setPhase("depth-choice")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
@@ -220,7 +220,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
             transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}>
-            Let&apos;s get to know each other <span>&rarr;</span>
+            {t("Let\u2019s get to know each other", "Vamos a conocernos")} <span>&rarr;</span>
           </button>
         </div>
         <Animations />
@@ -240,7 +240,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
             color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em",
             marginBottom: "2.5rem", maxWidth: 380,
           }}>
-            How would you like us to get to know each other?
+            {t("How would you like us to get to know each other?", "\u00bfC\u00f3mo te gustar\u00eda que nos conoci\u00e9ramos?")}
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 340 }}>
             <button onClick={() => startChat("deep")} style={{
@@ -252,10 +252,10 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
               transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
             }}>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.05rem", color: "rgba(255,255,255,0.95)", marginBottom: 6 }}>
-                Let&apos;s take our time
+                {t("Let\u2019s take our time", "Tom\u00e9monos nuestro tiempo")}
               </div>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
-                ~10-15 min &mdash; I&apos;ll really get to know you
+                {t("~10-15 min \u2014 I\u2019ll really get to know you", "~10-15 min \u2014 realmente te voy a conocer")}
               </div>
             </button>
             <button onClick={() => startChat("quick")} style={{
@@ -267,10 +267,10 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
               transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
             }}>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.05rem", color: "rgba(255,255,255,0.95)", marginBottom: 6 }}>
-                Quick intro
+                {t("Quick intro", "Intro r\u00e1pida")}
               </div>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
-                ~3-5 min &mdash; we can always go deeper later
+                {t("~3-5 min \u2014 we can always go deeper later", "~3-5 min \u2014 siempre podemos profundizar despu\u00e9s")}
               </div>
             </button>
           </div>
@@ -288,10 +288,10 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
         {/* Header */}
         <div style={{ padding: "1rem 1.5rem", textAlign: "center", position: "relative", zIndex: 2, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <div style={{ fontSize: "0.7rem", textTransform: "uppercase" as const, letterSpacing: "0.15em", color: "rgba(255,255,255,0.4)", marginBottom: 4 }}>
-            Getting to know you
+            {t("Getting to know you", "Conoci\u00e9ndote")}
           </div>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontWeight: 400, color: "rgba(255,255,255,0.9)" }}>
-            Talk to Menti
+            {t("Talk to Menti", "Habla con Menti")}
           </div>
         </div>
 
@@ -380,7 +380,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
                 cursor: "pointer",
               }}
             >
-              or type your own answer below
+              {t("or type your own answer below", "o escribe tu propia respuesta abajo")}
             </div>
           )}
         </div>
@@ -392,7 +392,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
               ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type your message..."
+              placeholder={t("Type your message...", "Escribe tu mensaje...")}
               disabled={loading}
               style={{
                 flex: 1, padding: "0.8rem 1rem",
@@ -435,7 +435,7 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
         transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
       }}>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(1.6rem, 5vw, 2.2rem)", color: "rgba(255,255,255,0.9)", textAlign: "center", marginBottom: "1.8rem", letterSpacing: "-0.02em" }}>
-          Here&apos;s what I learned about you
+          {t("Here\u2019s what I learned about you", "Esto es lo que aprend\u00ed de ti")}
         </h2>
 
         {summary && (
@@ -483,14 +483,14 @@ export function OnboardingChat({ firstName, userId, memberNumber }: OnboardingCh
           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
           transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         }}>
-          Continue to my vision <span>&rarr;</span>
+          {t("Continue to my vision", "Continuar a mi visi\u00f3n")} <span>&rarr;</span>
         </button>
         <button onClick={() => finishOnboarding("dashboard")} style={{
           marginTop: "1rem", fontSize: "0.85rem", color: "rgba(255,255,255,0.35)",
           background: "none", border: "none", cursor: "pointer",
           textDecoration: "underline", textUnderlineOffset: 3,
         }}>
-          I&apos;ll explore first
+          {t("I\u2019ll explore first", "Prefiero explorar primero")}
         </button>
       </div>
       <Animations />

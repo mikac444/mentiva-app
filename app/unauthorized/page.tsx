@@ -41,7 +41,7 @@ export default function UnauthorizedPage() {
           </p>
           <div className="flex flex-col items-center gap-4">
             <a
-              href="https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01"
+              href={process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK || "https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01"}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full rounded-lg font-semibold py-3 px-4 text-center transition-colors hover:opacity-90"

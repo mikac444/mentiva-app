@@ -196,6 +196,22 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    // Verify the authenticated user matches the userId from the request body
+    const serverSupabase = await createClient();
+    const { data: { user: authUser } } = await serverSupabase.auth.getUser();
+    if (!authUser) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+    if (authUser.id !== userId) {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
