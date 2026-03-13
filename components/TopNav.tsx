@@ -15,8 +15,8 @@ export function TopNav() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user ?? null);
     });
   }, []);
 
@@ -61,20 +61,23 @@ export function TopNav() {
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: "0.15rem" }}>
-        {tabs.map((tab) => {
-          const active = isActive(tab.href);
-          return (
-            <Link key={tab.href} href={tab.href} style={{
-              padding: "0.5rem 0.9rem", borderRadius: 10,
-              fontSize: "0.85rem", fontWeight: active ? 600 : 500,
-              color: active ? "#2C3028" : "#7E8C74",
-              background: active ? "rgba(44,48,40,0.08)" : "transparent",
-              textDecoration: "none", transition: "all 0.3s",
-            }}>
-              {tab.label}
-            </Link>
-          );
-        })}
+        {/* Nav tabs: hidden on mobile, shown on sm+ */}
+        <div className="hidden sm:flex" style={{ alignItems: "center", gap: "0.15rem" }}>
+          {tabs.map((tab) => {
+            const active = isActive(tab.href);
+            return (
+              <Link key={tab.href} href={tab.href} style={{
+                padding: "0.5rem 0.9rem", borderRadius: 10,
+                fontSize: "0.85rem", fontWeight: active ? 600 : 500,
+                color: active ? "#2C3028" : "#7E8C74",
+                background: active ? "rgba(44,48,40,0.08)" : "transparent",
+                textDecoration: "none", transition: "all 0.3s",
+              }}>
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
 
         {user && (
           <div ref={dropRef} style={{ position: "relative", marginLeft: "0.6rem" }}>

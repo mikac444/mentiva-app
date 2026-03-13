@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 
 type Member = { id: string; email: string; created_at: string };
 
@@ -20,7 +21,8 @@ export default function AdminPage() {
   async function checkAuth() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user?.email?.toLowerCase() === "mika@mentiva.app") {
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "mika@mentiva.app";
+    if (user?.email?.toLowerCase() === adminEmail) {
       setAuthorized(true);
       fetchMembers();
     } else {
@@ -30,7 +32,7 @@ export default function AdminPage() {
 
   async function fetchMembers() {
     try {
-      const res = await fetch("/api/admin/members");
+      const res = await fetchWithAuth("/api/admin/members");
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
       setMembers(data.members || []);
@@ -56,7 +58,7 @@ export default function AdminPage() {
 
     setAdding(true);
     try {
-      const res = await fetch("/api/admin/members", {
+      const res = await fetchWithAuth("/api/admin/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emails }),
@@ -78,7 +80,7 @@ export default function AdminPage() {
   async function handleRemove(email: string) {
     if (!confirm(`Remove ${email}?`)) return;
     try {
-      const res = await fetch("/api/admin/members", {
+      const res = await fetchWithAuth("/api/admin/members", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

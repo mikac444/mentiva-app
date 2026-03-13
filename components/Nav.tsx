@@ -25,8 +25,8 @@ export function Nav({ active, hideHamburger }: NavProps) {
 
   useEffect(() => {
     const client = createClient();
-    client.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    client.auth.getUser().then(({ data: { user } }) => {
+      setUser(user ?? null);
     });
     const {
       data: { subscription },

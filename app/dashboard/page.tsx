@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { createClient } from "@/lib/supabase";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/lib/language";
 import type { AnalysisResult } from "@/lib/analyze-types";
 import { OnboardingChat } from "@/components/OnboardingChat";
@@ -114,7 +115,7 @@ export default function DashboardPage() {
     setDeleteError(null);
 
     try {
-      const res = await fetch("/api/boards", {
+      const res = await fetchWithAuth("/api/boards", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ boardId: selectedBoard.id }),

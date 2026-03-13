@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/lib/language";
 import { TopNav } from "@/components/TopNav";
 import type { AnalysisResult } from "@/lib/analyze-types";
@@ -359,7 +360,7 @@ export default function ChatPage() {
 
     try {
       const history = [...messages, userMessage];
-      const res = await fetch("/api/chat", {
+      const res = await fetchWithAuth("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

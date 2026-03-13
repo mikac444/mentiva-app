@@ -71,7 +71,7 @@ export default function WelcomePage() {
           }
         }
       } catch (e) {
-        console.error("Failed to load member data:", e);
+        if (process.env.NODE_ENV !== "production") console.error("Failed to load member data:", e);
       } finally {
         setLoading(false);
       }

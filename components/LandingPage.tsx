@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
-const STRIPE_URL = "https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01";
+const STRIPE_URL = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK || "https://buy.stripe.com/14AeVc6QzbR11wv7DUf3a01";
 
 
 const ALL_IMAGES = Array.from({ length: 35 }, (_, i) => `/vision/${i + 1}.jpg`);
@@ -152,9 +152,9 @@ export default function LandingPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    // Check current session first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
+    // Check current user first
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
         router.replace('/dashboard');
       } else {
         setChecking(false);

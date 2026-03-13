@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { useLanguage } from "@/lib/language";
 import { TopNav } from "@/components/TopNav";
 import MissionCard from "@/components/MissionCard";
@@ -141,7 +142,7 @@ export default function TodayPage() {
 
     // 2. Check if user has a North Star
     try {
-      const nsRes = await fetch("/api/north-star");
+      const nsRes = await fetchWithAuth("/api/north-star");
       const nsData = await nsRes.json();
 
       if (!nsData.northStar) {
@@ -152,7 +153,7 @@ export default function TodayPage() {
       setNorthStarGoal(nsData.northStar.goal_text);
 
       // 3. Check if user has enfoques for this week
-      const enfRes = await fetch("/api/enfoques");
+      const enfRes = await fetchWithAuth("/api/enfoques");
       const enfData = await enfRes.json();
 
       if (!enfData.enfoques || enfData.enfoques.length === 0) {
@@ -165,7 +166,7 @@ export default function TodayPage() {
 
       // 5. Fetch journal entries
       try {
-        const journalRes = await fetch("/api/journal?days=all");
+        const journalRes = await fetchWithAuth("/api/journal?days=all");
         const journalData = await journalRes.json();
         if (journalData.entries) setJournalEntries(journalData.entries);
       } catch {
@@ -183,7 +184,7 @@ export default function TodayPage() {
     setAppState("generating");
 
     try {
-      const res = await fetch("/api/generate-missions", {
+      const res = await fetchWithAuth("/api/generate-missions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lang, forceRegenerate }),
@@ -292,7 +293,7 @@ export default function TodayPage() {
   // ─── Fetch personalized Menti message ───
   useEffect(() => {
     if (appState !== "missions" || !user) return;
-    fetch("/api/menti-message", {
+    fetchWithAuth("/api/menti-message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -402,7 +403,7 @@ export default function TodayPage() {
     if (!user || !journalText.trim()) return;
     setSavingJournal(true);
     try {
-      const res = await fetch("/api/journal", {
+      const res = await fetchWithAuth("/api/journal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: journalText.trim() }),
@@ -512,7 +513,7 @@ export default function TodayPage() {
     setSwappingId(taskId);
 
     try {
-      const res = await fetch("/api/swap-task", {
+      const res = await fetchWithAuth("/api/swap-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId, lang }),
@@ -534,7 +535,7 @@ export default function TodayPage() {
   // ─── North Star selection (from Today page picker) ───
   async function handleNorthStarSelect(goalText: string) {
     try {
-      await fetch("/api/north-star", {
+      await fetchWithAuth("/api/north-star", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ goalText, sourceBoardId: boardId }),
@@ -550,11 +551,11 @@ export default function TodayPage() {
   async function handleEnfoquesSelect(enfoqueNames: string[]) {
     try {
       // Get North Star ID first
-      const nsRes = await fetch("/api/north-star");
+      const nsRes = await fetchWithAuth("/api/north-star");
       const nsData = await nsRes.json();
       const northStarId = nsData.northStar?.id;
 
-      await fetch("/api/enfoques", {
+      await fetchWithAuth("/api/enfoques", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enfoqueNames, northStarId }),
@@ -601,7 +602,7 @@ export default function TodayPage() {
 
   async function getEnfoqueNames(): Promise<string[]> {
     try {
-      const res = await fetch("/api/enfoques");
+      const res = await fetchWithAuth("/api/enfoques");
       const data = await res.json();
       return (data.enfoques || []).map((e: { name: string }) => e.name);
     } catch {
