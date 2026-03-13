@@ -228,6 +228,15 @@ function LoginContent() {
           {t.cta}
         </button>
 
+        <p style={{ fontSize: "0.65rem", color: "#7E8C74", textAlign: "center", marginTop: 12,
+          opacity: phase >= 4 ? 1 : 0, transition: "opacity 0.8s ease",
+        }}>
+          By signing in, you agree to our{" "}
+          <a href="/terms" style={{ color: "#6B7E5C", textDecoration: "underline" }}>Terms</a>
+          {" "}and{" "}
+          <a href="/privacy" style={{ color: "#6B7E5C", textDecoration: "underline" }}>Privacy Policy</a>
+        </p>
+
         <div style={{
           marginTop: 36, opacity: phase >= 5 ? 1 : 0,
           transform: phase >= 5 ? "translateY(0)" : "translateY(8px)",

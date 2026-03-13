@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 const META_PROMPT = `You are conducting an onboarding conversation for Mentiva, a vision board app with an AI mentor called Menti. Your job is to get to know this person through a warm, natural conversation — NOT a form or survey.
 
@@ -185,6 +187,15 @@ function parseAIResponse(
 
 export async function POST(request: Request) {
   try {
+    const serverSupabase = await createServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { success: rateLimitOk } = rateLimit(user.id, { maxRequests: 40, windowMs: 600000 });
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: "Too many requests. Please wait a few minutes." }, { status: 429 });
+    }
+
     const { messages, collectedData, userName, depth: rawDepth, lang, messageCount: rawCount } = await request.json();
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

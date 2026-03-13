@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
-const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/unauthorized"];
+const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/unauthorized", "/terms", "/privacy"];
 const PROTECTED_PATHS = ["/dashboard", "/chat", "/upload", "/admin", "/today", "/welcome"];
 
 function isPublicPath(pathname: string): boolean {

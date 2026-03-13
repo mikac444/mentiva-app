@@ -60,7 +60,7 @@ export default function UnauthorizedPage() {
         </div>
       </main>
 
-      <div className="flex justify-center pb-12">
+      <div className="flex justify-center pb-6">
         <button
           type="button"
           onClick={handleSignOut}
@@ -69,6 +69,15 @@ export default function UnauthorizedPage() {
         >
           {t("Sign out", "Cerrar sesi\u00f3n")}
         </button>
+      </div>
+
+      <div style={{ textAlign: "center", padding: "0 1rem 2rem", opacity: 0.6 }}>
+        <a href="/terms" style={{ color: "#5A6352", fontSize: "0.7rem", marginRight: 16, textDecoration: "none" }}>
+          Terms of Service
+        </a>
+        <a href="/privacy" style={{ color: "#5A6352", fontSize: "0.7rem", textDecoration: "none" }}>
+          Privacy Policy
+        </a>
       </div>
     </div>
   );

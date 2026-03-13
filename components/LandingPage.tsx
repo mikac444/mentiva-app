@@ -359,7 +359,15 @@ export default function LandingPage() {
         className="relative z-10 py-6 text-center font-sans text-sm animate-[rise_0.8s_ease-out_0.4s_both]"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
-        {String.fromCharCode(169)} 2026 Mentiva
+        <div>{String.fromCharCode(169)} 2026 Mentiva</div>
+        <div style={{ marginTop: 8 }}>
+          <a href="/terms" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", marginRight: 16, textDecoration: "none" }}>
+            Terms of Service
+          </a>
+          <a href="/privacy" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem", textDecoration: "none" }}>
+            Privacy Policy
+          </a>
+        </div>
       </footer>
 
       <style>{`

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { generateMissionTasks } from "@/lib/generate-mission-tasks";
 import { getActiveSIP } from "@/lib/sip";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,11 @@ export async function POST(request: NextRequest) {
     const serverSupabase = await createServerClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { success: rateLimitOk } = rateLimit(user.id, { maxRequests: 10, windowMs: 600000 });
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: "Too many requests. Please wait a few minutes." }, { status: 429 });
+    }
 
     const userId = user.id;
     const userName = user.user_metadata?.full_name?.split(/\s+/)[0]
