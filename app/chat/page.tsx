@@ -103,7 +103,7 @@ export default function ChatPage() {
         monday.setDate(now.getDate() - ((day + 6) % 7));
         const weekStart = monday.toISOString().split("T")[0];
         const { data: enf, error: enfErr } = await supabase.from("enfoques").select("name").eq("user_id", user.id).eq("week_start", weekStart);
-        if (enfErr) console.error("Enfoques fetch error:", enfErr);
+        if (enfErr && process.env.NODE_ENV !== "production") console.error("Enfoques fetch error:", enfErr);
         if (enf && enf.length > 0) {
           setFocusAreas(enf.map((e: { name: string }) => e.name));
         } else {
@@ -114,12 +114,12 @@ export default function ChatPage() {
 
         // North Star (only active one)
         const { data: ns, error: nsErr } = await supabase.from("north_stars").select("goal_text").eq("user_id", user.id).eq("is_active", true).maybeSingle();
-        if (nsErr) console.error("North Star fetch error:", nsErr);
+        if (nsErr && process.env.NODE_ENV !== "production") console.error("North Star fetch error:", nsErr);
         if (ns?.goal_text) setNorthStar(ns.goal_text);
 
         // Streak
         const { data: streak, error: streakErr } = await supabase.from("streaks").select("date, non_negotiable_completed").eq("user_id", user.id).order("date", { ascending: false }).limit(30);
-        if (streakErr) console.error("Streak fetch error:", streakErr);
+        if (streakErr && process.env.NODE_ENV !== "production") console.error("Streak fetch error:", streakErr);
         if (streak && streak.length > 0) {
           let count = 0;
           const today = new Date().toISOString().split("T")[0];
@@ -135,10 +135,10 @@ export default function ChatPage() {
         // Recent tasks (7 days)
         const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
         const { data: rt, error: rtErr } = await supabase.from("daily_tasks").select("task_text, completed, date").eq("user_id", user.id).gte("date", weekAgo.toISOString().split("T")[0]);
-        if (rtErr) console.error("Recent tasks fetch error:", rtErr);
+        if (rtErr && process.env.NODE_ENV !== "production") console.error("Recent tasks fetch error:", rtErr);
         if (rt) setRecentTasks(rt);
       } catch (e) {
-        console.error("loadContext error:", e);
+        if (process.env.NODE_ENV !== "production") console.error("loadContext error:", e);
       }
     }
     loadContext();
@@ -402,9 +402,9 @@ export default function ChatPage() {
     }
   }
 
-  const headerStyle = { background: "rgba(44,48,40,0.03)", borderBottom: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
-  const glassStyle = { background: "rgba(44,48,40,0.04)", border: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
-  const sidebarStyle = { background: "rgba(44,48,40,0.03)", borderRight: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+  const headerStyle = { background: "rgba(255,255,255,0.35)", borderBottom: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+  const glassStyle = { background: "rgba(255,255,255,0.45)", border: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
+  const sidebarStyle = { background: "rgba(255,255,255,0.35)", borderRight: "1px solid rgba(44,48,40,0.06)", backdropFilter: "blur(10px)" };
 
   return (
     <div className="fixed inset-0 flex flex-col bg-mentiva-gradient">
@@ -537,7 +537,7 @@ export default function ChatPage() {
                           : "rounded-bl-md"
                       }`}
                       style={{
-                        background: msg.role === "user" ? "rgba(44,48,40,0.06)" : "rgba(44,48,40,0.03)",
+                        background: msg.role === "user" ? "rgba(44,48,40,0.06)" : "rgba(255,255,255,0.45)",
                         border: "1px solid rgba(44,48,40,0.05)",
                         color: "#2C3028",
                       }}
@@ -555,7 +555,7 @@ export default function ChatPage() {
                   <div className="flex justify-start">
                     <div
                       className="max-w-[85%] sm:max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm"
-                      style={{ background: "rgba(44,48,40,0.03)", border: "1px solid rgba(44,48,40,0.05)", color: "#2C3028" }}
+                      style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(44,48,40,0.05)", color: "#2C3028" }}
                     >
                       <p className="text-sm font-medium mb-2" style={{ color: "#7E8C74" }}>Menti</p>
                       <BouncingDots />
@@ -591,7 +591,7 @@ export default function ChatPage() {
               placeholder={t("Message Menti…", "Escribe a Menti…")}
               rows={1}
               disabled={isLoading}
-              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-[#9DA894]"
+              className="flex-1 min-h-[44px] max-h-32 resize-y rounded-xl px-4 py-3 outline-none disabled:opacity-50 text-sm sm:text-base placeholder-[#7E8C74]"
               style={{ background: "rgba(44,48,40,0.06)", border: "1px solid rgba(44,48,40,0.08)", color: "#2C3028", backdropFilter: "blur(10px)" }}
             />
             <button

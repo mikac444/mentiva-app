@@ -215,7 +215,7 @@ Respond with ONLY the JSON array, nothing else.`
               await supabase.from("user_focus_areas").insert(
                 newAreas.map((a: string) => ({ user_id: user.id, area: String(a) }))
               );
-              console.log("Focus areas added:", newAreas);
+              // Focus areas added silently
             }
           }
         } catch (e) {

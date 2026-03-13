@@ -50,8 +50,6 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         console.error("Failed to add email:", error);
-      } else {
-        console.log("Added email to allowlist:", email);
       }
 
       // 2. Credit referrer if this purchase came from a referral link
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
                 status: "converted",
               });
           }
-          console.log("Referral conversion tracked:", refCode, "->", normalizedEmail);
+          // Referral conversion tracked
         } catch (refErr) {
           console.error("Referral tracking failed:", refErr);
         }
@@ -114,9 +112,7 @@ export async function POST(req: NextRequest) {
             }),
           });
 
-          if (brevoRes.ok) {
-            console.log("Added to Brevo Founding Members list:", email);
-          } else {
+          if (!brevoRes.ok) {
             const errBody = await brevoRes.text();
             console.error("Brevo API error:", brevoRes.status, errBody);
           }
@@ -125,7 +121,7 @@ export async function POST(req: NextRequest) {
           console.error("Brevo API call failed:", brevoErr);
         }
       } else {
-        console.warn("BREVO_API_KEY not configured, skipping email list sync");
+        // BREVO_API_KEY not configured, skipping email list sync
       }
     }
   }

@@ -153,7 +153,7 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem", color: "#9DA894", fontSize: "0.85rem" }}>
+      <div style={{ textAlign: "center", padding: "2rem", color: "#7E8C74", fontSize: "0.85rem" }}>
         {t("Loading progress...", "Cargando progreso...")}
       </div>
     );
@@ -254,7 +254,7 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
                 fontSize: "0.6rem", fontWeight: 500, letterSpacing: "0.03em",
                 color: dot.isToday
                   ? "#6B7E5C"
-                  : "#9DA894",
+                  : "#7E8C74",
               }}>
                 {dot.dayLabel}
               </span>
@@ -326,7 +326,7 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
         <div style={{
           fontSize: "2.2rem", fontWeight: 300,
           fontFamily: "'Cormorant Garamond', serif",
-          color: currentStreak > 0 ? "#2C3028" : "#9DA894",
+          color: currentStreak > 0 ? "#2C3028" : "#7E8C74",
           lineHeight: 1.1,
         }}>
           {currentStreak}
@@ -340,7 +340,7 @@ export default function ProgressTab({ userId, northStarGoal, t, currentStreak }:
         </div>
         {longestStreak > currentStreak && (
           <div style={{
-            fontSize: "0.68rem", color: "#9DA894",
+            fontSize: "0.68rem", color: "#7E8C74",
             marginTop: 6,
           }}>
             {t("Longest:", "Récord:")} {longestStreak} {t("days", "días")}

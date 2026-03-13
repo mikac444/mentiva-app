@@ -205,7 +205,7 @@ export default function DashboardPage() {
               <p className="text-sm" style={{ color: "#5A6352" }}>
                 {t("No vision boards yet.", "A\u00fan no tienes tableros.")}
               </p>
-              <p className="text-xs max-w-xs" style={{ color: "#9DA894" }}>
+              <p className="text-xs max-w-xs" style={{ color: "#7E8C74" }}>
                 {t("Upload your first vision board to get started with Mentiva.", "Sube tu primer tablero de visi\u00f3n para comenzar con Mentiva.")}
               </p>
             </div>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                 className="flex flex-col rounded-xl overflow-hidden text-left transition-colors"
                 style={glassStyle}
               >
-                <div className="w-full aspect-square max-h-[150px] relative shrink-0" style={{ background: "rgba(44,48,40,0.03)" }}>
+                <div className="w-full aspect-square max-h-[150px] relative shrink-0" style={{ background: "rgba(255,255,255,0.35)" }}>
                   {board.image_url ? (
                     <img
                       src={board.image_url}
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl" style={{ color: "#9DA894" }}>
+                    <div className="w-full h-full flex items-center justify-center text-2xl" style={{ color: "#7E8C74" }}>
                       +
                     </div>
                   )}
