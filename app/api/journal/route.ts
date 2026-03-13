@@ -39,7 +39,10 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await query;
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("Journal GET DB error:", error.message);
+      return NextResponse.json({ error: "Failed to fetch journal entries" }, { status: 500 });
+    }
     return NextResponse.json({ entries: data ?? [] });
   } catch (err) {
     console.error("Journal GET error:", err);
@@ -72,7 +75,10 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("Journal POST DB error:", error.message);
+      return NextResponse.json({ error: "Failed to save journal entry" }, { status: 500 });
+    }
     return NextResponse.json({ entry: data });
   } catch (err) {
     console.error("Journal POST error:", err);

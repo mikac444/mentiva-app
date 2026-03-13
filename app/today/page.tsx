@@ -1044,13 +1044,42 @@ export default function TodayPage() {
                       </div>
                     ) : (
                       <div style={{
-                        textAlign: "center", padding: "2rem 1rem",
-                        color: "#5A6352", fontSize: "0.85rem",
+                        textAlign: "center",
+                        padding: "2rem 1.5rem",
+                        background: "rgba(255,255,255,0.35)",
+                        borderRadius: 16,
+                        margin: "0.5rem 0",
                       }}>
-                        {t(
-                          "No missions for today. Check back soon!",
-                          "¡No hay misiones hoy! ¡Vuelve pronto!"
-                        )}
+                        {/* Checkmark clipboard icon */}
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style={{ margin: "0 auto 0.8rem" }}>
+                          <rect x="10" y="6" width="20" height="28" rx="3" stroke="rgba(107,126,92,0.3)" strokeWidth="1.2" fill="none" />
+                          <rect x="15" y="3" width="10" height="5" rx="2" stroke="rgba(107,126,92,0.3)" strokeWidth="1.2" fill="none" />
+                          <path d="M16 20l3 3 5-6" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <p style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontWeight: 400,
+                          fontSize: "1.1rem",
+                          color: "#2C3028",
+                          margin: "0 0 0.4rem",
+                          lineHeight: 1.3,
+                        }}>
+                          {t("Your missions are on the way", "Tus misiones están en camino")}
+                        </p>
+                        <p style={{
+                          fontSize: "0.82rem",
+                          color: "#7E8C74",
+                          lineHeight: 1.5,
+                          margin: 0,
+                          maxWidth: 260,
+                          marginLeft: "auto",
+                          marginRight: "auto",
+                        }}>
+                          {t(
+                            "Set your weekly focus areas to generate daily missions",
+                            "Define tus enfoques semanales para generar misiones diarias"
+                          )}
+                        </p>
                       </div>
                     )}
 
@@ -1314,22 +1343,43 @@ export default function TodayPage() {
                     ) : (
                       /* Empty state */
                       <div style={{
-                        textAlign: "center", padding: "1.5rem 1rem",
+                        textAlign: "center",
+                        padding: "1.8rem 1.2rem",
+                        background: "rgba(255,255,255,0.25)",
+                        borderRadius: 14,
+                        margin: "0.3rem 0",
                       }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(107,126,92,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8 }}>
-                          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
-                          <line x1="16" y1="8" x2="2" y2="22" />
+                        {/* Feather/pencil icon */}
+                        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ margin: "0 auto 0.7rem" }}>
+                          <circle cx="18" cy="18" r="17" stroke="rgba(107,126,92,0.15)" strokeWidth="1" fill="none" />
+                          <path d="M23.24 14.24a4.5 4.5 0 0 0-6.37-6.37L12 12.38V18.5h6.38z" stroke="#6B7E5C" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          <line x1="19" y1="11" x2="9" y2="27" stroke="#6B7E5C" strokeWidth="1.3" strokeLinecap="round" />
                         </svg>
-                        <div style={{
-                          color: "#5A6352", fontSize: "0.82rem",
-                          fontStyle: "italic",
+                        <p style={{
                           fontFamily: "'Cormorant Garamond', serif",
+                          fontWeight: 400,
+                          fontSize: "1.05rem",
+                          color: "#2C3028",
+                          margin: "0 0 0.35rem",
+                          lineHeight: 1.3,
+                        }}>
+                          {t("No reflections yet", "Aún no hay reflexiones")}
+                        </p>
+                        <p style={{
+                          fontSize: "0.78rem",
+                          color: "#7E8C74",
+                          lineHeight: 1.5,
+                          margin: 0,
+                          maxWidth: 240,
+                          marginLeft: "auto",
+                          marginRight: "auto",
+                          fontStyle: "italic",
                         }}>
                           {t(
-                            "Your first reflection starts here.",
-                            "Tu primera reflexión empieza aquí."
+                            "Write your first thought above — even a sentence counts",
+                            "Escribe tu primer pensamiento arriba — incluso una frase cuenta"
                           )}
-                        </div>
+                        </p>
                       </div>
                     )}
               </div>

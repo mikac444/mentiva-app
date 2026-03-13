@@ -72,7 +72,13 @@ export async function POST(request: NextRequest) {
       ?? user.user_metadata?.name?.split(/\s+/)[0]
       ?? "friend";
 
-    const { lang, forceRegenerate } = await request.json();
+    let body: { lang?: string; forceRegenerate?: boolean };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+    const { lang, forceRegenerate } = body;
     const supabase = getAdminSupabase();
     const today = new Date().toISOString().split("T")[0];
 
@@ -220,7 +226,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error("Generate missions error:", err);
-    const message = err instanceof Error ? err.message : "Failed to generate missions";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to generate missions. Please try again." }, { status: 500 });
   }
 }

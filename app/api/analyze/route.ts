@@ -141,8 +141,9 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
+      console.error("ANTHROPIC_API_KEY is not configured");
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY is not configured" },
+        { error: "Service temporarily unavailable. Please try again later." },
         { status: 500 }
       );
     }
@@ -175,6 +176,14 @@ export async function POST(request: Request) {
       : "business|health|finance|relationships|learning|creative|routine|other";
 
     // ─── ENHANCE MODE: Merge existing + new goals ───
+    if (enhance) {
+      if (!existingGoals || typeof existingGoals !== "string" || !additionalGoals || typeof additionalGoals !== "string") {
+        return NextResponse.json(
+          { error: "Both existingGoals and additionalGoals are required for enhance mode" },
+          { status: 400 }
+        );
+      }
+    }
     if (enhance && existingGoals && additionalGoals) {
       const prompt = ENHANCE_PROMPT
         .replace("EXISTING_GOALS_PLACEHOLDER", existingGoals)
@@ -302,7 +311,6 @@ export async function POST(request: Request) {
     return NextResponse.json(parsed);
   } catch (err) {
     console.error("Analyze API error:", err);
-    const message = err instanceof Error ? err.message : "Analysis failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Analysis failed. Please try again." }, { status: 500 });
   }
 }

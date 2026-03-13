@@ -116,8 +116,9 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
+      console.error("ANTHROPIC_API_KEY is not configured");
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY is not configured" },
+        { error: "Service temporarily unavailable. Please try again later." },
         { status: 500 }
       );
     }
@@ -233,7 +234,6 @@ Respond with ONLY the JSON array, nothing else.`
     return NextResponse.json({ reply });
   } catch (err) {
     console.error("Chat API error:", err);
-    const message = err instanceof Error ? err.message : "Chat failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Chat failed. Please try again." }, { status: 500 });
   }
 }

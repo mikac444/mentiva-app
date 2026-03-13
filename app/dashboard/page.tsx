@@ -201,13 +201,67 @@ export default function DashboardPage() {
               {t("Loading...", "Cargando...")}
             </div>
           ) : boards.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center space-y-3">
-              <p className="text-sm" style={{ color: "#5A6352" }}>
-                {t("No vision boards yet.", "A\u00fan no tienes tableros.")}
-              </p>
-              <p className="text-xs max-w-xs" style={{ color: "#7E8C74" }}>
-                {t("Upload your first vision board to get started with Mentiva.", "Sube tu primer tablero de visi\u00f3n para comenzar con Mentiva.")}
-              </p>
+            <div className="col-span-full flex items-center justify-center py-8">
+              <div style={{
+                background: "rgba(255,255,255,0.45)",
+                border: "1px solid rgba(44,48,40,0.06)",
+                backdropFilter: "blur(10px)",
+                borderRadius: 20,
+                padding: "2.5rem 2rem",
+                textAlign: "center",
+                maxWidth: 360,
+                width: "100%",
+              }}>
+                {/* Sunrise/mountain icon */}
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ margin: "0 auto 1rem" }}>
+                  <circle cx="24" cy="24" r="23" stroke="rgba(107,126,92,0.2)" strokeWidth="1" fill="none" />
+                  <circle cx="24" cy="18" r="4" stroke="#6B7E5C" strokeWidth="1.5" fill="none" />
+                  <path d="M24 22v2" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M18 14l-1.5-1.5" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M30 14l1.5-1.5" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M24 10V8" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M12 34l8-10 5 6 4-5 7 9" stroke="#6B7E5C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <line x1="10" y1="34" x2="38" y2="34" stroke="rgba(107,126,92,0.3)" strokeWidth="1" />
+                </svg>
+                <h3 style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontWeight: 400,
+                  fontSize: "1.3rem",
+                  color: "#2C3028",
+                  margin: "0 0 0.5rem",
+                  lineHeight: 1.3,
+                }}>
+                  {t("Your vision starts here", "Tu visión empieza aquí")}
+                </h3>
+                <p style={{
+                  fontSize: "0.85rem",
+                  color: "#5A6352",
+                  lineHeight: 1.5,
+                  margin: "0 0 1.5rem",
+                }}>
+                  {t(
+                    "Upload an image of your dream life and let AI create your personal roadmap",
+                    "Sube una imagen de tu vida soñada y deja que la AI cree tu plan personalizado"
+                  )}
+                </p>
+                <Link
+                  href="/upload"
+                  style={{
+                    display: "inline-block",
+                    padding: "0.7rem 1.5rem",
+                    background: "#2C3028",
+                    color: "rgba(255,255,255,0.92)",
+                    borderRadius: 999,
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "opacity 0.2s",
+                  }}
+                >
+                  {t("Upload your first vision board", "Sube tu primer vision board")}
+                </Link>
+              </div>
             </div>
           ) : (
             boards.map((board) => (
